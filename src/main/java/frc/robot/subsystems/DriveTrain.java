@@ -4,12 +4,9 @@
 
 package frc.robot.subsystems;
 
+import java.util.Optional;
+
 import com.kauailabs.navx.frc.AHRS;
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.path.PathPlannerTrajectory
-import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -35,9 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import frc.robot.Constants;
-import frc.robot.FieldConstants;
 import frc.robot.Robot;
-import frc.robot.commands.FollowTrajectory;
 
 import frc.robot.swerve.*;
 
@@ -274,7 +269,8 @@ public class DriveTrain extends SubsystemBase {
         if (m_fieldCentric) {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
-            double redFlip = (DriverStation.getAlliance() == Alliance.Red) ? -1.0 : 1.0;
+            Optional<Alliance> alliance = DriverStation.getAlliance();
+            double redFlip = (alliance.isPresent() && alliance.get() == Alliance.Red) ? -1.0 : 1.0;
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                     redFlip * newInputX * m_maxVelocity,
@@ -436,43 +432,5 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/simX", newX);
         SmartDashboard.putNumber("drivetrain/simY", newY);
         SmartDashboard.putNumber("drivetrain/simHeading", Math.toDegrees(newHeading));
-    }
-
-    // // WARNING: this must not be called in a Command *constructor*. The Pose flip and currentPose values will be all wrong.
-    // Not currently used. Not tested.
-    // public Command driveToPoseTrajectoryCommand(Pose2d targetPose){
-    //     targetPose = FieldConstants.flipPose(targetPose);
-        
-    //     Pose2d currentPose = getPose();
-
-    //     boolean isTargetBelow = targetPose.getY() < currentPose.getY();
-    //     Rotation2d headingVertical = isTargetBelow ? Rotation2d.fromDegrees(270) : Rotation2d.fromDegrees(90);
-    //     boolean isTargetLeft = targetPose.getX() < currentPose.getX();
-    //     Rotation2d headingHorizontal = isTargetLeft ? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0);
-
-    //     PathPlannerTrajectory traj = PathPlanner.generatePath(
-    //         new PathConstraints(2.0, 2.0), // velocity, acceleration
-    //         new PathPoint(currentPose.getTranslation(), headingVertical, currentPose.getRotation()), // starting pose
-    //         new PathPoint(new Translation2d(currentPose.getTranslation().getX(), targetPose.getY()), headingHorizontal, targetPose.getRotation()), // moving up/down sideways and turn facing the cone
-    //         new PathPoint(targetPose.getTranslation(), headingHorizontal, targetPose.getRotation()) // move horizontally to grab pieces
-    //     );
-
-    //     return makeFollowTrajectoryCommand(traj);
-    // }
-
-    // Make a command to follow a given trajectory
-    // Note this does NOT include stopping at the end
-    public Command makeFollowTrajectoryCommand(PathPlannerTrajectory traj) {
-        return new FollowTrajectory(
-                this,
-                traj,
-                () -> this.getPose(),
-                m_kinematics,
-                m_xController,
-                m_yController,
-                m_thetaController,
-                (states) -> {
-                    this.drive(m_kinematics.toChassisSpeeds(states));
-                });
     }
 }
