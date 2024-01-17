@@ -153,6 +153,7 @@ public class NeoSteerController {
 
     public void updateSmartDashboard(String sdPrefix) {
         SmartDashboard.putNumber(sdPrefix + "/angle", getStateAngle().getDegrees());
+        SmartDashboard.putNumber(sdPrefix + "/cancoder", Math.toDegrees(m_absoluteEncoder.getAbsoluteAngleRadians()));
 
         // Compute the calibration angle for this module
         // Only use the value if the wheels are physically aligned forward, with bevel gear on the left

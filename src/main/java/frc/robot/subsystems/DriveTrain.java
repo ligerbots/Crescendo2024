@@ -145,7 +145,7 @@ public class DriveTrain extends SubsystemBase {
             0, 0,
             new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
 
-    public DriveTrain(Vision vision) {
+    public DriveTrain() {
 
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.NeoDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
@@ -173,7 +173,7 @@ public class DriveTrain extends SubsystemBase {
         m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
                 new Pose2d());
 
-        m_vision = vision;
+        m_vision = null;
 
         // as late as possible, re-sync the swerve angle encoders
         for (SwerveModule module : m_swerveModules) {
@@ -392,12 +392,12 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
-        if (Constants.SIMULATION_SUPPORT) {
-            m_vision.updateSimulation(getPose());
-        }
+        // if (Constants.SIMULATION_SUPPORT) {
+        //     m_vision.updateSimulation(getPose());
+        // }
 
-        // Have the vision system update based on the Apriltags, if seen
-        m_vision.updateOdometry(m_odometry, m_field);
+        // // Have the vision system update based on the Apriltags, if seen
+        // m_vision.updateOdometry(m_odometry, m_field);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
