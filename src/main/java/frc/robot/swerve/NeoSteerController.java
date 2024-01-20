@@ -36,7 +36,7 @@ public class NeoSteerController {
     static void checkNeoError(REVLibError error, String message) {
         if (error != REVLibError.kOk) {
             DriverStation.reportError(String.format("%s: %s", message, error.toString()), false);
-            System.out.println(String.format("%s: %s", message, error.toString()));
+            // System.out.println(String.format("%s: %s", message, error.toString()));
         }
     }
 
@@ -45,15 +45,15 @@ public class NeoSteerController {
         m_absoluteEncoder = new CanCoderWrapper(canCoderCanId, angleOffsetRadians);
 
         // the turn motor
-        m_motor = new CANSparkMax(canId, CANSparkMaxLowLevel.MotorType.kBrushless);
+        m_motor = new CANSparkMax(canId, CANSparkLowLevel.MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
 
         // adjust the CANbus update periods and alert on any errors
-        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 100),
+        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 100),
                 "Failed to set periodic status frame 0 rate");
-        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 20),
+        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 20),
                 "Failed to set periodic status frame 1 rate");
-        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 20),
+        checkNeoError(m_motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 20),
                 "Failed to set periodic status frame 2 rate");
 
         // set turn moter to brake mode

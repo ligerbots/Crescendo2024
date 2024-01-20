@@ -55,9 +55,6 @@ public class DriveTrain extends SubsystemBase {
     private static final double Y_PID_CONTROLLER_P = 3.0;
     private static final double THETA_PID_CONTROLLER_P = 4.0;
 
-    // speed used to drive onto/over the ChargeStation
-    public static final double CHARGE_STATION_DRIVE_MPS = 2.0;
-
     // the max velocity for drivetrain
     // adjusted when in precision driving mode
     private double m_maxVelocity = MAX_VELOCITY_METERS_PER_SECOND;
