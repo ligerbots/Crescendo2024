@@ -12,7 +12,8 @@
     import org.photonvision.PhotonCamera;
     import org.photonvision.PhotonPoseEstimator;
     import org.photonvision.simulation.PhotonCameraSim;
-    import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
     import org.photonvision.PhotonPoseEstimator.PoseStrategy;
     import org.photonvision.estimation.TargetModel;
     import org.photonvision.estimation.VisionEstimation;
@@ -25,7 +26,8 @@
     import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
     import edu.wpi.first.math.geometry.Pose2d;
     import edu.wpi.first.math.geometry.Pose3d;
-    import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
     import edu.wpi.first.math.geometry.Transform3d;
     import edu.wpi.first.math.geometry.Translation3d;
     import edu.wpi.first.math.util.Units;
@@ -148,12 +150,9 @@ import frc.robot.Robot;
                 }
             }
             else if (PLOT_TAG_SOLUTIONS) {
-                // bug in PV simulation, does not update the timestamp, so believes there is no solution
-                if (Robot.isReal()) {
-                    plotPose(field, "visionPose", null);
-                  plotPose(field, "visionAltPose", null);
-               }
-           }
+                plotPose(field, "visionPose", null);
+                plotPose(field, "visionAltPose", null);
+            }
         }
 
         private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
@@ -225,9 +224,23 @@ import frc.robot.Robot;
         // }
 
         private void initializeSimulation() {
-            m_visionSim = new VisionSystemSim("LigerVision");
-            // for now, cheat on the specs of the camera
-            PhotonCameraSim cam = new PhotonCameraSim(m_aprilTagCamera);
+            m_visionSim = new VisionSystemSim("AprilTag");
+
+            // roughly our Arducam camera
+            SimCameraProperties prop = new SimCameraProperties();
+            prop.setCalibration(800, 600, Rotation2d.fromDegrees(90.0));
+            prop.setFPS(60);
+            prop.setAvgLatencyMs(10.0);
+            prop.setLatencyStdDevMs(3.0);
+            
+            // Note: NetworkTables does not update the timestamp of an entry if the value does not change.
+            // The timestamp is used by PVLib to know if there is a new frame, so in a simulation
+            //  with no uncertainty, it thinks that it is not detecting a tag if the robot is static.
+            // So, always have a little bit of uncertainty.
+            prop.setCalibError(0.1, 0.03);
+
+            PhotonCameraSim cam = new PhotonCameraSim(m_aprilTagCamera, prop);
+            cam.setMaxSightRange(Units.feetToMeters(20.0));
             m_visionSim.addCamera(cam, m_robotToAprilTagCam);
 
             m_visionSim.addAprilTags(m_aprilTagFieldLayout);
