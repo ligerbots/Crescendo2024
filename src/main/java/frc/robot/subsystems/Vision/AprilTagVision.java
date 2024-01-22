@@ -64,9 +64,16 @@ public class AprilTagVision {
 
     // Forward B&W camera for Apriltags
     // relative position of the camera on the robot ot the robot center
-    private final Transform3d m_robotToAprilTagCam = new Transform3d(
+    // these are the offsets for the camera and need to be chaged based off of our robot 
+    private final Transform3d m_robotToFrontAprilTagCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(3.5), -0.136, Units.inchesToMeters(24.75)),
             new Rotation3d(0.0, 0.0, 0.0));
+
+
+    private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
+        new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(0)),
+        new Rotation3d(0.0, 0.0, 0.0));
+
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;
@@ -91,16 +98,16 @@ public class AprilTagVision {
 
         if (USE_MULTITAG) {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    m_aprilTagCameraFront, m_robotToAprilTagCam);
+                    m_aprilTagCameraFront, m_robotToFrontAprilTagCam);
             m_photonPoseEstimatorFront.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
             m_photonPoseEstimatorBack = new PhotonPoseEstimator(m_aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    m_aprilTagCameraFront, m_robotToAprilTagCam);
+                    m_aprilTagCameraFront, m_robotToBackAprilTagCam);
             m_photonPoseEstimatorBack.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
         } else {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
-                    PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraFront, m_robotToAprilTagCam);
+                    PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraFront, m_robotToFrontAprilTagCam);
             m_photonPoseEstimatorBack = new PhotonPoseEstimator(m_aprilTagFieldLayout,
-                    PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraBack, m_robotToAprilTagCam);
+                    PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraBack, m_robotToBackAprilTagCam);
         }
 
         // set the driver mode to false
@@ -137,7 +144,10 @@ public class AprilTagVision {
     }
     
     public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
+        if (!m_aprilTagCamera.isConnected())
+            return;
         
+
         if (m_aprilTagFieldLayout == null)
             return;
 
