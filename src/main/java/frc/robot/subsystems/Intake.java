@@ -9,7 +9,9 @@ import frc.robot.Constants;
 public class Intake extends SubsystemBase {
     
     final static double INTAKE_SPEED = 0.1;
+    final static double INTAKE_CENTERING_SPEED = 0.1;
     final static double OUTTAKE_SPEED = -0.1;
+    final static double OUTTAKE_CENTERING_SPEED = -0.1;
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;
 
@@ -23,17 +25,21 @@ public class Intake extends SubsystemBase {
         // This method will be called once per scheduler run
     }
 
-    public void run(double speed) {
-        m_intakeMotor.set(speed); //TODO: Find if posotive or negitive
-        m_centeringMotor.set(speed); //TODO: Find if posotive or negitive
+    public void run(double rollerSpeed, double centeringWheelSpeed) {
+        m_intakeMotor.set(rollerSpeed); //TODO: Find if posotive or negitive
+        m_centeringMotor.set(centeringWheelSpeed); //TODO: Find if posotive or negitive
     }
 
     public void intake() {
-        run(INTAKE_SPEED);
+        run(INTAKE_SPEED, INTAKE_CENTERING_SPEED);
     }
 
     public void outtake() {
-        run(OUTTAKE_SPEED);
+        run(OUTTAKE_SPEED, OUTTAKE_CENTERING_SPEED);
+    }
+
+    public void stop() {
+        run(0,0);
     }
 
 }
