@@ -207,7 +207,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
         // Add some extra numbers to diagnose the load on the motors
         SmartDashboard.putNumber("shooter/leaderOutput", m_shoulder.get());
         SmartDashboard.putNumber("shooter/encoder", Math.toDegrees(getShoulderAngle()));
-        SmartDashboard.putNumber("shooter/encoderSpeed", Math.toDegrees(getSpeed()));
+        SmartDashboard.putNumber("shooter/encoderSpeed", Math.toDegrees(getShoulderSpeed()));
         SmartDashboard.putNumber("shooter/goal", Math.toDegrees(m_goal));
         SmartDashboard.putNumber("shooter/absoluteEncoder", Math.toDegrees(-m_dutyEncoder.getDistance()));
         // SmartDashboard.putBoolean("shooter/m_resetShoulderPos", m_resetShoulderPos)
