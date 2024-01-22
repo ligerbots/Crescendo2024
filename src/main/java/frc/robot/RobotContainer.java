@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.commands.Drive;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
@@ -19,6 +20,7 @@ public class RobotContainer {
 
     // private final Vision m_vision = new Vision();
     private final DriveTrain m_driveTrain = new DriveTrain();
+    private final Intake m_intake = new Intake();
 
     public RobotContainer() {
         configureBindings();
@@ -26,6 +28,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        m_controller.rightBumper().whileTrue(() -> {m_intake.intake();});
     }
 
     public Command getAutonomousCommand() {
