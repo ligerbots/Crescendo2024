@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Vision;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,10 +112,10 @@ public class AprilTagVision {
         m_visionSim.update(pose);
     }
 
-    private ArrayList<Pose2d> getTarget(PhotonCamera camera, Pose2d currentPose){
+    private PairReturn getTarget(PhotonCamera camera, Pose2d currentPose){
         ArrayList<Pose2d> targets = new ArrayList<Pose2d>();
         if (!camera.isConnected())
-            return targets;
+            return new PairReturn(0, targets);
 
         PhotonPipelineResult targetResult = camera.getLatestResult();
 
@@ -124,7 +124,7 @@ public class AprilTagVision {
             // if no target, clean out the numbers
             SmartDashboard.putNumber("vision/targetID", -1);
 
-            return targets;
+            return new PairReturn(0, targets);
         } 
 
         // Estimate the robot pose.
@@ -132,6 +132,8 @@ public class AprilTagVision {
         Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(currentPose);
         SmartDashboard.putNumber("vision/timestamp", targetResult.getTimestampSeconds());
         SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
+        
+        return new PairReturn(targetResult.getTimestampSeconds(), targets);
     }
     
     public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
