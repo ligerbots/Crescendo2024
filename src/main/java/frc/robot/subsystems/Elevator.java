@@ -24,13 +24,13 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
-    private static final double ELEVATOR_MAX_VEL_METER_PER_SEC = Units.inchesToMeters(100.0);
+    private static final double ELEVATOR_MAX_VEL_METER_PER_SEC = Units.inchesToMeters(100.0); //TODO: Find actual value
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 
     private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
 
-    private static final double ELEVATOR_METER_PER_REVOLUTION = Units.inchesToMeters(0.7); //TODO: find actual value
+    private static final double ELEVATOR_METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)/4); //May be swiched to 1:5, NEED TO CHECK
 
 
     // PID Constants for the reacher PID controller
@@ -42,7 +42,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_K_FF = 0.0;
 
     //Offset for command
-    public static final double REACHER_OFFSET_TOLERANCE_METERS = 1; //TODO: pick value
+    public static final double REACHER_OFFSET_TOLERANCE_METERS = 1; //TODO: pick value, used in the command SetElevator length
 
     // Define the motor and encoders
     private final CANSparkMax m_motor;
