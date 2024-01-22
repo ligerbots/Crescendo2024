@@ -38,7 +38,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
     import frc.robot.Constants;
 import frc.robot.Robot;
 
-    public class Vision {
+    public class NoteVision {
         // variable to turn on/off our private tag layout
         // if this is false, the compiler should remove all the unused code.
         public static final boolean USE_PRIVATE_TAG_LAYOUT = false;
@@ -69,7 +69,7 @@ import frc.robot.Robot;
         // Simulation support
         private VisionSystemSim m_visionSim;
 
-        public Vision() {
+        public NoteVision() {
             try {
                 m_aprilTagFieldLayout = AprilTagFieldLayout
                             .loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
