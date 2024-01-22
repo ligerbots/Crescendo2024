@@ -6,14 +6,15 @@
 
     import java.io.IOException;
     import java.util.ArrayList;
-    import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
     import org.photonvision.EstimatedRobotPose;
     import org.photonvision.PhotonCamera;
     import org.photonvision.PhotonPoseEstimator;
     import org.photonvision.simulation.PhotonCameraSim;
-import org.photonvision.simulation.SimCameraProperties;
-import org.photonvision.simulation.VisionSystemSim;
+    import org.photonvision.simulation.SimCameraProperties;
+    import org.photonvision.simulation.VisionSystemSim;
     import org.photonvision.PhotonPoseEstimator.PoseStrategy;
     import org.photonvision.estimation.TargetModel;
     import org.photonvision.estimation.VisionEstimation;
@@ -26,8 +27,8 @@ import org.photonvision.simulation.VisionSystemSim;
     import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
     import edu.wpi.first.math.geometry.Pose2d;
     import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
+    import edu.wpi.first.math.geometry.Rotation2d;
+    import edu.wpi.first.math.geometry.Rotation3d;
     import edu.wpi.first.math.geometry.Transform3d;
     import edu.wpi.first.math.geometry.Translation3d;
     import edu.wpi.first.math.util.Units;
@@ -36,9 +37,9 @@ import edu.wpi.first.math.geometry.Rotation3d;
     import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
     import frc.robot.Constants;
-import frc.robot.Robot;
+    import frc.robot.Robot;
 
-    public class Vision {
+    public class AprilTagVision {
         // variable to turn on/off our private tag layout
         // if this is false, the compiler should remove all the unused code.
         public static final boolean USE_PRIVATE_TAG_LAYOUT = false;
@@ -54,8 +55,11 @@ import frc.robot.Robot;
         static final double SHED_TAG_NODE_ZOFFSET = 0.31;
         static final double SHED_TAG_SUBSTATION_YOFFSET = 1.19;
 
-        private static final String CAMERA_NAME = "ApriltagCamera";
-        private final PhotonCamera m_aprilTagCamera = new PhotonCamera(CAMERA_NAME);
+        private static final String CAMERA_NAME_FRONT = "ApriltagCameraFront";
+        private static final String CAMERA_NAME_BACK = "ApriltagCameraBack";
+        private final PhotonCamera m_aprilTagCameraFront = new PhotonCamera(CAMERA_NAME_FRONT);
+        private final PhotonCamera m_aprilTagCameraBack = new PhotonCamera(CAMERA_NAME_BACK);
+
         private AprilTagFieldLayout m_aprilTagFieldLayout;
 
         // Forward B&W camera for Apriltags
@@ -64,12 +68,14 @@ import frc.robot.Robot;
                 new Translation3d(Units.inchesToMeters(3.5), -0.136, Units.inchesToMeters(24.75)),
                 new Rotation3d(0.0, 0.0, 0.0));
 
-        private final PhotonPoseEstimator m_photonPoseEstimator;
+        private final PhotonPoseEstimator m_photonPoseEstimatorFront;
+        private final PhotonPoseEstimator m_photonPoseEstimatorBack;
+
 
         // Simulation support
         private VisionSystemSim m_visionSim;
 
-        public Vision() {
+        public AprilTagVision() {
             try {
                 m_aprilTagFieldLayout = AprilTagFieldLayout
                             .loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
@@ -84,52 +90,58 @@ import frc.robot.Robot;
             }
 
             if (USE_MULTITAG) {
-                m_photonPoseEstimator = new PhotonPoseEstimator(m_aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                        m_aprilTagCamera, m_robotToAprilTagCam);
-                m_photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+                m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                        m_aprilTagCameraFront, m_robotToAprilTagCam);
+                m_photonPoseEstimatorFront.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
+                m_photonPoseEstimatorBack = new PhotonPoseEstimator(m_aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                        m_aprilTagCameraFront, m_robotToAprilTagCam);
+                m_photonPoseEstimatorBack.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
             } else {
-                m_photonPoseEstimator = new PhotonPoseEstimator(m_aprilTagFieldLayout,
-                        PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCamera, m_robotToAprilTagCam);
+                m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
+                        PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraFront, m_robotToAprilTagCam);
+                m_photonPoseEstimatorBack = new PhotonPoseEstimator(m_aprilTagFieldLayout,
+                        PoseStrategy.CLOSEST_TO_REFERENCE_POSE, m_aprilTagCameraBack, m_robotToAprilTagCam);
             }
 
             // set the driver mode to false
-            m_aprilTagCamera.setDriverMode(false);
+            m_aprilTagCameraFront.setDriverMode(false);
+            m_aprilTagCameraBack.setDriverMode(false);
         }
 
         public void updateSimulation(Pose2d pose) {
             m_visionSim.update(pose);
         }
 
-        public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
-            if (!m_aprilTagCamera.isConnected())
-                return;
+        private ArrayList<Pose2d> getTarget(PhotonCamera camera, Pose2d currentPose){
+            ArrayList<Pose2d> targets = new ArrayList<Pose2d>();
+            if (!camera.isConnected())
+                return targets;
 
-            if (m_aprilTagFieldLayout == null)
-                return;
-
-            PhotonPipelineResult targetResult = m_aprilTagCamera.getLatestResult();
+            PhotonPipelineResult targetResult = camera.getLatestResult();
 
             SmartDashboard.putBoolean("vision/hasTargets", targetResult.hasTargets());
             if (!targetResult.hasTargets()) {
                 // if no target, clean out the numbers
                 SmartDashboard.putNumber("vision/targetID", -1);
 
-                if (PLOT_TAG_SOLUTIONS) {
-                    clearTagSolutions(field);
-                }    
-                return;
+                return targets;
             } 
-            
-            // debugging/display assistance
-            if (PLOT_TAG_SOLUTIONS) {
-                plotVisibleTags(field, targetResult);
-            }    
-        
+
             // Estimate the robot pose.
             // If successful, update the odometry using the timestamp of the measurement
-            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(odometry.getEstimatedPosition());
+            Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(currentPose);
             SmartDashboard.putNumber("vision/timestamp", targetResult.getTimestampSeconds());
             SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
+        }
+        
+        public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
+            
+            if (m_aprilTagFieldLayout == null)
+                return;
+
+            if (PLOT_TAG_SOLUTIONS) {
+                clearTagSolutions(field);
+            }    
             if (result.isPresent()) {
                 EstimatedRobotPose camPose = result.get();
                 SmartDashboard.putString("vision/solutionMethod", camPose.strategy.toString());
