@@ -32,5 +32,6 @@ public class Constants {
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 12;
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(108.5);
 
-
+    //Elevator
+    public static final int ELEVATOR_CAN_ID = 100000001; //TODO: REPLACE WITH REAL CAN ID
 }
