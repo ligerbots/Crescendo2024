@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.commands.Drive;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Vision;
 
 public class RobotContainer {
@@ -19,6 +20,9 @@ public class RobotContainer {
 
     // private final Vision m_vision = new Vision();
     private final DriveTrain m_driveTrain = new DriveTrain();
+
+    //Elevator
+    private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
         configureBindings();
