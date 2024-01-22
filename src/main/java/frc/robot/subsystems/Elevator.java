@@ -41,6 +41,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_K_D = 0.0;
     private static final double ELEVATOR_K_FF = 0.0;
 
+    //Offset for command
+    public static final double REACHER_OFFSET_TOLERANCE_METERS = 1; //TODO: pick value
+
     // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;

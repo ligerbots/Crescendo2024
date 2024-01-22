@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.Drive;
+import frc.robot.commands.SetElevatorLength;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Vision;
@@ -27,6 +28,8 @@ public class RobotContainer {
     public RobotContainer() {
         configureBindings();
         m_driveTrain.setDefaultCommand(getDriveCommand());
+        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 0));//NOTE:Can be rebound to a button and any value
+
     }
 
     private void configureBindings() {
