@@ -23,12 +23,13 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain();
 
     //Elevator
+    //NOTE: some values in elevator subsystem need checking before run on the robot. They all have comments next to them
     private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
         configureBindings();
         m_driveTrain.setDefaultCommand(getDriveCommand());
-        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 0));//NOTE:Can be rebound to a button and any value
+        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 10));//NOTE:Can be rebound to a button and any value
 
     }
 

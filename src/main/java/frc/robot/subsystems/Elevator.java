@@ -17,8 +17,10 @@ import frc.robot.Constants;
 
 public class Elevator extends TrapezoidProfileSubsystem {
 
-    private static final double ELEVATOR_MAX_LENGTH = Units.inchesToMeters(22.0);
-    private static final double ELEVATOR_MIN_LENGTH = Units.inchesToMeters(0.0);
+    private static final double ELEVATOR_GEAR_REDUCTION = 1/4; //TODO: Check if changed on real robot
+
+    private static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
+    private static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
     public static final double ELEVATOR_OFFSET_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Find tolorence
 
@@ -30,7 +32,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
 
-    private static final double ELEVATOR_METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)/4); //May be swiched to 1:5, NEED TO CHECK
+    private static final double ELEVATOR_METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*ELEVATOR_GEAR_REDUCTION); //TODO: Double check robot if correct when built
 
 
     // PID Constants for the reacher PID controller
@@ -50,7 +52,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     //initializing Potentiometer
     private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
-    private final double POTENTIOMETER_RANGE = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
+    private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
     private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
     private final AnalogPotentiometer m_stringPotentiometer;
 
@@ -84,7 +86,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Set the position conversion factor.
         m_encoder.setPositionConversionFactor(ELEVATOR_METER_PER_REVOLUTION);
 
-        m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE, POTENTIOMETER_OFFSET);
+        m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
         // m_encoder.setPosition(ELEVATOR_OFFSET_METER);
         m_encoder.setPosition(getPotentiometerReadingMeters());
 
@@ -130,7 +132,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // this needs to be public so that commands can get the restricted distance. (safety, limits of to high)
     public static double limitElevatorLength(double length){
-        return Math.min(ELEVATOR_MAX_LENGTH, Math.max(ELEVATOR_MIN_LENGTH, length));
+        return Math.min(ELEVATOR_MAX_LENGTH_METERS, Math.max(ELEVATOR_MIN_LENGTH_METERS, length));
     }
 
     // set reacher length in inches
