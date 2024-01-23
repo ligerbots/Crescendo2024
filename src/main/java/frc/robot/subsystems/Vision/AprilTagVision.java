@@ -154,8 +154,6 @@ public class AprilTagVision {
 
     public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
 
-       
-
         if (m_aprilTagFieldLayout == null) {
             return;
         }
@@ -164,13 +162,13 @@ public class AprilTagVision {
             return;
         }
 
-         if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected()) {
-         // Estimate the robot pose.
-        // If successful, update the odometry using the timestamp of the measurement
-        Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(odometry.getEstimatedPosition());
-        SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
-        if (result.isPresent()) {
+        if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected()) {
+            // Estimate the robot pose.
+            // If successful, update the odometry using the timestamp of the measurement
+
             DoubleReturn Targets;
+            DoubleReturn frontTargets;
+            DoubleReturn backTargets;
             if (m_aprilTagCameraBack.isConnected()) {
                 Targets = getTarget(m_aprilTagCameraBack);
                 updateOdometrySingleCamera(odometry, field, Targets);
@@ -183,31 +181,19 @@ public class AprilTagVision {
                 return;
             }
 
+            if (m_aprilTagCameraFront.isConnected() && m_aprilTagCameraBack.isConnected()) {
+                frontTargets = getTarget(m_aprilTagCameraFront);
+                backTargets = getTarget(m_aprilTagCameraBack);
 
-            
+                updateOdometrySingleCamera(odometry, field, frontTargets);
+                updateOdometrySingleCamera(odometry, field, backTargets);
 
+            }
 
+        }
+    }
 
-
-
-
-            EstimatedRobotPose camPose = result.get();
-            Pose2d estimatedPose = camPose.estimatedPose.toPose2d();
-
-            
-            double curImageTimeStamp = Targets.getTimestamp();
-            odometry.addVisionMeasurement(estimatedPose, curImageTimeStamp);
-
-            if (PLOT_TAG_SOLUTIONS) {
-                plotPose(field, "visionPose", estimatedPose);
-
-                // // NOTE this the new PV version as for Sept 2023
-                // var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCamera.getCameraMatrix().get(),
-                //         m_aprilTagCamera.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout);
-                // Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToAprilTagCam.inverse());
-                // plotPose(field, "visionAltPose", alt.toPose2d());
-            } 
-            }}}
+    
 
     // PhotonCamera apriltagCamera;
     // PhotonPoseEstimator poseEstimator;
@@ -237,23 +223,20 @@ public class AprilTagVision {
 
     // }
 
+    public void updateOdometrySingleCamera(SwerveDrivePoseEstimator odometry, Field2d field, DoubleReturn targets) {
 
-    public void updateOdometrySingleCamera(SwerveDrivePoseEstimator odometry, Field2d field, DoubleReturn targets){
-       
         Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(odometry.getEstimatedPosition());
         SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
         if (result.isPresent()) {
             EstimatedRobotPose camPose = result.get();
             Pose2d estimatedPose = camPose.estimatedPose.toPose2d();
 
-            
             double curImageTimeStamp = targets.getTimestamp();
             odometry.addVisionMeasurement(estimatedPose, curImageTimeStamp);
         }
         return;
     }
-
-
+    
 
     private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         try {
