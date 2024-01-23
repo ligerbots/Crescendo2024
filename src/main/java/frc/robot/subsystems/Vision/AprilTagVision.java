@@ -203,10 +203,10 @@ public class AprilTagVision {
         
     }
 
-    private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+    private Optional<EstimatedRobotPose> getEstimatedGlobalPose(PhotonPoseEstimator photonPoseEstimator, Pose2d prevEstimatedRobotPose) {
         try {
-            m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-            return m_photonPoseEstimator.update();
+            photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+            return photonPoseEstimator.update();
         } catch (Exception e) {
             // bad! log this and keep going
             DriverStation.reportError("Exception running PhotonPoseEstimator", e.getStackTrace());
@@ -216,12 +216,12 @@ public class AprilTagVision {
 
     // get the tag ID closest to horizontal center of camera
     // we might want to use this to do fine adjustments on field element locations
-    public int getCentralTagId() {
+    public int getCentralTagId(PhotonCamera aprilTagCamera) {
         // make sure camera connected
-        if (!m_aprilTagCamera.isConnected())
+        if (!aprilTagCamera.isConnected())
             return -1;
 
-        var targetResult = m_aprilTagCamera.getLatestResult();
+        var targetResult = aprilTagCamera.getLatestResult();
 
         // make a temp holder var for least Y translation, set to first tags translation
         double minY = 1.0e6; // big number
@@ -294,11 +294,12 @@ public class AprilTagVision {
         // static.
         // So, always have a little bit of uncertainty.
         prop.setCalibError(0.1, 0.03);
-
-        PhotonCameraSim cam = new PhotonCameraSim(m_aprilTagCamera, prop);
-        cam.setMaxSightRange(Units.feetToMeters(20.0));
-        m_visionSim.addCamera(cam, m_robotToAprilTagCam);
-
+        PhotonCameraSim camFront = new PhotonCameraSim(m_aprilTagCameraFront, prop);
+        PhotonCameraSim camBack = new PhotonCameraSim(m_aprilTagCameraBack, prop);
+        camFront.setMaxSightRange(Units.feetToMeters(20.0));
+        camBack.setMaxSightRange(Units.feetToMeters(20.0));
+        m_visionSim.addCamera(camFront, m_robotToFrontAprilTagCam);
+        m_visionSim.addCamera(camBack, m_robotToBackAprilTagCam);
         m_visionSim.addAprilTags(m_aprilTagFieldLayout);
     }
 
@@ -342,12 +343,12 @@ public class AprilTagVision {
         field.getObject("visibleTagPoses").setPoses(poses);
     }
 
-    private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult) {
+    private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult, PhotonCamera aprilTagCamera, Transform3d robotToAprilTagCam) {
         // NOTE this is for PV 2024
-        var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCamera.getCameraMatrix().get(),
-                m_aprilTagCamera.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
+        var pnpResults = VisionEstimation.estimateCamPosePNP(aprilTagCamera.getCameraMatrix().get(),
+                aprilTagCamera.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
                 TargetModel.kAprilTag36h11);
-        Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToAprilTagCam.inverse());
+        Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(robotToAprilTagCam.inverse());
         plotPose(field, "visionAltPose", alt.toPose2d());
     }
 }
