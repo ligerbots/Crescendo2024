@@ -116,10 +116,10 @@ public class AprilTagVision {
         m_visionSim.update(pose);
     }
 
-    private TripleReturn getTarget(PhotonCamera camera, Pose2d currentPose) {
+    private QuadReturn getTarget(PhotonCamera camera, Pose2d currentPose) {
         ArrayList<Pose2d> targets = new ArrayList<Pose2d>();
         if (!camera.isConnected())// idk what the default estimate should be, just the last real Pose?
-            return new TripleReturn(0, targets, null);
+            return new QuadReturn(0, targets, null, null);
 
         PhotonPipelineResult targetResult = camera.getLatestResult();
 
@@ -128,7 +128,7 @@ public class AprilTagVision {
             // if no target, clean out the numbers
             SmartDashboard.putNumber("vision/targetID", -1);
             // still dont know what it should default to
-            return new TripleReturn(0, targets, null);
+            return new QuadReturn(0, targets, null, null);
         }
 
         // Estimate the robot pose.
@@ -137,70 +137,70 @@ public class AprilTagVision {
         SmartDashboard.putNumber("vision/timestamp", targetResult.getTimestampSeconds());
         SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
 
-        return new TripleReturn(targetResult.getTimestampSeconds(), targets, result);
+        return new QuadReturn(targetResult.getTimestampSeconds(), targets, result, targetResult);
     }
 
     public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
         // i dont remember how to get curr pose
-        TripleReturn frontRestult = getTarget(m_aprilTagCameraFront, null);
-        TripleReturn backRestult = getTarget(m_aprilTagCameraBack, null);
-        TripleReturn result;
+        QuadReturn frontResult = getTarget(m_aprilTagCameraFront, null);
+        QuadReturn backResult = getTarget(m_aprilTagCameraBack, null);
+        QuadReturn result;
 
         if (m_aprilTagFieldLayout == null) {
-                return;
-
-            }
+            return;
+        }
 
         if (!m_aprilTagCameraFront.isConnected() && !m_aprilTagCameraBack.isConnected()) {
             return;
         }
-
+        PhotonCamera apriltagCamera;
+        PhotonPoseEstimator poseEstimator;
         if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected()) {
-            
-            
             if (m_aprilTagCameraBack.isConnected()) {
-                PhotonCamera ApriltagCamera = m_aprilTagCameraBack;
-                result = backRestult;
+                apriltagCamera = m_aprilTagCameraBack;
+                poseEstimator = m_photonPoseEstimatorBack;
+                result = backResult;
             }
             if (m_aprilTagCameraFront.isConnected()) {
-                PhotonCamera ApriltagCamera = m_aprilTagCameraFront;
-                result = frontRestult;
+                apriltagCamera = m_aprilTagCameraFront;
+                poseEstimator = m_photonPoseEstimatorFront;
+                result = frontResult;
+            }
+            
+            if (PLOT_TAG_SOLUTIONS) {
+                clearTagSolutions(field);
             }
 
-            
+            Optional<EstimatedRobotPose> optionalRobotPose = result.getEstimatedRobotPose();
+            if (optionalRobotPose.isPresent()) {
+                EstimatedRobotPose robotPose = optionalRobotPose.get();
+                
+                SmartDashboard.putString("vision/solutionMethod", poseEstimator.getPrimaryStrategy().toString());
 
+                Pose2d estimatedPose = robotPose.estimatedPose.toPose2d();
+                plotPose(field, "visionPose", estimatedPose);
+
+                double curImageTimeStamp = result.getTimestamp();
+                odometry.addVisionMeasurement(estimatedPose, curImageTimeStamp);
+
+                if (PLOT_TAG_SOLUTIONS) {
+                    if (poseEstimator.getPrimaryStrategy() != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
+                            && poseEstimator.getPrimaryStrategy() != PoseStrategy.MULTI_TAG_PNP_ON_RIO) {
+                        plotAlternateSolution(field, result.getPhotonPipeline());
+                    } else {
+                        plotPose(field, "visionAltPose", null);
+                    }
+                }
+            } else if (PLOT_TAG_SOLUTIONS) {
+                plotPose(field, "visionPose", null);
+                plotPose(field, "visionAltPose", null);
+            }
         }
-
+        // two cameras at once
         if (m_aprilTagCameraBack.isConnected() && m_aprilTagCameraFront.isConnected()) {
             
-
         }
-
-        if (PLOT_TAG_SOLUTIONS) {
-            clearTagSolutions(field);
-        }
-        if (result.isPresent()) {
-            EstimatedRobotPose camPose = result.get();
-            SmartDashboard.putString("vision/solutionMethod", camPose.strategy.toString());
-
-            Pose2d estimatedPose = camPose.estimatedPose.toPose2d();
-            plotPose(field, "visionPose", estimatedPose);
-
-            double curImageTimeStamp = targetResult.getTimestampSeconds();
-            odometry.addVisionMeasurement(estimatedPose, curImageTimeStamp);
-
-            if (PLOT_TAG_SOLUTIONS) {
-                if (camPose.strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
-                        && camPose.strategy != PoseStrategy.MULTI_TAG_PNP_ON_RIO) {
-                    plotAlternateSolution(field, targetResult);
-                } else {
-                    plotPose(field, "visionAltPose", null);
-                }
-            }
-        } else if (PLOT_TAG_SOLUTIONS) {
-            plotPose(field, "visionPose", null);
-            plotPose(field, "visionAltPose", null);p
-        }
+        
     }
 
     private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
