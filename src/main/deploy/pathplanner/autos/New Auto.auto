@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.3460223265312605,
+      "y": 5.515714580536304
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4 note middle"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top note pos"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top note to top shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top shot to top middle note "
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
