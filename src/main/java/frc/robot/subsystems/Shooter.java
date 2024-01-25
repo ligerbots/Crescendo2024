@@ -86,16 +86,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
-        if (upperHub == false) {
-            // if shooting to lowerHub, then return shooterSpeed with values for lowerHub
-            return lowHubSpeeds;
-        }
-
         Map.Entry<Double, ShooterSpeeds> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterSpeeds> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
             if (after == null) {
-                return lowHubSpeeds; // this should never happen b/c shooterSpeeds should have at least 1 element
+                return null; // this should never happen b/c shooterSpeeds should have at least 1 element
             }
             return after.getValue();
         }
