@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,7 +22,7 @@ public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
 
-    static final double KP = 0.1;
+    static final double KP = 1.0e-3;
     static final double KI = 0.0;
     static final double KD = 0.0;
     static final double KF = 0.0;
@@ -29,6 +30,8 @@ public class Shooter extends SubsystemBase {
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
     SparkPIDController m_leftPidController, m_rightPidController;
+    private RelativeEncoder m_leftEncoder;
+    private RelativeEncoder m_rightEncoder;
 
     // lookup table for upper hub speeds
     public static class ShooterSpeeds {
@@ -64,28 +67,23 @@ public class Shooter extends SubsystemBase {
         m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
 
         m_leftPidController = m_leftShooterMotor.getPIDController();
-        // // Config the Velocity closed loop gains in slot0
-        // m_leftShooterMotor.config_kP(0, KP);
-        // m_leftShooterMotor.config_kI(0, KI);
-        // m_leftShooterMotor.config_kD(0, KD);
-        // m_leftShooterMotor.config_kF(0, KF);
-
-        // m_rightShooterMotor.config_kP(0, Constants.SHOOTER_KP);
-        // m_rightShooterMotor.config_kI(0, Constants.SHOOTER_KI);
-        // m_rightShooterMotor.config_kD(0, Constants.SHOOTER_KD);
-        // m_rightShooterMotor.config_kF(0, Constants.SHOOTER_KF);
+        setPidController(m_leftPidController);
+        m_rightPidController = m_rightShooterMotor.getPIDController();
+        setPidController(m_rightPidController);
+        m_leftEncoder = m_leftShooterMotor.getEncoder();
+        m_rightEncoder = m_rightShooterMotor.getEncoder();
     }
 
-    private void setPidController() {
-         // set PID coefficients
-    m_pidController.setP(kP);
-    m_pidController.setI(kI);
-    m_pidController.setD(kD);
-    m_pidController.setIZone(kIz);
-    m_pidController.setFF(kFF);
-    m_pidController.setOutputRange(kMinOutput, kMaxOutput);
-
+    private void setPidController(SparkPIDController pidController) {
+        // set PID coefficients
+        pidController.setP(KP);
+        pidController.setI(KI);
+        pidController.setD(KD);
+        // pidController.setIZone(kIz);
+        // pidController.setFF(kFF);
+        // pidController.setOutputRange(kMinOutput, kMaxOutput);
     }
+
     public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
         if (upperHub == false) {
             // if shooting to lowerHub, then return shooterSpeed with values for lowerHub
@@ -116,27 +114,22 @@ public class Shooter extends SubsystemBase {
     // periodically update the values of motors for shooter to SmartDashboard
     @Override
     public void periodic() {
-        // SmartDashboard.putNumber("shooter/bottom_rpm", getBottomRpm());
-        // SmartDashboard.putNumber("shooter/top_rpm", getTopRpm());
+        SmartDashboard.putNumber("shooter/left_rpm", getLeftRpm());
+        SmartDashboard.putNumber("shooter/right_rpm", getRightRpm());
     }
 
-    // public double getTopRpm() {
-    //     return m_leftShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
-    // }
+    public double getLeftRpm() {
+        return m_leftEncoder.getVelocity();
+    }
 
-    // public double getBottomRpm() {
-    //     return m_rightShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
-    // }
+    public double getRightRpm() {
+        return m_rightEncoder.getVelocity();
+    }
 
-    // public void setShooterRpms(double topRpm, double bottomRpm) {
-    //     // double target_unitsPer100ms = target_RPM * Constants.kSensorUnitsPerRotation / 600.0; //RPM -> Native units
-    //     // double targetVelocity_UnitsPer100ms = leftYstick * 2000.0 * 2048.0 / 600.0;
-    //     double falconTop = topRpm * Constants.FALCON_UNITS_PER_RPM;
-    //     double falconBottom = bottomRpm * Constants.FALCON_UNITS_PER_RPM;
-    //     System.out.println("setting shooter motor signals " + falconTop + " " + falconBottom);
-    //     m_leftShooterMotor.set(ControlMode.Velocity, falconTop);
-    //     m_rightShooterMotor.set(TalonFXControlMode.Velocity, falconBottom);
-    // }
+    public void setShooterRpms(double leftRpm, double rightRpm) {
+        m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
+        m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
+    }
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
