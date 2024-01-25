@@ -82,7 +82,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // Set the motor encoder and Position setpoint to the initialAngle from the absolute encoder
         m_encoder.setPosition(initialAngle);
 
-        setCoastMode(false);
+        setCoastMode(m_coastMode);
         SmartDashboard.putBoolean("shooterPivot/coastMode", m_coastMode);
     }
 
