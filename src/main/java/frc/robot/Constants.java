@@ -35,4 +35,6 @@ public class Constants {
     public static final int INTAKE_MOTOR_CAN_ID = 100001; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
     public static final int CENTERING_MOTOR_CAN_ID = 1000000; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
 
+    public static final int SHOOTER_PIVOT_ID = 10101; //TODO: REPLACE WITH REAL ID
+
 }
