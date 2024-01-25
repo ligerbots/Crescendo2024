@@ -20,6 +20,7 @@ public class RobotContainer {
     private final Vision m_vision = new Vision();
     private final DriveTrain m_driveTrain = new DriveTrain(m_vision);
     private final Intake m_intake = new Intake();
+    private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
 
     public RobotContainer() {
         configureBindings();
