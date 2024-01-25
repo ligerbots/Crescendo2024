@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,35 +28,9 @@ public class Shooter extends SubsystemBase {
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
+    SparkPIDController m_leftPidController, m_rightPidController;
 
     // lookup table for upper hub speeds
-    static final TreeMap<Double, ShooterSpeeds> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, FEEDER_SPEED)),      // actually lower hub, but safer to include
-            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, FEEDER_SPEED)))); // Revere
-            
-    // values for lowerHub
-    static final ShooterSpeeds lowHubSpeeds = new ShooterSpeeds(900.0, 900.0, 0.3);
-
-    // Shooter class constructor, initialize arrays for motors controllers,
-    // encoders, and SmartDashboard data
-    public Shooter() {
-        m_feederMotor = new CANSparkMax(Constants.FEEDER_CAN_ID, MotorType.kBrushless);
-
-        m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
-        m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
-
-        // // Config the Velocity closed loop gains in slot0
-        // m_leftShooterMotor.config_kP(0, KP);
-        // m_leftShooterMotor.config_kI(0, KI);
-        // m_leftShooterMotor.config_kD(0, KD);
-        // m_leftShooterMotor.config_kF(0, KF);
-
-        // m_rightShooterMotor.config_kP(0, Constants.SHOOTER_KP);
-        // m_rightShooterMotor.config_kI(0, Constants.SHOOTER_KI);
-        // m_rightShooterMotor.config_kD(0, Constants.SHOOTER_KD);
-        // m_rightShooterMotor.config_kF(0, Constants.SHOOTER_KF);
-    }
-
     public static class ShooterSpeeds {
         public double top, bottom, chute;
         
@@ -73,6 +48,44 @@ public class Shooter extends SubsystemBase {
         }
     }
 
+    static final TreeMap<Double, ShooterSpeeds> shooterSpeeds = new TreeMap<>(Map.ofEntries(
+            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, FEEDER_SPEED)),      // actually lower hub, but safer to include
+            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, FEEDER_SPEED)))); // Revere
+            
+    // values for lowerHub
+    static final ShooterSpeeds lowHubSpeeds = new ShooterSpeeds(900.0, 900.0, 0.3);
+
+    // Shooter class constructor, initialize arrays for motors controllers,
+    // encoders, and SmartDashboard data
+    public Shooter() {
+        m_feederMotor = new CANSparkMax(Constants.FEEDER_CAN_ID, MotorType.kBrushless);
+
+        m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
+        m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
+
+        m_leftPidController = m_leftShooterMotor.getPIDController();
+        // // Config the Velocity closed loop gains in slot0
+        // m_leftShooterMotor.config_kP(0, KP);
+        // m_leftShooterMotor.config_kI(0, KI);
+        // m_leftShooterMotor.config_kD(0, KD);
+        // m_leftShooterMotor.config_kF(0, KF);
+
+        // m_rightShooterMotor.config_kP(0, Constants.SHOOTER_KP);
+        // m_rightShooterMotor.config_kI(0, Constants.SHOOTER_KI);
+        // m_rightShooterMotor.config_kD(0, Constants.SHOOTER_KD);
+        // m_rightShooterMotor.config_kF(0, Constants.SHOOTER_KF);
+    }
+
+    private void setPidController() {
+         // set PID coefficients
+    m_pidController.setP(kP);
+    m_pidController.setI(kI);
+    m_pidController.setD(kD);
+    m_pidController.setIZone(kIz);
+    m_pidController.setFF(kFF);
+    m_pidController.setOutputRange(kMinOutput, kMaxOutput);
+
+    }
     public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
         if (upperHub == false) {
             // if shooting to lowerHub, then return shooterSpeed with values for lowerHub
