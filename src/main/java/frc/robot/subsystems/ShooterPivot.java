@@ -94,10 +94,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
         // SmartDashboard.putBoolean("shooterPivot/m_resetPivotPos", m_resetPivotPos)
 
-        m_coastMode = SmartDashboard.getBoolean("shooterPivot/coastMode", m_coastMode);
+        // m_coastMode = SmartDashboard.getBoolean("shooterPivot/coastMode", m_coastMode);
 
-        if (m_coastMode)
-            setCoastMode(m_coastMode);
+        // if (m_coastMode)
+        //     setCoastMode(m_coastMode);
 
         // Execute the super class periodic method
         super.periodic();
