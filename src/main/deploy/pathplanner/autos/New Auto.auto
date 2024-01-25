@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.3460223265312605,
-      "y": 5.515714580536304
+      "x": 1.3481856539605939,
+      "y": 5.551962333463358
     },
     "rotation": 180.0
   },
@@ -14,13 +14,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4 note middle"
+            "pathName": "straight subwoffer to bottom stage note"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "top note pos"
+            "pathName": "bottom stage note to middle stage note "
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "middle stage note to top stage note "
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top stage note to top note"
           }
         },
         {
@@ -33,6 +45,12 @@
           "type": "path",
           "data": {
             "pathName": "top shot to top middle note "
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top middle note to top shoot"
           }
         }
       ]

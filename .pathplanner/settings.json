@@ -3,9 +3,11 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "shoot pose to note pose",
+    "note pose to note pose",
     "note pose to shoot pose",
-    "note poses"
+    "note poses",
+    "shoot pose to note pose",
+    "starting pose to note"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
