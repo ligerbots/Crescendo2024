@@ -9,11 +9,8 @@ package frc.robot.subsystems;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -21,24 +18,20 @@ import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     
-    // CANSparkMax for the hopper
-    CANSparkMax m_chuteMotor;
-    // WPI_TalonFX for the shooter
-    WPI_TalonFX m_topShooterMotor, m_bottomShooterMotor;
+    static final double FEEDER_SPEED = 0.3;
+
+    static final double KP = 0.1;
+    static final double KI = 0.0;
+    static final double KD = 0.0;
+    static final double KF = 0.0;
+
+    CANSparkMax m_feederMotor;
+    CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
 
     // lookup table for upper hub speeds
     static final TreeMap<Double, ShooterSpeeds> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, Constants.CHUTE_SPEED)),      // actually lower hub, but safer to include
-            Map.entry(54.99, new ShooterSpeeds(900.0, 900.0, Constants.CHUTE_SPEED)),    // actually lower hub, but safer to include
-            Map.entry(55.0, new ShooterSpeeds(900.0, 2200.0, 0.3)),                      // Bionics
-            Map.entry(71.0, new ShooterSpeeds(1450.0, 1700.0, 0.3)),                     // Bionics
-            Map.entry(84.0, new ShooterSpeeds(1550.0, 1550.0, Constants.CHUTE_SPEED)),   // Revere
-            Map.entry(92.0, new ShooterSpeeds(1600.0, 1600.0, Constants.CHUTE_SPEED)),   // Revere
-            Map.entry(123.0, new ShooterSpeeds(1650.0, 1750.0, Constants.CHUTE_SPEED)),  // Revere
-            Map.entry(154.0, new ShooterSpeeds(1750.0, 2000.0, Constants.CHUTE_SPEED)),  // Revere
-            Map.entry(163.0, new ShooterSpeeds(1850.0, 2150.0, Constants.CHUTE_SPEED)),  // Revere
-            Map.entry(195.0, new ShooterSpeeds(1900.0, 2100.0, Constants.CHUTE_SPEED)),  // Revere
-            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, Constants.CHUTE_SPEED)))); // Revere
+            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, FEEDER_SPEED)),      // actually lower hub, but safer to include
+            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, FEEDER_SPEED)))); // Revere
             
     // values for lowerHub
     static final ShooterSpeeds lowHubSpeeds = new ShooterSpeeds(900.0, 900.0, 0.3);
@@ -46,21 +39,21 @@ public class Shooter extends SubsystemBase {
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
     public Shooter() {
-        m_chuteMotor = new CANSparkMax(Constants.CHUTE_CAN_ID, MotorType.kBrushless);
+        m_feederMotor = new CANSparkMax(Constants.FEEDER_CAN_ID, MotorType.kBrushless);
 
-        m_topShooterMotor = new WPI_TalonFX(Constants.TOP_SHOOTER_CAN_ID);
-        m_bottomShooterMotor = new WPI_TalonFX(Constants.BOTTOM_SHOOTER_CAN_ID);
+        m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
+        m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
 
-        // Config the Velocity closed loop gains in slot0
-        m_topShooterMotor.config_kP(0, Constants.SHOOTER_KP);
-        m_topShooterMotor.config_kI(0, Constants.SHOOTER_KI);
-        m_topShooterMotor.config_kD(0, Constants.SHOOTER_KD);
-        m_topShooterMotor.config_kF(0, Constants.SHOOTER_KF);
+        // // Config the Velocity closed loop gains in slot0
+        // m_leftShooterMotor.config_kP(0, KP);
+        // m_leftShooterMotor.config_kI(0, KI);
+        // m_leftShooterMotor.config_kD(0, KD);
+        // m_leftShooterMotor.config_kF(0, KF);
 
-        m_bottomShooterMotor.config_kP(0, Constants.SHOOTER_KP);
-        m_bottomShooterMotor.config_kI(0, Constants.SHOOTER_KI);
-        m_bottomShooterMotor.config_kD(0, Constants.SHOOTER_KD);
-        m_bottomShooterMotor.config_kF(0, Constants.SHOOTER_KF);
+        // m_rightShooterMotor.config_kP(0, Constants.SHOOTER_KP);
+        // m_rightShooterMotor.config_kI(0, Constants.SHOOTER_KI);
+        // m_rightShooterMotor.config_kD(0, Constants.SHOOTER_KD);
+        // m_rightShooterMotor.config_kF(0, Constants.SHOOTER_KF);
     }
 
     public static class ShooterSpeeds {
@@ -110,29 +103,29 @@ public class Shooter extends SubsystemBase {
     // periodically update the values of motors for shooter to SmartDashboard
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("shooter/bottom_rpm", getBottomRpm());
-        SmartDashboard.putNumber("shooter/top_rpm", getTopRpm());
+        // SmartDashboard.putNumber("shooter/bottom_rpm", getBottomRpm());
+        // SmartDashboard.putNumber("shooter/top_rpm", getTopRpm());
     }
 
-    public double getTopRpm() {
-        return m_topShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
-    }
+    // public double getTopRpm() {
+    //     return m_leftShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
+    // }
 
-    public double getBottomRpm() {
-        return m_bottomShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
-    }
+    // public double getBottomRpm() {
+    //     return m_rightShooterMotor.getSelectedSensorVelocity() / Constants.FALCON_UNITS_PER_RPM;
+    // }
 
-    public void setShooterRpms(double topRpm, double bottomRpm) {
-        // double target_unitsPer100ms = target_RPM * Constants.kSensorUnitsPerRotation / 600.0; //RPM -> Native units
-        // double targetVelocity_UnitsPer100ms = leftYstick * 2000.0 * 2048.0 / 600.0;
-        double falconTop = topRpm * Constants.FALCON_UNITS_PER_RPM;
-        double falconBottom = bottomRpm * Constants.FALCON_UNITS_PER_RPM;
-        System.out.println("setting shooter motor signals " + falconTop + " " + falconBottom);
-        m_topShooterMotor.set(ControlMode.Velocity, falconTop);
-        m_bottomShooterMotor.set(TalonFXControlMode.Velocity, falconBottom);
-    }
+    // public void setShooterRpms(double topRpm, double bottomRpm) {
+    //     // double target_unitsPer100ms = target_RPM * Constants.kSensorUnitsPerRotation / 600.0; //RPM -> Native units
+    //     // double targetVelocity_UnitsPer100ms = leftYstick * 2000.0 * 2048.0 / 600.0;
+    //     double falconTop = topRpm * Constants.FALCON_UNITS_PER_RPM;
+    //     double falconBottom = bottomRpm * Constants.FALCON_UNITS_PER_RPM;
+    //     System.out.println("setting shooter motor signals " + falconTop + " " + falconBottom);
+    //     m_leftShooterMotor.set(ControlMode.Velocity, falconTop);
+    //     m_rightShooterMotor.set(TalonFXControlMode.Velocity, falconBottom);
+    // }
 
-    public void setChuteSpeed(double chute) {
-        m_chuteMotor.set(-chute);
+    public void setFeederSpeed(double chute) {
+        m_feederMotor.set(-chute);
     }
 }
