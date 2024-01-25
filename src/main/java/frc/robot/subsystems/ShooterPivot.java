@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-//this was taken from the 2023 shoulder code 
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -13,24 +12,14 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkMax;
 
-
-// import edu.wpi.first.math.controller.ArmFeedforward;
-// import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-// import edu.wpi.first.wpilibj.RobotController;
-// import edu.wpi.first.wpilibj.simulation.BatterySim;
-// import edu.wpi.first.wpilibj.simulation.RoboRioSim;
-// import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-// import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-// import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-// import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
-public class Shooter extends TrapezoidProfileSubsystem {
+public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double SHOOTER_SHOULDER_MAX_ANGLE = Math.toRadians(30.0);
     private static final double SHOOTER_SHOULDER_MIN_ANGLE = Math.toRadians(-65.0);
     //TODO all constants were taken from the 2023 arm 
@@ -121,7 +110,7 @@ public class Shooter extends TrapezoidProfileSubsystem {
     //         Units.radiansToDegrees(m_shooterSim.getAngleRads()), 6, new Color8Bit(Color.kYellow)));
 
     // Construct a new shooter subsystem
-    public Shooter(DutyCycleEncoder dutyCycleEncoder) {
+    public ShooterPivot(DutyCycleEncoder dutyCycleEncoder) {
         super(new TrapezoidProfile.Constraints(SHOOTER_SHOULDER_MAX_VEL_RADIAN_PER_SEC / SHOOTER_SHOULDER_RADIAN_PER_UNIT,
                 SHOOTER_SHOULDER_MAX_ACC_RADIAN_PER_SEC_SQ / SHOOTER_SHOULDER_RADIAN_PER_UNIT),
                 (SHOOTER_SHOULDER_OFFSET_RADIAN-dutyCycleEncoder.getDistance() * 2 * Math.PI) / SHOOTER_SHOULDER_RADIAN_PER_UNIT);
