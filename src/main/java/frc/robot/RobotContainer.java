@@ -5,9 +5,11 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 import frc.robot.commands.*;
@@ -20,6 +22,7 @@ public class RobotContainer {
     private final Vision m_vision = new Vision();
     private final DriveTrain m_driveTrain = new DriveTrain(m_vision);
     private final Intake m_intake = new Intake();
+    private final Shooter m_shooter = new Shooter();
 
     public RobotContainer() {
         configureBindings();
@@ -27,9 +30,17 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        //Intake
+        // Intake
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+
+        m_controller.y().onTrue(new TestShootSpeed(m_shooter,
+            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
+            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+            
+        m_controller.x().onTrue(new Shoot(m_shooter,
+            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
+            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
     }
 
     public Command getAutonomousCommand() {

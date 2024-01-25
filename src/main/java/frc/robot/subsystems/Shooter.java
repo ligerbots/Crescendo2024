@@ -72,6 +72,10 @@ public class Shooter extends SubsystemBase {
         setPidController(m_rightPidController);
         m_leftEncoder = m_leftShooterMotor.getEncoder();
         m_rightEncoder = m_rightShooterMotor.getEncoder();
+
+        // RPMs for testing
+        SmartDashboard.putNumber("shooter/test_left_rpm", 0);
+        SmartDashboard.putNumber("shooter/test_right_rpm", 0);
     }
 
     private void setPidController(SparkPIDController pidController) {
@@ -133,5 +137,9 @@ public class Shooter extends SubsystemBase {
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
+    }
+
+    public void turnOnFeeder() {
+        setFeederSpeed(FEEDER_SPEED);
     }
 }
