@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.335734502756208,
+        "y": 5.507830453904955
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.8747701060216935,
+        "y": 6.167305195721503
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.85,
+        "y": 5.77
+      },
+      "prevControl": {
+        "x": 6.134616153491566,
+        "y": 7.177849156624239
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Start to NoteCheck",
+  "previewStartingState": null,
+  "useDefaultConstraints": false
+}
