@@ -17,8 +17,8 @@ public class RobotContainer {
     private final CommandXboxController m_controller = new CommandXboxController(0);
     private final Joystick m_farm = new Joystick(1);
 
-    // private final Vision m_vision = new Vision();
-    private final DriveTrain m_driveTrain = new DriveTrain();
+    private final Vision m_vision = new Vision();
+    private final DriveTrain m_driveTrain = new DriveTrain(m_vision);
 
     public RobotContainer() {
         configureBindings();
