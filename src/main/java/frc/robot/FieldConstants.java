@@ -36,7 +36,7 @@ public class FieldConstants {
 
 
     public final Pose2d START_1 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
-    public final Pose2d START_2 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
+    public final Pose2d START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
     public final Pose2d START_3 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
 
 }
