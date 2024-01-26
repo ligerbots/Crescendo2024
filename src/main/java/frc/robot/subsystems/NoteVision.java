@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Vision;
+package frc.robot.subsystems;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,66 +95,6 @@ public class NoteVision {
 
     }
 
-    private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        try {
-            m_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-            return m_photonPoseEstimator.update();
-        } catch (Exception e) {
-            // bad! log this and keep going
-            DriverStation.reportError("Exception running PhotonPoseEstimator", e.getStackTrace());
-            return Optional.empty();
-        }
-    }
-
-    // get the tag ID closest to horizontal center of camera
-    // we might want to use this to do fine adjustments on field element locations
-    public int getCentralTagId() {
-        // make sure camera connected
-        if (!m_aprilTagCamera.isConnected())
-            return -1;
-
-        var targetResult = m_aprilTagCamera.getLatestResult();
-
-        // make a temp holder var for least Y translation, set to first tags translation
-        double minY = 1.0e6; // big number
-        int targetID = -1;
-        for (PhotonTrackedTarget tag : targetResult.getTargets()) { // for every target in camera
-            // find id for current tag we are focusing on
-            int tempTagID = tag.getFiducialId();
-
-            // if tag has an invalid ID then skip this tag
-            if (tempTagID < 1 || tempTagID > 16) {
-                continue;
-            }
-
-            // get transformation to target
-            Transform3d tagTransform = tag.getBestCameraToTarget();
-            // get abs translation to target from transformation
-            double tagY = Math.abs(tagTransform.getY());
-
-            // looking for smallest absolute relative to camera Y
-            // if abs Y translation of new tag is less then holder tag, it becomes holder
-            // tag
-            if (tagY < minY) {
-                minY = tagY;
-                targetID = tempTagID; // remember targetID
-            }
-        }
-
-        return targetID;
-    }
-
-    // get the pose for a tag.
-    // will return null if the tag is not in the field map (eg -1)
-    public Optional<Pose2d> getTagPose(int tagId) {
-        // optional in case no target is found
-        Optional<Pose3d> tagPose = m_aprilTagFieldLayout.getTagPose(tagId);
-        if (tagPose.isEmpty()) {
-            return Optional.empty(); // returns an empty optional
-        }
-        return Optional.of(tagPose.get().toPose2d());
-    }
-
     // private static AprilTag constructTag(int id, double x, double y, double z,
     // double angle) {
     // return new AprilTag(id, new Pose3d(x, y, z, new Rotation3d(0, 0,
@@ -187,11 +127,10 @@ public class NoteVision {
         // So, always have a little bit of uncertainty.
         prop.setCalibError(0.1, 0.03);
 
-        PhotonCameraSim cam = new PhotonCameraSim(m_aprilTagCamera, prop);
+        PhotonCameraSim cam = new PhotonCameraSim(m_noteCamera, prop);
         cam.setMaxSightRange(Units.feetToMeters(20.0));
-        m_visionSim.addCamera(cam, m_robotToAprilTagCam);
+        m_visionSim.addCamera(cam, m_robotToNoteCam);
 
-        m_visionSim.addAprilTags(m_aprilTagFieldLayout);
     }
 
     // --- Routines to plot the vision solutions on a Field2d ---------
@@ -214,32 +153,6 @@ public class NoteVision {
             field.getObject(label).setPose(pose);
     }
 
-    private void plotVisibleTags(Field2d field, PhotonPipelineResult result) {
-        if (field == null)
-            return;
-
-        ArrayList<Pose2d> poses = new ArrayList<Pose2d>();
-        for (PhotonTrackedTarget target : result.getTargets()) {
-            int targetFiducialId = target.getFiducialId();
-            if (targetFiducialId == -1)
-                continue;
-
-            Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(targetFiducialId);
-            if (targetPosition.isEmpty())
-                continue;
-
-            poses.add(targetPosition.get().toPose2d());
-        }
-
-        field.getObject("visibleTagPoses").setPoses(poses);
-    }
-
-    private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult) {
-        // NOTE this is for PV 2024
-        var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCamera.getCameraMatrix().get(),
-                m_aprilTagCamera.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
-                TargetModel.kAprilTag36h11);
-        Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToAprilTagCam.inverse());
-        plotPose(field, "visionAltPose", alt.toPose2d());
-    }
 }
+
+ 
