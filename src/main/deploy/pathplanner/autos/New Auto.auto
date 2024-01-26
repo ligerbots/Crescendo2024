@@ -20,13 +20,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "bottom stage note to middle stage note "
+            "pathName": "Note_C_1 to Note_C_2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "middle stage note to top stage note "
+            "pathName": "Note_S_2 to Note_C_3"
           }
         },
         {
