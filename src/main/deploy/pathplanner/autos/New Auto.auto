@@ -20,19 +20,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Note_C_1 to Note_C_2"
+            "pathName": "Note_S_1 to Note_S_2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Note_S_2 to Note_C_3"
+            "pathName": "Note_S_2 to Note_S_3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "top stage note to top note"
+            "pathName": null
           }
         },
         {
