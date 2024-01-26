@@ -88,4 +88,8 @@ public class RobotContainer {
     public DriveTrain getDriveTrain() {
         return m_driveTrain;
     }
+    
+    public NoteVision getNoteVision() {
+        return m_noteVision;
+    }
 }

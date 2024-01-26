@@ -32,21 +32,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import frc.robot.Constants;
-import frc.robot.Robot;
-
 public class NoteVision {
-    // variable to turn on/off our private tag layout
-    // if this is false, the compiler should remove all the unused code.
-    public static final boolean USE_PRIVATE_TAG_LAYOUT = false;
-
-    // Use the multitag pose estimator
-    public static final boolean USE_MULTITAG = true;
-
     // Plot vision solutions
     public static final boolean PLOT_TAG_SOLUTIONS = true;
 
