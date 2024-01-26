@@ -32,5 +32,15 @@ public class Constants {
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 12;
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(108.5);
 
+    // Elevator
+    public static final int ELEVATOR_CAN_ID = 18; //TODO: REPLACE WITH REAL CAN ID
 
+    public static final int INTAKE_MOTOR_CAN_ID = 15; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
+    public static final int CENTERING_MOTOR_CAN_ID = 16; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
+
+    public static final int SHOOTER_PIVOT_CAN_ID = 17; //TODO: REPLACE WITH REAL ID
+
+    public static final int LEFT_SHOOTER_CAN_ID = 20;
+    public static final int RIGHT_SHOOTER_CAN_ID = 21;
+    public static final int FEEDER_CAN_ID = 22;
 }

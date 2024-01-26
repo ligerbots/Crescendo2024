@@ -164,3 +164,4 @@ bin/
 *-window.json
 ctre_sim
 simgui*.json
+networktables.json
