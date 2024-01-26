@@ -23,6 +23,7 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
+    private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
         configureBindings();
@@ -34,6 +35,8 @@ public class RobotContainer {
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
+        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 10));
+        
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
