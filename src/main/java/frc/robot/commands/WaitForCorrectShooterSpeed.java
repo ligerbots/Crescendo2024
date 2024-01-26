@@ -7,20 +7,27 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Shooter;
 
 public class WaitForCorrectShooterSpeed extends Command {
+  private final Shooter m_shooter;
+  private final DoubleSupplier m_leftRpm, m_rightRpm;
+  private static final double TOLERANCE = 5; // TODO Tune this later
+  
   /** Creates a new WaitForCorrectShooterSpeed. */
-
-  Shooter shooter
-
   public WaitForCorrectShooterSpeed(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
-    addRequirements(shooter);
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(shooter);
+    m_shooter = shooter;
+    m_leftRpm = leftRpm;
+    m_rightRpm = rightRpm;
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_shooter.setShooterRpms(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble());
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -33,6 +40,7 @@ public class WaitForCorrectShooterSpeed extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return Math.abs(m_shooter.getLeftRpm() - m_leftRpm.getAsDouble()) < TOLERANCE
+        && Math.abs(m_shooter.getRightRpm() - m_rightRpm.getAsDouble()) < TOLERANCE;
   }
 }
