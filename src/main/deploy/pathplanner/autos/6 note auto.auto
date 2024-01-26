@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.403759131923026,
-      "y": 5.544847389917994
+      "x": 1.33,
+      "y": 3.4037781961352613
     },
-    "rotation": 177.77336754749737
+    "rotation": 122.99491485218034
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "6 note middle"
+            "pathName": "Start_2 to Note_C_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": null
           }
         }
       ]
