@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -24,6 +25,8 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
     private final Elevator m_elevator = new Elevator();
+
+
 
     public RobotContainer() {
         configureBindings();
@@ -44,6 +47,12 @@ public class RobotContainer {
         m_controller.x().onTrue(new Shoot(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+
+        JoystickButton farm1 = new JoystickButton(m_farm, 1);
+        farm1.onTrue(new SetElevatorLength(m_elevator, Constants.ONSTAGE_RAISE_ELEVATOR));
+        
+        JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        farm2.onTrue(new SetElevatorLength(m_elevator, Constants.ONSTAGE_LOWER_ELEVATOR));
     }
 
     public Command getAutonomousCommand() {

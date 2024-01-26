@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
 public class Constants {
     public static double MAX_VOLTAGE = 12.0;
 
@@ -43,4 +45,7 @@ public class Constants {
     public static final int LEFT_SHOOTER_CAN_ID = 20;
     public static final int RIGHT_SHOOTER_CAN_ID = 21;
     public static final int FEEDER_CAN_ID = 22;
+
+    public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
+    public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
 }
