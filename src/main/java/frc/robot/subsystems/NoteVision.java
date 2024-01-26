@@ -66,14 +66,15 @@ public class NoteVision {
     // m_visionSim.update(pose);
     // }
     public List<Pose2d> getNotes() {
+        List<Pose2d> poses = new ArrayList<Pose2d>();
+
         if (!m_noteCamera.isConnected()) {
-            return null;
+            return poses;
         }
 
         var results = m_noteCamera.getLatestResult();
         List<PhotonTrackedTarget> targets = results.getTargets();
 
-        List<Pose2d> poses = new ArrayList<Pose2d>();
         for (PhotonTrackedTarget tgt : targets) {
             double d = m_robotToNoteCam.getZ() / Math.tan(tgt.getPitch());
             double x = d * Math.cos(tgt.getYaw());
@@ -81,7 +82,6 @@ public class NoteVision {
             poses.add(new Pose2d(x, y, new Rotation2d(0)));
         }
         return poses;
-
     }
 
     // private static AprilTag constructTag(int id, double x, double y, double z,
