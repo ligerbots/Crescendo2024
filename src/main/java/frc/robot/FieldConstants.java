@@ -20,9 +20,9 @@ public class FieldConstants {
     public final Pose2d NOTE_C_4 = new Pose2d(NOTE_C_X, 5.77, Rotation2d.fromDegrees(0));
     public final Pose2d NOTE_C_5 = new Pose2d(NOTE_C_X, 7.45, Rotation2d.fromDegrees(0));
 
-    public final Pose2d NOTE_S_1 = new Pose2d(NOTE_S_X, 4.11, Rotation2d.fromDegrees(0));
-    public final Pose2d NOTE_S_2 = new Pose2d(NOTE_S_X, 5.57, Rotation2d.fromDegrees(0));
-    public final Pose2d NOTE_S_3 = new Pose2d(NOTE_S_X, 7.00, Rotation2d.fromDegrees(0));
+    public final Pose2d NOTE_S_1 = new Pose2d(2.49, 6.81, Rotation2d.fromDegrees(161.94));
+    public final Pose2d NOTE_S_2 = new Pose2d(2.43, 5.55, Rotation2d.fromDegrees(0));
+    public final Pose2d NOTE_S_3 = new Pose2d(2.49, 4.26, Rotation2d.fromDegrees(157.45));
 
     //these are all placeholders and subject to change 
     public final Pose2d SHOOT_M_1 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
