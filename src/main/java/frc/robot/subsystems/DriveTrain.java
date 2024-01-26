@@ -65,7 +65,7 @@ public class DriveTrain extends SubsystemBase {
     private boolean m_fieldCentric = true;
 
     // if true, then robot is in precision mode
-    private boolean m_precisionMode = false;
+    private boolean m_precisionMode = true;
 
     // limit the acceleration from 0 to full power to take 1/3 second.
     private SlewRateLimiter m_xLimiter = new SlewRateLimiter(3);
@@ -141,8 +141,7 @@ public class DriveTrain extends SubsystemBase {
             0, 0,
             new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
 
-    public DriveTrain() {
-
+    public DriveTrain(Vision vision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.NeoDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
@@ -169,7 +168,7 @@ public class DriveTrain extends SubsystemBase {
         m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
                 new Pose2d());
 
-        m_vision = null;
+        m_vision = vision;
 
         // as late as possible, re-sync the swerve angle encoders
         for (SwerveModule module : m_swerveModules) {
@@ -247,7 +246,7 @@ public class DriveTrain extends SubsystemBase {
     public void joystickDrive(double inputX, double inputY, double inputRotation) {
         // SmartDashboard.putNumber("drivetrain/joystickX", inputX);
         // SmartDashboard.putNumber("drivetrain/joystickY", inputY);
-        // SmartDashboard.putNumber("drivetrain/joystickR", inputRotation);
+        SmartDashboard.putNumber("drivetrain/joystickR", inputRotation);
 
         // apply SlewLimiters to the joystick values to control acceleration
         double newInputX = m_xLimiter.calculate(inputX);
@@ -388,12 +387,12 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
-        // if (Constants.SIMULATION_SUPPORT) {
-        //     m_vision.updateSimulation(getPose());
-        // }
+        if (Constants.SIMULATION_SUPPORT) {
+            m_vision.updateSimulation(getPose());
+        }
 
-        // // Have the vision system update based on the Apriltags, if seen
-        // m_vision.updateOdometry(m_odometry, m_field);
+        // Have the vision system update based on the Apriltags, if seen
+        m_vision.updateOdometry(m_odometry, m_field);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
@@ -419,7 +418,6 @@ public class DriveTrain extends SubsystemBase {
         double newX = m_simPose.getX() + SIM_LOOP_TIME * (head.getCos() * m_simChassisSpeeds.vxMetersPerSecond - head.getSin() * m_simChassisSpeeds.vyMetersPerSecond);
         double newY = m_simPose.getY() + SIM_LOOP_TIME * (head.getSin() * m_simChassisSpeeds.vxMetersPerSecond + head.getCos() * m_simChassisSpeeds.vyMetersPerSecond);
         double newHeading = m_simPose.getRotation().getRadians() + m_simChassisSpeeds.omegaRadiansPerSecond * SIM_LOOP_TIME;
-        // double newHeading = m_simPose.getRotation().getRadians();
                 
         // set the sim variable, and force the odometry to match
         setPose(new Pose2d(newX, newY, Rotation2d.fromRadians(newHeading)));
