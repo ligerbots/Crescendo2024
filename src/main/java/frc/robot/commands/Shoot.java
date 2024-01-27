@@ -22,9 +22,8 @@ public class Shoot extends SequentialCommandGroup {
     addCommands(
       new SetShooterSpeed(shooter, leftRpm, rightRpm),
       new InstantCommand(shooter::turnOnFeeder),
-      new WaitCommand(2.0), // TODO Tune this later
-      new InstantCommand(() -> {shooter.setShooterRpms(0, 0);}),
-      new InstantCommand(() -> {shooter.setFeederSpeed(0);})
+      new WaitCommand(2), // TODO Tune this later
+      new InstantCommand(shooter::resetShooter)
     );
 
     addRequirements(shooter);
