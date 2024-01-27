@@ -3,12 +3,7 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "Start to NoteCheck",
-    "note pose to note pose",
-    "note pose to shoot pose",
-    "note poses",
-    "shoot pose to note pose",
-    "starting pose to note"
+    "Start to NoteCheck"
   ],
   "autoFolders": [],
   "defaultMaxVel": 3.0,
