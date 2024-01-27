@@ -20,7 +20,7 @@ public class Shoot extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new WaitForCorrectShooterSpeed(shooter, leftRpm, rightRpm),
+      new SetShooterSpeed(shooter, leftRpm, rightRpm),
       new InstantCommand(shooter::turnOnFeeder),
       new WaitCommand(2.0), // TODO Tune this later
       new InstantCommand(() -> {shooter.setShooterRpms(0, 0);}),

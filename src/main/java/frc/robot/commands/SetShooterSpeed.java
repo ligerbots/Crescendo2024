@@ -9,14 +9,12 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 
-public class WaitForCorrectShooterSpeed extends Command {
+public class SetShooterSpeed extends Command {
   private final Shooter m_shooter;
   private final DoubleSupplier m_leftRpm, m_rightRpm;
-  private static final double TOLERANCE = 5; // TODO Tune this later
+  private static final double TOLERANCE = 100; // TODO Tune this later
   
-  /** Creates a new WaitForCorrectShooterSpeed. */
-  public WaitForCorrectShooterSpeed(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
-    // Use addRequirements() here to declare subsystem dependencies.
+  public SetShooterSpeed(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
     addRequirements(shooter);
     m_shooter = shooter;
     m_leftRpm = leftRpm;
