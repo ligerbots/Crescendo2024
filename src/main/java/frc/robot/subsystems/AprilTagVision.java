@@ -6,7 +6,10 @@ package frc.robot.subsystems;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -74,26 +77,10 @@ public class AprilTagVision {
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;
 
+    private final Set<Integer> reportedErrors = new HashSet<>();
+
     // Simulation support
     private VisionSystemSim m_visionSim;
-
-    private class DoubleReturn {
-        private double returnedDouble;
-        private PhotonPipelineResult returnedPhotonPipelineResult;
-
-        public DoubleReturn(double returnedDouble, PhotonPipelineResult returnedPhotonPipelineResult) {
-            this.returnedDouble = returnedDouble;
-            this.returnedPhotonPipelineResult = returnedPhotonPipelineResult;
-        }
-
-        public double getTimestamp() {
-            return returnedDouble;
-        }
-
-        public PhotonPipelineResult getPhotonPipeline() {
-            return returnedPhotonPipelineResult;
-        }
-    }
 
     public AprilTagVision() {
         try {
@@ -135,65 +122,125 @@ public class AprilTagVision {
         m_visionSim.update(pose);
     }
 
-    private DoubleReturn getTarget(PhotonCamera camera) {
-        if (!camera.isConnected())// idk what the default estimate should be, just the last real Pose?
-            return new DoubleReturn(0, null);
-
-        PhotonPipelineResult targetResult = camera.getLatestResult();
-
-        SmartDashboard.putBoolean("vision/hasTargets", targetResult.hasTargets());
-        if (!targetResult.hasTargets()) {
-            // if no target, clean out the numbers
-            SmartDashboard.putNumber("vision/targetID", -1);
-            // still don't know what it should default to
-            return new DoubleReturn(0, null);
+    private void reportFiducialPoseError(int fiducialId) {
+        if (!reportedErrors.contains(fiducialId)) {
+            DriverStation.reportError(
+                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + fiducialId, false);
+            reportedErrors.add(fiducialId);
         }
-
-        return new DoubleReturn(targetResult.getTimestampSeconds(), targetResult);
     }
 
-    public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
+    public Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator){
+
+        try {
+            poseEstimator.setReferencePose(robotPose);
+            return poseEstimator.update();
+        } catch (Exception e) {
+            // bad! log this and keep going
+            DriverStation.reportError("Exception running PhotonPoseEstimator", e.getStackTrace());
+            return Optional.empty();
+        }
+
+    }
+
+    private ArrayList<Pose3d> getAmbiguousPoses(PhotonPipelineResult result, Transform3d robotToCamera) {
+
+        ArrayList<Pose3d> ambigiousPoses = new ArrayList<>();
+
+        for (PhotonTrackedTarget target : result.targets) {
+            int targetFiducialId = target.getFiducialId();
+
+            // Don't report errors for non-fiducial targets. This could also be resolved by
+            // adding -1 to
+            // the initial HashSet.
+            if (targetFiducialId == -1)
+                continue;
+
+            Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(target.getFiducialId());
+
+            if (targetPosition.isEmpty()) {
+                reportFiducialPoseError(targetFiducialId);
+                continue;
+            }
+            ambigiousPoses.add(
+                    targetPosition
+                            .get()
+                            .transformBy(target.getBestCameraToTarget().inverse())
+                            .transformBy(robotToCamera.inverse()));
+
+        }
+        return ambigiousPoses;
+        // Pose3d altTransformPosition =
+        // targetPosition
+        // .get()
+        // .transformBy(target.getAlternateCameraToTarget().inverse())
+        // .transformBy(robotToCamera.inverse());
+        // Pose3d bestTransformPosition =
+        // targetPosition
+        // .get()
+        // .transformBy(target.getBestCameraToTarget().inverse())
+        // .transformBy(robotToCamera.inverse());
+    }
+
+    public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field, PhotonPipelineResult targetResult) {
 
         if (m_aprilTagFieldLayout == null) {
             return;
         }
 
-        if (!m_aprilTagCameraFront.isConnected() && !m_aprilTagCameraBack.isConnected()) {
-            return;
-        }
+        Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(), m_photonPoseEstimatorFront);
+        Optional<EstimatedRobotPose> backEstimate = getEstimateForCamera(odometry.getEstimatedPosition(), m_photonPoseEstimatorBack);
 
+        List<Pose3d> frontOptions = new ArrayList<Pose3d>();
+        if (frontEstimate.isPresent()) {
+            if (frontEstimate.get().strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                frontOptions.add(frontEstimate.get().estimatedPose);
+            } else {
+                frontOptions = getAmbiguousPoses(targetResult, m_robotToFrontAprilTagCam);
+            }
+        }
         if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected()) {
             // Estimate the robot pose.
             // If successful, update the odometry using the timestamp of the measurement
 
-            DoubleReturn Targets;
-            DoubleReturn frontTargets;
-            DoubleReturn backTargets;
             if (m_aprilTagCameraBack.isConnected()) {
-                Targets = getTarget(m_aprilTagCameraBack);
-                updateOdometrySingleCamera(odometry, field, Targets);
+                Optional<EstimatedRobotPose> backResult = getEstimatedGlobalPose(odometry.getEstimatedPosition());
+                if (backResult.isPresent()){
+                    EstimatedRobotPose backPose = backResult.get();
+                    Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
+                    double curImageTimeStamp = targetResult.getTimestampSeconds();
+                    odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
+                }
                 return;
             }
 
-            if (m_aprilTagCameraFront.isConnected()) {
-                Targets = getTarget(m_aprilTagCameraFront);
-                updateOdometrySingleCamera(odometry, field, Targets);
+            if (m_aprilTagCameraFront.) {
+                Optional<EstimatedRobotPose> frontResult = getEstimatedGlobalPose(odometry.getEstimatedPosition());
+                if (frontResult.isPresent()){
+                    EstimatedRobotPose backPose = frontResult.get();
+                    Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
+                    double curImageTimeStamp = targetResult.getTimestampSeconds();
+                    odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
+                }
                 return;
             }
 
             if (m_aprilTagCameraFront.isConnected() && m_aprilTagCameraBack.isConnected()) {
-                frontTargets = getTarget(m_aprilTagCameraFront);
-                backTargets = getTarget(m_aprilTagCameraBack);
+                ArrayList<Pose3d> backAmbiguousPoses = getAmbiguousPoses(m_aprilTagCameraBack.getLatestResult(), m_robotToBackAprilTagCam);
+                ArrayList<Pose3d> frontAmbiguousPoses = getAmbiguousPoses(m_aprilTagCameraFront.getLatestResult(), m_robotToFrontAprilTagCam);
+                
+                for(Pose3d poses : backAmbiguousPoses){
+                    for(Pose3d frontPoses : backAmbiguousPoses){
 
-                updateOdometrySingleCamera(odometry, field, frontTargets);
-                updateOdometrySingleCamera(odometry, field, backTargets);
+                    }
+
+                }
+
 
             }
 
         }
     }
-
-    
 
     // PhotonCamera apriltagCamera;
     // PhotonPoseEstimator poseEstimator;
@@ -222,21 +269,6 @@ public class AprilTagVision {
     // m_aprilTagCameraFront.isConnected()) {
 
     // }
-
-    public void updateOdometrySingleCamera(SwerveDrivePoseEstimator odometry, Field2d field, DoubleReturn targets) {
-
-        Optional<EstimatedRobotPose> result = getEstimatedGlobalPose(odometry.getEstimatedPosition());
-        SmartDashboard.putBoolean("vision/foundSolution", result.isPresent());
-        if (result.isPresent()) {
-            EstimatedRobotPose camPose = result.get();
-            Pose2d estimatedPose = camPose.estimatedPose.toPose2d();
-
-            double curImageTimeStamp = targets.getTimestamp();
-            odometry.addVisionMeasurement(estimatedPose, curImageTimeStamp);
-        }
-        return;
-    }
-    
 
     private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         try {
