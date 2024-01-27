@@ -38,12 +38,12 @@ public class RobotContainer {
         m_controller.b().onTrue(new SetElevatorLength(m_elevator, 10));
         
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
-            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
-            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
             
         m_controller.x().onTrue(new Shoot(m_shooter,
-            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
-            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
     }
 
     public Command getAutonomousCommand() {
