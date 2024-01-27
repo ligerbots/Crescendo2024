@@ -4,53 +4,33 @@
 
 package frc.robot.subsystems;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.estimation.TargetModel;
-import org.photonvision.estimation.VisionEstimation;
-import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-// import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class NoteVision {
     // Plot vision solutions
     public static final boolean PLOT_TAG_SOLUTIONS = true;
 
-    // constants for extra tags in the shed (lengths in meters!!)
-    static final double SHED_TAG_NODE_XOFFSET = 0.45;
-    static final double SHED_TAG_NODE_ZOFFSET = 0.31;
-    static final double SHED_TAG_SUBSTATION_YOFFSET = 1.19;
-
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
 
-    // Forward B&W camera for Apriltags
     // relative position of the camera on the robot ot the robot center
     private final Transform3d m_robotToNoteCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(3.5), -0.136, Units.inchesToMeters(24.75)),
+            new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
             new Rotation3d(0.0, 0.0, 0.0));
 
     // Simulation support
@@ -76,9 +56,10 @@ public class NoteVision {
         List<PhotonTrackedTarget> targets = results.getTargets();
 
         for (PhotonTrackedTarget tgt : targets) {
-            double d = m_robotToNoteCam.getZ() / Math.tan(tgt.getPitch());
-            double x = d * Math.cos(tgt.getYaw());
-            double y = d * Math.sin(tgt.getYaw());
+            double d = Math.abs(m_robotToNoteCam.getZ() / Math.tan(Math.toRadians(tgt.getPitch())));
+            double yaw = Math.toRadians(tgt.getYaw());
+            double x = d * Math.cos(yaw);
+            double y = d * Math.sin(yaw);
             poses.add(new Pose2d(x, y, new Rotation2d(0)));
         }
         return poses;
