@@ -130,7 +130,7 @@ public class AprilTagVision {
         }
     }
 
-    public Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator){
+    public Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator) {
 
         try {
             poseEstimator.setReferencePose(robotPose);
@@ -170,16 +170,6 @@ public class AprilTagVision {
 
         }
         return ambigiousPoses;
-        // Pose3d altTransformPosition =
-        // targetPosition
-        // .get()
-        // .transformBy(target.getAlternateCameraToTarget().inverse())
-        // .transformBy(robotToCamera.inverse());
-        // Pose3d bestTransformPosition =
-        // targetPosition
-        // .get()
-        // .transformBy(target.getBestCameraToTarget().inverse())
-        // .transformBy(robotToCamera.inverse());
     }
 
     public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field, PhotonPipelineResult targetResult) {
@@ -188,10 +178,14 @@ public class AprilTagVision {
             return;
         }
 
-        Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(), m_photonPoseEstimatorFront);
-        Optional<EstimatedRobotPose> backEstimate = getEstimateForCamera(odometry.getEstimatedPosition(), m_photonPoseEstimatorBack);
+        Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
+                m_photonPoseEstimatorFront);
+        Optional<EstimatedRobotPose> backEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
+                m_photonPoseEstimatorBack);
 
         List<Pose3d> frontOptions = new ArrayList<Pose3d>();
+        List<Pose3d> backOptions = new ArrayList<Pose3d>();
+
         if (frontEstimate.isPresent()) {
             if (frontEstimate.get().strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
                 frontOptions.add(frontEstimate.get().estimatedPose);
@@ -199,47 +193,91 @@ public class AprilTagVision {
                 frontOptions = getAmbiguousPoses(targetResult, m_robotToFrontAprilTagCam);
             }
         }
-        if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected()) {
-            // Estimate the robot pose.
-            // If successful, update the odometry using the timestamp of the measurement
-
-            if (m_aprilTagCameraBack.isConnected()) {
-                Optional<EstimatedRobotPose> backResult = getEstimatedGlobalPose(odometry.getEstimatedPosition());
-                if (backResult.isPresent()){
-                    EstimatedRobotPose backPose = backResult.get();
-                    Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
-                    double curImageTimeStamp = targetResult.getTimestampSeconds();
-                    odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
-                }
-                return;
+        if (backEstimate.isPresent()) {
+            if (backEstimate.get().strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                backOptions.add(backEstimate.get().estimatedPose);
+            } else {
+                backOptions = getAmbiguousPoses(targetResult, m_robotToFrontAprilTagCam);
             }
+        }
 
-            if (m_aprilTagCameraFront.) {
-                Optional<EstimatedRobotPose> frontResult = getEstimatedGlobalPose(odometry.getEstimatedPosition());
-                if (frontResult.isPresent()){
-                    EstimatedRobotPose backPose = frontResult.get();
-                    Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
-                    double curImageTimeStamp = targetResult.getTimestampSeconds();
-                    odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
-                }
-                return;
-            }
+        // if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected())
+        // {
+        // // Estimate the robot pose.
+        // // If successful, update the odometry using the timestamp of the measurement
 
-            if (m_aprilTagCameraFront.isConnected() && m_aprilTagCameraBack.isConnected()) {
-                ArrayList<Pose3d> backAmbiguousPoses = getAmbiguousPoses(m_aprilTagCameraBack.getLatestResult(), m_robotToBackAprilTagCam);
-                ArrayList<Pose3d> frontAmbiguousPoses = getAmbiguousPoses(m_aprilTagCameraFront.getLatestResult(), m_robotToFrontAprilTagCam);
-                
-                for(Pose3d poses : backAmbiguousPoses){
-                    for(Pose3d frontPoses : backAmbiguousPoses){
+        // if (m_aprilTagCameraBack.isConnected()) {
+        // Optional<EstimatedRobotPose> backResult =
+        // getEstimatedGlobalPose(odometry.getEstimatedPosition());
+        // if (backResult.isPresent()){
+        // EstimatedRobotPose backPose = backResult.get();
+        // Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
+        // double curImageTimeStamp = targetResult.getTimestampSeconds();
+        // odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
+        // }
+        // return;
+        // }
 
+        // if (m_aprilTagCameraFront.) {
+        // Optional<EstimatedRobotPose> frontResult =
+        // getEstimatedGlobalPose(odometry.getEstimatedPosition());
+        // if (frontResult.isPresent()){
+        // EstimatedRobotPose backPose = frontResult.get();
+        // Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
+        // double curImageTimeStamp = targetResult.getTimestampSeconds();
+        // odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
+        // }
+        // return;
+        // }
+
+        double frontTimestamp = m_aprilTagCameraFront.getLatestResult().getTimestampSeconds();
+        double backTimestamp = m_aprilTagCameraBack.getLatestResult().getTimestampSeconds();
+        for (Pose3d backPoses : backOptions) {
+            for (Pose3d frontPoses : frontOptions) {
+
+                Pose2d frontPose2d = frontPoses.toPose2d();
+                Pose2d backPose2d = backPoses.toPose2d();
+                double backX = backPoses.getX();
+                double backY = backPoses.getY();
+                double frontX = frontPose2d.getX();
+                double frontY = frontPose2d.getY();
+                double xAmbiguity = backX - frontX;
+                double yAmbiguity = backY - frontY;
+
+                // 1 is a placeholder
+                if (Math.abs(xAmbiguity) <= 1 && Math.abs(yAmbiguity) <= 1) {
+                    // if they are the same update with that pose
+                    odometry.addVisionMeasurement(frontPose2d, frontTimestamp);
+                    odometry.addVisionMeasurement(backPose2d, backTimestamp);
+                    return;
+                } else {
+                    Pose2d estimatedPose = odometry.getEstimatedPosition();
+                    double estimatedPoseX = estimatedPose.getX();
+                    double estimatedPoseY = estimatedPose.getY();
+
+                    double backPoseXDifference = estimatedPoseX - backX;
+                    double backPoseYDifference = estimatedPoseY - backY;
+                    double frontPoseXDifference = estimatedPoseX - frontX;
+                    double frontPoseYDifference = estimatedPoseY - frontY;
+                    // this is hacky and idk if there is a better way
+                    double addedBackPoseDifference = backPoseXDifference + backPoseYDifference;
+                    double addedFrontPoseDifference = frontPoseXDifference + frontPoseYDifference;
+                    if (addedBackPoseDifference > addedFrontPoseDifference) {
+                        odometry.addVisionMeasurement(frontPose2d, frontTimestamp);
+                        return;
+                    }
+                    if (addedBackPoseDifference < addedFrontPoseDifference) {
+                        odometry.addVisionMeasurement(backPose2d, backTimestamp);
+                        return;
+                    } else {
+                        return;
                     }
 
                 }
 
-
             }
-
         }
+
     }
 
     // PhotonCamera apriltagCamera;

@@ -392,7 +392,8 @@ public class DriveTrain extends SubsystemBase {
         }
 
         // Have the vision system update based on the Apriltags, if seen
-        m_vision.updateOdometry(m_odometry, m_field);
+        // need to add the pipeline result 
+        m_vision.updateOdometry(m_odometry, m_field, null);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
