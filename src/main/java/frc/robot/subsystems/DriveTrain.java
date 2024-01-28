@@ -430,14 +430,16 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
-        if (Constants.SIMULATION_SUPPORT) {
-            m_vision.updateSimulation(getPose());
-        }
+        // FIXME vision updates robot poses and makes auto sim looks messy for now
+        // if (Constants.SIMULATION_SUPPORT) {
+        //     m_vision.updateSimulation(getPose());
+        // }
 
-        // Have the vision system update based on the Apriltags, if seen
-        m_vision.updateOdometry(m_odometry, m_field);
-        m_field.setRobotPose(m_odometry.getEstimatedPosition());
+        // // Have the vision system update based on the Apriltags, if seen
+        // m_vision.updateOdometry(m_odometry, m_field);
+        // m_field.setRobotPose(m_odometry.getEstimatedPosition());
 
+        
         // Pose2d pose = m_odometry.getEstimatedPosition();
         // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
         // SmartDashboard.putNumber("drivetrain/yPosition", pose.getY());

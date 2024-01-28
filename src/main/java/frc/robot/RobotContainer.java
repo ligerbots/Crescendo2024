@@ -22,7 +22,7 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain(m_vision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
-    private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
+    // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
     private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
@@ -47,7 +47,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        // return Commands.print("No autonomous command configured");
+        System.out.println("auto command configured");
+        return m_driveTrain.makePathFollowingCommand("Test");
     }
 
     public Command getDriveCommand() {
