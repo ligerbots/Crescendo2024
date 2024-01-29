@@ -95,7 +95,7 @@ public class AprilTagVision {
             // initialize a simulated camera. Must be done after creating the tag layout
             initializeSimulation();
         }
-
+        // if there is multitag, use the corresponding strategy with reference as back up
         if (USE_MULTITAG) {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -131,7 +131,6 @@ public class AprilTagVision {
     }
 
     public Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator) {
-
         try {
             poseEstimator.setReferencePose(robotPose);
             return poseEstimator.update();
@@ -143,10 +142,9 @@ public class AprilTagVision {
 
     }
 
+    // create a strategy based off closestToReferencePoseStrategy that returns all possible robot positions
     private ArrayList<Pose3d> getAmbiguousPoses(PhotonPipelineResult result, Transform3d robotToCamera) {
-
         ArrayList<Pose3d> ambigiousPoses = new ArrayList<>();
-
         for (PhotonTrackedTarget target : result.targets) {
             int targetFiducialId = target.getFiducialId();
 
@@ -162,6 +160,8 @@ public class AprilTagVision {
                 reportFiducialPoseError(targetFiducialId);
                 continue;
             }
+
+            // add all possible robot positions to the array that is returned
             ambigiousPoses.add(
                     targetPosition
                             .get()
@@ -186,52 +186,30 @@ public class AprilTagVision {
         List<Pose3d> frontOptions = new ArrayList<Pose3d>();
         List<Pose3d> backOptions = new ArrayList<Pose3d>();
 
+        // if the front camera has any estimates of robot position, add this to the list
         if (frontEstimate.isPresent()) {
+            // if multitag is used, add robot pose to frontOptions
             if (frontEstimate.get().strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
                 frontOptions.add(frontEstimate.get().estimatedPose);
             } else {
+                // if only one tag is visible, add all possible poses to frontOptions
                 frontOptions = getAmbiguousPoses(targetResult, m_robotToFrontAprilTagCam);
             }
         }
+        // if the back camera has any estimates of robot position, add this to the list
         if (backEstimate.isPresent()) {
+            // if multitag is used, add robot pose to backOptions
             if (backEstimate.get().strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
                 backOptions.add(backEstimate.get().estimatedPose);
             } else {
+                // if only one tag is visible, add all possible poses to backOptions
                 backOptions = getAmbiguousPoses(targetResult, m_robotToFrontAprilTagCam);
             }
         }
 
-        // if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected())
-        // {
-        // // Estimate the robot pose.
-        // // If successful, update the odometry using the timestamp of the measurement
-
-        // if (m_aprilTagCameraBack.isConnected()) {
-        // Optional<EstimatedRobotPose> backResult =
-        // getEstimatedGlobalPose(odometry.getEstimatedPosition());
-        // if (backResult.isPresent()){
-        // EstimatedRobotPose backPose = backResult.get();
-        // Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
-        // double curImageTimeStamp = targetResult.getTimestampSeconds();
-        // odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
-        // }
-        // return;
-        // }
-
-        // if (m_aprilTagCameraFront.) {
-        // Optional<EstimatedRobotPose> frontResult =
-        // getEstimatedGlobalPose(odometry.getEstimatedPosition());
-        // if (frontResult.isPresent()){
-        // EstimatedRobotPose backPose = frontResult.get();
-        // Pose2d backEstimatedPose = backPose.estimatedPose.toPose2d();
-        // double curImageTimeStamp = targetResult.getTimestampSeconds();
-        // odometry.addVisionMeasurement(backEstimatedPose, curImageTimeStamp);
-        // }
-        // return;
-        // }
-
         double frontTimestamp = m_aprilTagCameraFront.getLatestResult().getTimestampSeconds();
         double backTimestamp = m_aprilTagCameraBack.getLatestResult().getTimestampSeconds();
+        // compare all backposes and frontposes to each other to find correct robot pose
         for (Pose3d backPoses : backOptions) {
             for (Pose3d frontPoses : frontOptions) {
 
@@ -279,34 +257,6 @@ public class AprilTagVision {
         }
 
     }
-
-    // PhotonCamera apriltagCamera;
-    // PhotonPoseEstimator poseEstimator;
-    // if (m_aprilTagCameraBack.isConnected() ^ m_aprilTagCameraFront.isConnected())
-    // {
-
-    // if (m_aprilTagCameraBack.isConnected()) {
-    // apriltagCamera = m_aprilTagCameraBack;
-    // poseEstimator = m_photonPoseEstimatorBack;
-    // result = backResult;
-    // }
-
-    // if (m_aprilTagCameraFront.isConnected()) {
-    // apriltagCamera = m_aprilTagCameraFront;
-    // poseEstimator = m_photonPoseEstimatorFront;
-    // result = frontResult;
-    // }
-
-    // if (PLOT_TAG_SOLUTIONS) {
-    // clearTagSolutions(field);
-    // }
-
-    // }
-    // // two cameras at once
-    // if (m_aprilTagCameraBack.isConnected() &&
-    // m_aprilTagCameraFront.isConnected()) {
-
-    // }
 
     private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         try {
