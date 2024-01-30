@@ -127,15 +127,7 @@ public class AprilTagVision {
         return x.getTranslation().getDistance(y.getTranslation());
     }
 
-    private void reportFiducialPoseError(int fiducialId) {
-        if (!reportedErrors.contains(fiducialId)) {
-            DriverStation.reportError(
-                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + fiducialId, false);
-            reportedErrors.add(fiducialId);
-        }
-    }
-
-    public Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator) {
+    private Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator) {
         try {
             poseEstimator.setReferencePose(robotPose);
             return poseEstimator.update();
@@ -162,10 +154,8 @@ public class AprilTagVision {
 
             Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(target.getFiducialId());
 
-            if (targetPosition.isEmpty()) {
-                reportFiducialPoseError(targetFiducialId);
+            if (targetPosition.isEmpty())
                 continue;
-            }
 
             // add all possible robot positions to the array that is returned
             ambigiousPoses.add(
@@ -175,6 +165,7 @@ public class AprilTagVision {
                             .transformBy(robotToCamera.inverse()));
 
         }
+
         return ambigiousPoses;
     }
 
@@ -252,30 +243,18 @@ public class AprilTagVision {
         return;
     }
 
-    private Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        try {
-            m_photonPoseEstimatorFront.setReferencePose(prevEstimatedRobotPose);
-            return m_photonPoseEstimatorFront.update();
-        } catch (Exception e) {
-            // bad! log this and keep going
-            DriverStation.reportError("Exception running PhotonPoseEstimator", e.getStackTrace());
-            return Optional.empty();
-        }
-    }
-
     // get the tag ID closest to horizontal center of camera
     // we might want to use this to do fine adjustments on field element locations
     public int getCentralTagId() {
         // make sure camera connected
-        if (!m_aprilTagCameraFront.isConnected() && !m_aprilTagCameraBack.isConnected())
+        if (!m_aprilTagCameraFront.isConnected())
             return -1;
 
-        var FrontTargetResult = m_aprilTagCameraFront.getLatestResult();
-        var BacktargetResult = m_aprilTagCameraBack.getLatestResult();
+        var targetResult = m_aprilTagCameraFront.getLatestResult();
         // make a temp holder var for least Y translation, set to first tags translation
         double minY = 1.0e6; // big number
         int targetID = -1;
-        for (PhotonTrackedTarget tag : FrontTargetResult.getTargets()) { // for every target in camera
+        for (PhotonTrackedTarget tag : targetResult.getTargets()) { // for every target in camera
             // find id for current tag we are focusing on
             int tempTagID = tag.getFiducialId();
 
@@ -335,12 +314,9 @@ public class AprilTagVision {
         prop.setAvgLatencyMs(10.0);
         prop.setLatencyStdDevMs(3.0);
 
-        // Note: NetworkTables does not update the timestamp of an entry if the value
-        // does not change.
-        // The timestamp is used by PVLib to know if there is a new frame, so in a
-        // simulation
-        // with no uncertainty, it thinks that it is not detecting a tag if the robot is
-        // static.
+        // Note: NetworkTables does not update the timestamp of an entry if the value does not change.
+        // The timestamp is used by PVLib to know if there is a new frame, so in a simulation
+        // with no uncertainty, it thinks that it is not detecting a tag if the robot is static.
         // So, always have a little bit of uncertainty.
         prop.setCalibError(0.1, 0.03);
 
