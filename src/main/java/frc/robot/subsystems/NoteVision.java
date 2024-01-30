@@ -28,7 +28,7 @@ import frc.robot.FieldConstants;
 
 public class NoteVision {
     // Plot vision solutions
-    public static final boolean PLOT_TAG_SOLUTIONS = true;
+    public static final boolean PLOT_NOTES = true;
 
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
