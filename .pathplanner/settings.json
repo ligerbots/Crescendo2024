@@ -3,6 +3,10 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
+    "note to shoot",
+    "Note to Note ",
+    "Shoot to Note",
+    "Start to Note",
     "Start to NoteCheck"
   ],
   "autoFolders": [],

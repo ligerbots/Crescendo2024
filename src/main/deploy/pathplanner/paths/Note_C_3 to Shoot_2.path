@@ -49,7 +49,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "note pose to shoot pose",
+  "folder": "Shoot to Note",
   "previewStartingState": null,
   "useDefaultConstraints": false
 }
