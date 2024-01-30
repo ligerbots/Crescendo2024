@@ -67,8 +67,8 @@ public class AprilTagVision {
             new Rotation3d(0.0, 0.0, 0.0));
 
     private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(0)),
-            new Rotation3d(0.0, 0.0, 0.0));
+            new Translation3d(Units.inchesToMeters(-10.0), 0, Units.inchesToMeters(24.0)),
+            new Rotation3d(0.0, 0.0, 180.0));
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;
