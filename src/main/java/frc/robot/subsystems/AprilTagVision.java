@@ -123,7 +123,7 @@ public class AprilTagVision {
             return;
 
         if (PLOT_TAG_SOLUTIONS) {
-            plotVisibleTags(field, new PhotonCamera[]{m_aprilTagCameraFront, m_aprilTagCameraBack});
+            plotVisibleTags(field, List.of(m_aprilTagCameraFront, m_aprilTagCameraBack));
         }
 
         Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
@@ -204,7 +204,7 @@ public class AprilTagVision {
         odometry.addVisionMeasurement(bestBackPose3d.toPose2d(), backTimestamp);
 
         if (PLOT_TAG_SOLUTIONS) {
-            plotVisionPoses(field, new Pose2d[]{bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()});
+            plotVisionPoses(field, List.of(bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()));
         }
         return;
     }
@@ -357,7 +357,7 @@ public class AprilTagVision {
     //     field.getObject("visibleTagPoses").setPoses();
     // }
 
-    private void plotVisionPoses(Field2d field, Pose2d[] poses) {
+    private void plotVisionPoses(Field2d field, List<Pose2d> poses) {
         if (field == null)
             return;
         if (poses == null)
@@ -372,7 +372,7 @@ public class AprilTagVision {
         field.getObject("visionPoses").setPose(pose);
     }
 
-    private void plotVisibleTags(Field2d field, PhotonCamera[] cameraList) {
+    private void plotVisibleTags(Field2d field, List<PhotonCamera> cameraList) {
         if (field == null)
             return;
 
