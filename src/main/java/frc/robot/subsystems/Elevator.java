@@ -87,6 +87,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
         setCoastMode(false);
         SmartDashboard.putBoolean("Elevator/coastMode", m_coastMode);
+
+        // Create SD values needed during testing. Here so that they are visible in NetworkTables
+        SmartDashboard.putNumber("Elevator/testGoalLength", 0);
     }
 
     @Override
