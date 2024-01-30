@@ -47,6 +47,6 @@ public class SetElevatorLength extends Command {
     @Override
     public boolean isFinished() {
         double curLength = m_elevator.getLength(); //Could use string pot but currently uses motor one
-        return Math.abs(curLength - m_length) < Elevator.REACHER_OFFSET_TOLERANCE_METERS;
+        return Math.abs(curLength - m_length) < Elevator.LENGTH_TOLERANCE_METERS;
     }
 }
