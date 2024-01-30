@@ -5,6 +5,8 @@
 package frc.robot.commands;
 
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
@@ -13,12 +15,12 @@ public class SetElevatorLength extends Command {
 
     /** Creates a new SetElevatorLength. */
     Elevator m_elevator;
-    double m_length;
+    DoubleSupplier m_length;
 
-    public SetElevatorLength(Elevator elevator, double length) {
+    public SetElevatorLength(Elevator elevator, DoubleSupplier length) {
         // Use addRequirements() here to declare subsystem dependencies.
         m_elevator = elevator;
-        m_length = Elevator.limitElevatorLength(length);
+        m_length = length;
 
         addRequirements(m_elevator);
     }
@@ -26,7 +28,7 @@ public class SetElevatorLength extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_elevator.setLength(m_length);
+        m_elevator.setLength(m_length.getAsDouble());
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -43,6 +45,6 @@ public class SetElevatorLength extends Command {
     @Override
     public boolean isFinished() {
         double curLength = m_elevator.getLength(); //Could use string pot but currently uses motor one
-        return Math.abs(curLength - m_length) < Elevator.REACHER_OFFSET_TOLERANCE_METERS;
+        return Math.abs(curLength - m_length.getAsDouble()) < Elevator.REACHER_OFFSET_TOLERANCE_METERS;
     }
 }
