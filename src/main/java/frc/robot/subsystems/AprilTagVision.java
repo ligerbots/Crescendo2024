@@ -89,8 +89,8 @@ public class AprilTagVision {
             // initialize a simulated camera. Must be done after creating the tag layout
             initializeSimulation();
         }
-        // if there is multitag, use the corresponding strategy with reference as back
-        // up
+        
+        // if there is multitag, use the corresponding strategy with reference as back up
         if (USE_MULTITAG) {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
