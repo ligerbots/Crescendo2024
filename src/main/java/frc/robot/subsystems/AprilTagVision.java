@@ -13,8 +13,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.estimation.TargetModel;
-import org.photonvision.estimation.VisionEstimation;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -124,6 +122,10 @@ public class AprilTagVision {
         if (m_aprilTagFieldLayout == null)
             return;
 
+        if (PLOT_TAG_SOLUTIONS) {
+            plotVisibleTags(field, new PhotonCamera[]{m_aprilTagCameraFront, m_aprilTagCameraBack});
+        }
+
         Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
                 m_photonPoseEstimatorFront);
         Optional<EstimatedRobotPose> backEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
@@ -135,14 +137,28 @@ public class AprilTagVision {
         // if front estimate is not there just add back estimate 
         if (!frontEstimate.isPresent()) {
             if (backEstimate.isPresent()) {
-                odometry.addVisionMeasurement(backEstimate.get().estimatedPose.toPose2d(), backTimestamp);
+                Pose2d pose = backEstimate.get().estimatedPose.toPose2d();
+                odometry.addVisionMeasurement(pose, backTimestamp);
+                        
+                if (PLOT_TAG_SOLUTIONS) {
+                    plotVisionPose(field, pose);
+                }
+            } else {
+                // no results, so clear the list in the Field
+                plotVisionPoses(field,null);
             }
+        
             return;
         } 
 
         // if back estimate is not there add front estimate because we know it is there
         if (!backEstimate.isPresent()) {
-            odometry.addVisionMeasurement(frontEstimate.get().estimatedPose.toPose2d(), frontTimestamp);
+            Pose2d pose = frontEstimate.get().estimatedPose.toPose2d();
+            odometry.addVisionMeasurement(pose, frontTimestamp);
+                                    
+            if (PLOT_TAG_SOLUTIONS) {
+                plotVisionPose(field, pose);
+            }
             return;
         }
 
@@ -186,6 +202,10 @@ public class AprilTagVision {
 
         odometry.addVisionMeasurement(bestFrontPose3d.toPose2d(), frontTimestamp);
         odometry.addVisionMeasurement(bestBackPose3d.toPose2d(), backTimestamp);
+
+        if (PLOT_TAG_SOLUTIONS) {
+            plotVisionPoses(field, new Pose2d[]{bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()});
+        }
         return;
     }
 
@@ -319,55 +339,65 @@ public class AprilTagVision {
         cam.setMaxSightRange(Units.feetToMeters(20.0));
         m_visionSim.addCamera(cam, m_robotToFrontAprilTagCam);
 
+        cam = new PhotonCameraSim(m_aprilTagCameraBack, prop);
+        cam.setMaxSightRange(Units.feetToMeters(20.0));
+        m_visionSim.addCamera(cam, m_robotToBackAprilTagCam);
+
         m_visionSim.addAprilTags(m_aprilTagFieldLayout);
     }
 
     // --- Routines to plot the vision solutions on a Field2d ---------
 
-    private void clearTagSolutions(Field2d field) {
-        if (field == null)
-            return;
-        field.getObject("tagSolutions").setPoses();
-        field.getObject("visionPose").setPoses();
-        field.getObject("visionAltPose").setPoses();
-        field.getObject("visibleTagPoses").setPoses();
-    }
+    // private void clearTagSolutions(Field2d field) {
+    //     if (field == null)
+    //         return;
+    //     // field.getObject("tagSolutions").setPoses();
+    //     field.getObject("visionPoses").setPoses();
+    //     // field.getObject("visionAltPose").setPoses();
+    //     field.getObject("visibleTagPoses").setPoses();
+    // }
 
-    private void plotPose(Field2d field, String label, Pose2d pose) {
+    private void plotVisionPoses(Field2d field, Pose2d[] poses) {
         if (field == null)
             return;
-        if (pose == null)
-            field.getObject(label).setPoses();
+        if (poses == null)
+            field.getObject("visionPoses").setPoses();
         else
-            field.getObject(label).setPose(pose);
+            field.getObject("visionPoses").setPoses(poses);
     }
 
-    private void plotVisibleTags(Field2d field, PhotonPipelineResult result) {
+    private void plotVisionPose(Field2d field, Pose2d pose) {
+        if (field == null)
+            return;
+        field.getObject("visionPoses").setPose(pose);
+    }
+
+    private void plotVisibleTags(Field2d field, PhotonCamera[] cameraList) {
         if (field == null)
             return;
 
         ArrayList<Pose2d> poses = new ArrayList<Pose2d>();
-        for (PhotonTrackedTarget target : result.getTargets()) {
-            int targetFiducialId = target.getFiducialId();
-            if (targetFiducialId == -1)
-                continue;
+        for (PhotonCamera cam : cameraList) {
+            for (PhotonTrackedTarget target : cam.getLatestResult().getTargets()) {
+                int targetFiducialId = target.getFiducialId();
+                if (targetFiducialId == -1)
+                    continue;
 
-            Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(targetFiducialId);
-            if (targetPosition.isEmpty())
-                continue;
-
-            poses.add(targetPosition.get().toPose2d());
+                Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(targetFiducialId);
+                if (!targetPosition.isEmpty())
+                    poses.add(targetPosition.get().toPose2d());
+            }
         }
 
         field.getObject("visibleTagPoses").setPoses(poses);
     }
 
-    private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult) {
-        // NOTE this is for PV 2024
-        var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCameraFront.getCameraMatrix().get(),
-                m_aprilTagCameraFront.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
-                TargetModel.kAprilTag36h11);
-        Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToFrontAprilTagCam.inverse());
-        plotPose(field, "visionAltPose", alt.toPose2d());
-    }
+    // private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult) {
+    //     // NOTE this is for PV 2024
+    //     var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCameraFront.getCameraMatrix().get(),
+    //             m_aprilTagCameraFront.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
+    //             TargetModel.kAprilTag36h11);
+    //     Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToFrontAprilTagCam.inverse());
+    //     plotPose(field, "visionAltPose", alt.toPose2d());
+    // }
 }
