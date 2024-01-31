@@ -4,10 +4,11 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,6 +42,21 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
+    // set initial robot position
+    Pose2d robotStartPose;
+    if(DriverStation.getLocation().getAsInt() == 1)
+      robotStartPose = FieldConstants.START_1;
+    else if(DriverStation.getLocation().getAsInt() == 2)
+      robotStartPose = FieldConstants.START_2;
+    else
+      robotStartPose = FieldConstants.START_3;
+    
+    // flip paths when red (have to do this because PathPlanner flips a path only)
+    if(DriverStation.getAlliance().get().toString() == "Red")
+      robotStartPose = new Pose2d(FieldConstants.FIELD_LENGTH - robotStartPose.getX(), robotStartPose.getY(), Rotation2d.fromDegrees(180.0));
+      
+    m_robotContainer.getDriveTrain().setPose(robotStartPose);
+    
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
