@@ -49,9 +49,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // return Commands.print("No autonomous command configured");
-        System.out.println("auto command configured");
-        return m_driveTrain.makePathFollowingCommand("Test");
+        return Commands.print("No autonomous command configured");
     }
 
     public Command getDriveCommand() {
