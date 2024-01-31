@@ -38,7 +38,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import frc.robot.Constants;
 import frc.robot.Robot;
-
 import frc.robot.swerve.*;
 
 public class DriveTrain extends SubsystemBase {
@@ -134,7 +133,7 @@ public class DriveTrain extends SubsystemBase {
     // the odometry class to keep track of where the robot is on the field
     private final SwerveDrivePoseEstimator m_odometry;
 
-    private final Vision m_vision;
+    private final AprilTagVision m_vision;
 
     // simulation variables
     private static final double SIM_LOOP_TIME = 0.020;
@@ -157,7 +156,7 @@ public class DriveTrain extends SubsystemBase {
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
 
-    public DriveTrain(Vision vision) {
+    public DriveTrain(AprilTagVision vision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.NeoDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
@@ -435,10 +434,10 @@ public class DriveTrain extends SubsystemBase {
         //     m_vision.updateSimulation(getPose());
         // }
 
-        // // Have the vision system update based on the Apriltags, if seen
-        // m_vision.updateOdometry(m_odometry, m_field);
-        // m_field.setRobotPose(m_odometry.getEstimatedPosition());
-
+        // Have the vision system update based on the Apriltags, if seen
+        // need to add the pipeline result 
+        m_vision.updateOdometry(m_odometry, m_field);
+        m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
         // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
