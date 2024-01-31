@@ -4,6 +4,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class FieldConstants {
+
+    public static final double FIELD_LENGTH = 16.54;
+    public static final double FIELD_WIDTH = 8.21;    
+
     /*
     C = center
     S = stage
@@ -36,8 +40,8 @@ public class FieldConstants {
 
 
 
-    public final Pose2d START_1 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
-    public final Pose2d START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
-    public final Pose2d START_3 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
+    public static final Pose2d START_1 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
+    public static final Pose2d START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
+    public static final Pose2d START_3 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
 
 }
