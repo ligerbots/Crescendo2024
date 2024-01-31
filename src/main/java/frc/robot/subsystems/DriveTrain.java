@@ -55,8 +55,7 @@ public class DriveTrain extends SubsystemBase {
      */
     private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
-    // TODO confirm if this year's robot is a square base
-    private static final double DRIVE_BASE_RADIUS_METERS = WHEELBASE_METERS / Math.sqrt(2);
+    private static final double DRIVE_BASE_RADIUS_METERS = Math.sqrt(TRACKWIDTH_METERS*TRACKWIDTH_METERS + WHEELBASE_METERS*WHEELBASE_METERS) / 2.0;
 
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
