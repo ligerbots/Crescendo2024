@@ -165,3 +165,4 @@ bin/
 ctre_sim
 simgui*.json
 networktables.json
+settings.json
