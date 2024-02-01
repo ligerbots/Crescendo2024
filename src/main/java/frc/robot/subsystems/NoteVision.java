@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -22,11 +23,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 
-public class NoteVision {
+public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
 
@@ -34,9 +37,10 @@ public class NoteVision {
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
 
     // relative position of the camera on the robot to the robot center
+    // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToNoteCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
-            new Rotation3d(0.0, 0.0, Math.toRadians(180.0)));
+            new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(180.0)));
 
     // Simulation support
     private VisionSystemSim m_visionSim;
@@ -66,13 +70,28 @@ public class NoteVision {
         List<PhotonTrackedTarget> targets = results.getTargets();
 
         for (PhotonTrackedTarget tgt : targets) {
-            double d = Math.abs(m_robotToNoteCam.getZ() / Math.tan(Math.toRadians(tgt.getPitch())));
+            // this calc assumes pitch angle is positive UP, so flip the camera's pitch
+            // note that PV target angles are in degrees
+            double d = Math.abs(m_robotToNoteCam.getZ() / 
+                Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
             double yaw = Math.toRadians(tgt.getYaw());
             double x = d * Math.cos(yaw);
             double y = d * Math.sin(yaw);
             poses.add(new Pose2d(x, y, new Rotation2d(0)));
         }
         return poses;
+    }
+
+    @Override
+    public void periodic() {
+        // DEBUG
+        List<Pose2d> notes = getNotes();
+        SmartDashboard.putNumber("noteVision/nFound", notes.size());
+        if (notes.size() > 0) {
+            Pose2d p = notes.get(0);
+            SmartDashboard.putNumber("noteVision/x", p.getX());
+            SmartDashboard.putNumber("noteVision/y", p.getY());
+        }
     }
 
     private void initializeSimulation() {
@@ -96,13 +115,20 @@ public class NoteVision {
         m_visionSim.addCamera(cam, m_robotToNoteCam);
 
         // Add the Auto notes on the field
-        for (Pose2d notePose : List.of(FieldConstants.NOTE_C_1,
-                FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3,
-                FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5,
-                FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2,
-                FieldConstants.NOTE_S_3)) {
+        TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14), Units.inchesToMeters(2));
+        for (Pose2d notePose : List.of(
+                FieldConstants.NOTE_C_1,
+                FieldConstants.NOTE_C_2,
+                FieldConstants.NOTE_C_3,
+                FieldConstants.NOTE_C_4,
+                FieldConstants.NOTE_C_5,
+                FieldConstants.NOTE_S_1,
+                FieldConstants.NOTE_S_2,
+                FieldConstants.NOTE_S_3
+            ))
+        {
             m_visionSim.addVisionTargets("note",
-                    new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), null));
+                    new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
         }
     }
 

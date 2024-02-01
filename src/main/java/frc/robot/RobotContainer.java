@@ -20,7 +20,7 @@ public class RobotContainer {
 
     private final NoteVision m_noteVision = new NoteVision();
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
-    private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision);
+    private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
