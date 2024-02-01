@@ -37,9 +37,10 @@ public class NoteVision extends SubsystemBase {
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
 
     // relative position of the camera on the robot to the robot center
+    // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToNoteCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(180.0)));
+            new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(180.0)));
 
     // Simulation support
     private VisionSystemSim m_visionSim;
@@ -69,7 +70,10 @@ public class NoteVision extends SubsystemBase {
         List<PhotonTrackedTarget> targets = results.getTargets();
 
         for (PhotonTrackedTarget tgt : targets) {
-            double d = Math.abs(m_robotToNoteCam.getZ() / Math.tan(Math.toRadians(tgt.getPitch())));
+            // this calc assumes pitch angle is positive UP, so flip the camera's pitch
+            // note that PV target angles are in degrees
+            double d = Math.abs(m_robotToNoteCam.getZ() / 
+                Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
             double yaw = Math.toRadians(tgt.getYaw());
             double x = d * Math.cos(yaw);
             double y = d * Math.sin(yaw);
@@ -112,11 +116,17 @@ public class NoteVision extends SubsystemBase {
 
         // Add the Auto notes on the field
         TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14), Units.inchesToMeters(2));
-        for (Pose2d notePose : List.of(FieldConstants.NOTE_C_1,
-                FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3,
-                FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5,
-                FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2,
-                FieldConstants.NOTE_S_3)) {
+        for (Pose2d notePose : List.of(
+                FieldConstants.NOTE_C_1,
+                FieldConstants.NOTE_C_2,
+                FieldConstants.NOTE_C_3,
+                FieldConstants.NOTE_C_4,
+                FieldConstants.NOTE_C_5,
+                FieldConstants.NOTE_S_1,
+                FieldConstants.NOTE_S_2,
+                FieldConstants.NOTE_S_3
+            ))
+        {
             m_visionSim.addVisionTargets("note",
                     new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
         }
