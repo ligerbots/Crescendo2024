@@ -43,6 +43,9 @@ public class FieldConstants {
     public static final Pose2d START_3 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
     public static Pose2d flipPose(Pose2d pose) {
+        if(DriverStation.getAlliance().isEmpty())
+            return pose;
+
         // flip pose when red (have to do this because PathPlanner flips a path only)
         if (DriverStation.getAlliance().get() == Alliance.Red){
             Rotation2d rot = pose.getRotation();

@@ -7,6 +7,7 @@ package frc.robot.commands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -29,6 +30,6 @@ public class NoteAuto extends AutoCommandInterface {
 
     @Override
     public Pose2d getInitialPose() {
-        return m_initPose;
+        return FieldConstants.flipPose(m_initPose);
     }
 }

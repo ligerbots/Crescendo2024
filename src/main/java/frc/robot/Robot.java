@@ -17,6 +17,8 @@ import frc.robot.subsystems.DriveTrain;
 
 public class Robot extends TimedRobot {
     private AutoCommandInterface m_autonomousCommand;
+    private AutoCommandInterface m_prevAutoCommand = null;
+    
     private SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
 
     private RobotContainer m_robotContainer;
@@ -42,11 +44,13 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        m_autonomousCommand = m_chosenAuto.getSelected();
+        m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
-        // set initial robot position after flipping it based on alliance color
-        m_robotContainer.getDriveTrain().setPose(FieldConstants.flipPose(m_autonomousCommand.getInitialPose()));
-
+        AutoCommandInterface autoCommandInterface = m_chosenAuto.getSelected();
+        if (autoCommandInterface != null && autoCommandInterface != m_prevAutoCommand) {
+            m_robotContainer.getDriveTrain().setPose(autoCommandInterface.getInitialPose());
+            m_prevAutoCommand = autoCommandInterface;
+        }
     }
 
     @Override
@@ -56,9 +60,6 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousInit() {
         m_autonomousCommand = m_chosenAuto.getSelected();
-
-        // set initial robot position after flipping it based on alliance color
-        m_robotContainer.getDriveTrain().setPose(FieldConstants.flipPose(m_autonomousCommand.getInitialPose()));
 
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
