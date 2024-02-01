@@ -46,10 +46,10 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
-        AutoCommandInterface autoCommandInterface = m_chosenAuto.getSelected();
-        if (autoCommandInterface != null && autoCommandInterface != m_prevAutoCommand) {
-            m_robotContainer.getDriveTrain().setPose(autoCommandInterface.getInitialPose());
-            m_prevAutoCommand = autoCommandInterface;
+        AutoCommandInterface autoCommand = m_chosenAuto.getSelected();
+        if (autoCommand != null && autoCommand != m_prevAutoCommand) {
+            m_robotContainer.getDriveTrain().setPose(autoCommand.getInitialPose());
+            m_prevAutoCommand = autoCommand;
         }
     }
 
@@ -78,12 +78,15 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
+            m_autonomousCommand = null;
         }
+
+        m_robotContainer.getDriveCommand().schedule();
     }
 
-  @Override
-  public void teleopPeriodic() {
-  }
+    @Override
+    public void teleopPeriodic() {
+    }
 
     @Override
     public void teleopExit() {
