@@ -22,11 +22,13 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 
-public class NoteVision {
+public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
 
@@ -73,6 +75,17 @@ public class NoteVision {
             poses.add(new Pose2d(x, y, new Rotation2d(0)));
         }
         return poses;
+    }
+
+    @Override
+    public void periodic() {
+        // DEBUG
+        List<Pose2d> notes = getNotes();
+        SmartDashboard.putNumber("noteVision/nFound", notes.size());
+        if (notes.size() > 0) {
+            SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
+            SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
+        }
     }
 
     private void initializeSimulation() {
