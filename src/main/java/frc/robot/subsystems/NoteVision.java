@@ -36,7 +36,7 @@ public class NoteVision {
     // relative position of the camera on the robot to the robot center
     private final Transform3d m_robotToNoteCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
-            new Rotation3d(0.0, 0.0, 180.0));
+            new Rotation3d(0.0, 0.0, Math.toRadians(180.0)));
 
     // Simulation support
     private VisionSystemSim m_visionSim;
