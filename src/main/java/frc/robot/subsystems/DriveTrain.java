@@ -406,8 +406,7 @@ public class DriveTrain extends SubsystemBase {
         return m_simChassisSpeeds;
     }
 
-    public Command makePathFollowingCommand(String pathName) {
-        PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+    public Command makePathFollowingCommand(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
                 () -> {
