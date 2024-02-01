@@ -77,13 +77,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // DEBUG
-    List<Pose2d> notes = m_robotContainer.getNoteVision().getNotes();
-    SmartDashboard.putNumber("noteVision/nFound", notes.size());
-    if (notes.size() > 0) {
-      SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
-      SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
-    }
   }
 
   @Override
