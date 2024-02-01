@@ -13,8 +13,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.estimation.TargetModel;
-import org.photonvision.estimation.VisionEstimation;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -46,7 +44,9 @@ public class AprilTagVision {
     public static final boolean USE_MULTITAG = true;
 
     // Plot vision solutions
-    public static final boolean PLOT_TAG_SOLUTIONS = true;
+    public static final boolean PLOT_VISIBLE_TAGS = true;
+    public static final boolean PLOT_POSE_SOLUTIONS = true;
+    public static final boolean PLOT_ALTERNATE_POSES = true;
 
     // constants for extra tags in the shed lengths in meters!!)
     static final double SHED_TAG_NODE_XOFFSET = 0.45;
@@ -69,8 +69,8 @@ public class AprilTagVision {
             new Rotation3d(0.0, 0.0, 0.0));
 
     private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(0)),
-            new Rotation3d(0.0, 0.0, 0.0));
+            new Translation3d(Units.inchesToMeters(-10.0), 0, Units.inchesToMeters(24.0)),
+            new Rotation3d(0.0, 0.0, Math.toRadians(180.0)));
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;
@@ -91,8 +91,8 @@ public class AprilTagVision {
             // initialize a simulated camera. Must be done after creating the tag layout
             initializeSimulation();
         }
-        // if there is multitag, use the corresponding strategy with reference as back
-        // up
+        
+        // if there is multitag, use the corresponding strategy with reference as back up
         if (USE_MULTITAG) {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -101,7 +101,7 @@ public class AprilTagVision {
 
             m_photonPoseEstimatorBack = new PhotonPoseEstimator(m_aprilTagFieldLayout,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    m_aprilTagCameraFront, m_robotToBackAprilTagCam);
+                    m_aprilTagCameraBack, m_robotToBackAprilTagCam);
             m_photonPoseEstimatorBack.setMultiTagFallbackStrategy(PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
         } else {
             m_photonPoseEstimatorFront = new PhotonPoseEstimator(m_aprilTagFieldLayout,
@@ -124,25 +124,65 @@ public class AprilTagVision {
         if (m_aprilTagFieldLayout == null)
             return;
 
-        Optional<EstimatedRobotPose> frontEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
-                m_photonPoseEstimatorFront);
-        Optional<EstimatedRobotPose> backEstimate = getEstimateForCamera(odometry.getEstimatedPosition(),
-                m_photonPoseEstimatorBack);
+        if (PLOT_VISIBLE_TAGS) {
+            plotVisibleTags(field, List.of(m_aprilTagCameraFront, m_aprilTagCameraBack));
+        }
 
-        double frontTimestamp = m_aprilTagCameraFront.getLatestResult().getTimestampSeconds();
-        double backTimestamp = m_aprilTagCameraBack.getLatestResult().getTimestampSeconds();
+        // Warning: be careful about fetching values. If cameras are not connected, you get errors
+        // Example: cannot fetch timestamp without checking for the camera.
+        // Make sure to test!
+
+        Pose2d robotPose = odometry.getEstimatedPosition();
+        Optional<EstimatedRobotPose> frontEstimate = 
+                getEstimateForCamera(m_aprilTagCameraFront, m_photonPoseEstimatorFront, robotPose);
+        Optional<EstimatedRobotPose> backEstimate = 
+                getEstimateForCamera(m_aprilTagCameraBack, m_photonPoseEstimatorBack, robotPose);
 
         // if front estimate is not there just add back estimate 
         if (!frontEstimate.isPresent()) {
             if (backEstimate.isPresent()) {
-                odometry.addVisionMeasurement(backEstimate.get().estimatedPose.toPose2d(), backTimestamp);
+                Pose2d pose = backEstimate.get().estimatedPose.toPose2d();
+                odometry.addVisionMeasurement(pose, m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
+                        
+                if (PLOT_POSE_SOLUTIONS) {
+                    plotVisionPose(field, pose);
+                }
+                if (PLOT_ALTERNATE_POSES) {
+                    // *** Yes, this is repeated code, and maybe that is bad. 
+                    // But this will save some cycles if this PLOT option is turned off.
+                    if (backEstimate.get().strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                        plotAlternateSolutions(field,
+                                List.of(getAmbiguousPoses(m_aprilTagCameraBack.getLatestResult(), m_robotToBackAprilTagCam)));
+                    } else
+                        field.getObject("visionAltPoses").setPose(pose);
+                }
+            } else {
+                // no results, so clear the list in the Field
+                plotVisionPoses(field,null);
+                field.getObject("visionAltPoses").setPoses();
             }
+
             return;
         } 
 
         // if back estimate is not there add front estimate because we know it is there
         if (!backEstimate.isPresent()) {
-            odometry.addVisionMeasurement(frontEstimate.get().estimatedPose.toPose2d(), frontTimestamp);
+            Pose2d pose = frontEstimate.get().estimatedPose.toPose2d();
+            odometry.addVisionMeasurement(pose, m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
+                                    
+            if (PLOT_POSE_SOLUTIONS) {
+                plotVisionPose(field, pose);
+            }
+            if (PLOT_ALTERNATE_POSES) {
+                // *** Yes, this is repeated code, and maybe that is bad.
+                // But this will save some cycles if this PLOT option is turned off.
+                if (frontEstimate.get().strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
+                    plotAlternateSolutions(field, 
+                            List.of(getAmbiguousPoses(m_aprilTagCameraFront.getLatestResult(), m_robotToFrontAprilTagCam)));
+                } else
+                        field.getObject("visionAltPoses").setPose(pose);
+            }
+
             return;
         }
 
@@ -170,6 +210,10 @@ public class AprilTagVision {
         Pose3d bestFrontPose3d = new Pose3d();
         double minDistance = 1e6;
 
+        if (PLOT_ALTERNATE_POSES) {
+            plotAlternateSolutions(field, List.of(frontOptions, backOptions));
+        }
+
         // compare all backposes and frontposes to each other to find correct robot pose
         for (Pose3d backPose : backOptions) {
             for (Pose3d frontPose : frontOptions) {
@@ -184,8 +228,12 @@ public class AprilTagVision {
             }
         }
 
-        odometry.addVisionMeasurement(bestFrontPose3d.toPose2d(), frontTimestamp);
-        odometry.addVisionMeasurement(bestBackPose3d.toPose2d(), backTimestamp);
+        odometry.addVisionMeasurement(bestFrontPose3d.toPose2d(), m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
+        odometry.addVisionMeasurement(bestBackPose3d.toPose2d(), m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
+
+        if (PLOT_POSE_SOLUTIONS) {
+            plotVisionPoses(field, List.of(bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()));
+        }
         return;
     }
 
@@ -243,7 +291,9 @@ public class AprilTagVision {
         return x.getTranslation().getDistance(y.getTranslation());
     }
 
-    private Optional<EstimatedRobotPose> getEstimateForCamera(Pose2d robotPose, PhotonPoseEstimator poseEstimator) {
+    private Optional<EstimatedRobotPose> getEstimateForCamera(PhotonCamera cam, PhotonPoseEstimator poseEstimator, Pose2d robotPose) {
+        if (!cam.isConnected()) return Optional.empty();
+
         try {
             poseEstimator.setReferencePose(robotPose);
             return poseEstimator.update();
@@ -252,7 +302,6 @@ public class AprilTagVision {
             DriverStation.reportError("Exception running PhotonPoseEstimator", e.getStackTrace());
             return Optional.empty();
         }
-
     }
 
     // create a strategy based off closestToReferencePoseStrategy that returns all
@@ -275,11 +324,13 @@ public class AprilTagVision {
 
             // add all possible robot positions to the array that is returned
             ambigiousPoses.add(
-                    targetPosition
-                            .get()
+                    targetPosition.get()
                             .transformBy(target.getBestCameraToTarget().inverse())
                             .transformBy(robotToCamera.inverse()));
-
+            ambigiousPoses.add(
+                    targetPosition.get()
+                            .transformBy(target.getAlternateCameraToTarget().inverse())
+                            .transformBy(robotToCamera.inverse()));
         }
 
         return ambigiousPoses;
@@ -319,55 +370,62 @@ public class AprilTagVision {
         cam.setMaxSightRange(Units.feetToMeters(20.0));
         m_visionSim.addCamera(cam, m_robotToFrontAprilTagCam);
 
+        cam = new PhotonCameraSim(m_aprilTagCameraBack, prop);
+        cam.setMaxSightRange(Units.feetToMeters(20.0));
+        m_visionSim.addCamera(cam, m_robotToBackAprilTagCam);
+
         m_visionSim.addAprilTags(m_aprilTagFieldLayout);
     }
 
     // --- Routines to plot the vision solutions on a Field2d ---------
 
-    private void clearTagSolutions(Field2d field) {
+    private void plotVisionPoses(Field2d field, List<Pose2d> poses) {
         if (field == null)
             return;
-        field.getObject("tagSolutions").setPoses();
-        field.getObject("visionPose").setPoses();
-        field.getObject("visionAltPose").setPoses();
-        field.getObject("visibleTagPoses").setPoses();
-    }
-
-    private void plotPose(Field2d field, String label, Pose2d pose) {
-        if (field == null)
-            return;
-        if (pose == null)
-            field.getObject(label).setPoses();
+        if (poses == null)
+            field.getObject("visionPoses").setPoses();
         else
-            field.getObject(label).setPose(pose);
+            field.getObject("visionPoses").setPoses(poses);
     }
 
-    private void plotVisibleTags(Field2d field, PhotonPipelineResult result) {
+    private void plotVisionPose(Field2d field, Pose2d pose) {
+        if (field == null)
+            return;
+        field.getObject("visionPoses").setPose(pose);
+    }
+
+    private void plotVisibleTags(Field2d field, List<PhotonCamera> cameraList) {
         if (field == null)
             return;
 
         ArrayList<Pose2d> poses = new ArrayList<Pose2d>();
-        for (PhotonTrackedTarget target : result.getTargets()) {
-            int targetFiducialId = target.getFiducialId();
-            if (targetFiducialId == -1)
-                continue;
+        for (PhotonCamera cam : cameraList) {
+            if (!cam.isConnected()) continue;
 
-            Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(targetFiducialId);
-            if (targetPosition.isEmpty())
-                continue;
+            for (PhotonTrackedTarget target : cam.getLatestResult().getTargets()) {
+                int targetFiducialId = target.getFiducialId();
+                if (targetFiducialId == -1)
+                    continue;
 
-            poses.add(targetPosition.get().toPose2d());
+                Optional<Pose3d> targetPosition = m_aprilTagFieldLayout.getTagPose(targetFiducialId);
+                if (!targetPosition.isEmpty())
+                    poses.add(targetPosition.get().toPose2d());
+            }
         }
 
         field.getObject("visibleTagPoses").setPoses(poses);
     }
 
-    private void plotAlternateSolution(Field2d field, PhotonPipelineResult targetResult) {
-        // NOTE this is for PV 2024
-        var pnpResults = VisionEstimation.estimateCamPosePNP(m_aprilTagCameraFront.getCameraMatrix().get(),
-                m_aprilTagCameraFront.getDistCoeffs().get(), targetResult.getTargets(), m_aprilTagFieldLayout,
-                TargetModel.kAprilTag36h11);
-        Pose3d alt = new Pose3d().plus(pnpResults.alt).plus(m_robotToFrontAprilTagCam.inverse());
-        plotPose(field, "visionAltPose", alt.toPose2d());
+    private void plotAlternateSolutions(Field2d field, List<List<Pose3d>> allPoses) {
+        if (field == null)
+            return;
+
+        ArrayList<Pose2d> both = new ArrayList<>();
+        for (List<Pose3d> pl: allPoses) {
+            for (Pose3d p : pl)
+                both.add(p.toPose2d());
+        }
+
+        field.getObject("visionAltPoses").setPoses(both);
     }
 }
