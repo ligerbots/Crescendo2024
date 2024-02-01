@@ -18,17 +18,18 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.NoteVision;
 
+//this is only for the center 5 notes 
+//we can make a different command if we want to generate a trajectory to the note on the fly 
 public class CheckNoteAndDrive extends Command {
   /** Creates a new checkNoteAndDrive. */
   private DriveTrain m_driveTrain;
+  private NoteVision m_noteVision;
 
-  private final Command NoteCheck2ToNoteC5 = m_driveTrain.makePathFollowingCommand(null);
-  private final Command NoteCheck2ToNoteC4 = m_driveTrain.makePathFollowingCommand(null);
-  private final Command NoteCheck1ToNoteC1 = m_driveTrain.makePathFollowingCommand(null);
-  private final Command NoteCheck1ToNoteC2 = m_driveTrain.makePathFollowingCommand(null);
+  private Command m_followTrajectory;
 
   private int m_wantedNote;
   private int m_backUpNote;
@@ -44,7 +45,18 @@ public class CheckNoteAndDrive extends Command {
 
   };
 
-  private NoteVision m_noteVision;
+  private static final Map<Integer, String> ROBOT_PATHS = new HashMap<Integer, String>() {
+    {
+      put(1, "/this/is/a/placeholder");
+      put(2, "/this/is/a/placeholder");
+      put(3, "/this/is/a/placeholder");
+      put(4, "/this/is/a/placeholder");
+      put(5, "/this/is/a/placeholder");
+    }
+
+  };
+
+  // t
 
   public CheckNoteAndDrive(DriveTrain driveTrain, NoteVision noteVision, int wantedNote, int backUpNote) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -60,14 +72,19 @@ public class CheckNoteAndDrive extends Command {
   public void initialize() {
     List<Pose2d> notes = m_noteVision.getNotes();
     if (notes.isEmpty()) {
+      m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
 
     }
     for (Pose2d note : notes) {
       // goes through the notes in the note list and checks if the wanted note pose is
-      // in there .2 is arbitrary and will need to be tuned for accuracy 
+      // in there .2 is arbitrary and will need to be tuned for accuracy
       if (note.getTranslation().getDistance(NOTE_POSITIONS.get(m_wantedNote).getTranslation()) <= .2) {
-
+        m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
+      } else {
+        m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
       }
+
+      m_followTrajectory.initialize();
     }
 
   }
@@ -75,16 +92,24 @@ public class CheckNoteAndDrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    if (m_followTrajectory != null)
+      m_followTrajectory.execute();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    // if interrupted, stop the follow trajectory
+    System.out.println("NoteCheckAndDrive end interrupted = " + interrupted);
+
+    if (m_followTrajectory != null)
+      m_followTrajectory.end(interrupted);
+    m_followTrajectory = null;
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_followTrajectory == null || m_followTrajectory.isFinished();
   }
 }
