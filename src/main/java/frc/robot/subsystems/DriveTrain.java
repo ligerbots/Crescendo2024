@@ -132,8 +132,11 @@ public class DriveTrain extends SubsystemBase {
     // the odometry class to keep track of where the robot is on the field
     private final SwerveDrivePoseEstimator m_odometry;
 
-    private final AprilTagVision m_vision;
-
+    private final AprilTagVision m_aprilTagVision;
+    
+    // this is needed for the simulation
+    private final NoteVision m_noteVision;
+    
     // simulation variables
     private static final double SIM_LOOP_TIME = 0.020;
     private Pose2d m_simPose = new Pose2d();
@@ -155,7 +158,7 @@ public class DriveTrain extends SubsystemBase {
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
 
-    public DriveTrain(AprilTagVision vision) {
+    public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.NeoDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
@@ -182,7 +185,8 @@ public class DriveTrain extends SubsystemBase {
         m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
                 new Pose2d());
 
-        m_vision = vision;
+        m_aprilTagVision = apriltagVision;
+        m_noteVision = noteVision;
 
         // as late as possible, re-sync the swerve angle encoders
         for (SwerveModule module : m_swerveModules) {
@@ -427,13 +431,9 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
-        if (Constants.SIMULATION_SUPPORT) {
-            m_vision.updateSimulation(getPose());
-        }
-
         // Have the vision system update based on the Apriltags, if seen
         // need to add the pipeline result 
-        m_vision.updateOdometry(m_odometry, m_field);
+        m_aprilTagVision.updateOdometry(m_odometry, m_field);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
@@ -472,5 +472,10 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/simX", newX);
         SmartDashboard.putNumber("drivetrain/simY", newY);
         SmartDashboard.putNumber("drivetrain/simHeading", Math.toDegrees(newHeading));
+
+        // update the Apriltag sim. Needs the robot pose
+        Pose2d robotPose = getPose();
+        m_aprilTagVision.updateSimulation(robotPose);
+        m_noteVision.updateSimulation(robotPose);
     }
 }
