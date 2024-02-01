@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
@@ -38,7 +39,7 @@ public class NoteVision extends SubsystemBase {
     // relative position of the camera on the robot to the robot center
     private final Transform3d m_robotToNoteCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
-            new Rotation3d(0.0, 0.0, Math.toRadians(180.0)));
+            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(180.0)));
 
     // Simulation support
     private VisionSystemSim m_visionSim;
@@ -83,8 +84,9 @@ public class NoteVision extends SubsystemBase {
         List<Pose2d> notes = getNotes();
         SmartDashboard.putNumber("noteVision/nFound", notes.size());
         if (notes.size() > 0) {
-            SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
-            SmartDashboard.putNumber("noteVision/x", notes.get(0).getX());
+            Pose2d p = notes.get(0);
+            SmartDashboard.putNumber("noteVision/x", p.getX());
+            SmartDashboard.putNumber("noteVision/y", p.getY());
         }
     }
 
@@ -109,13 +111,14 @@ public class NoteVision extends SubsystemBase {
         m_visionSim.addCamera(cam, m_robotToNoteCam);
 
         // Add the Auto notes on the field
+        TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14), Units.inchesToMeters(2));
         for (Pose2d notePose : List.of(FieldConstants.NOTE_C_1,
                 FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3,
                 FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5,
                 FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2,
                 FieldConstants.NOTE_S_3)) {
             m_visionSim.addVisionTargets("note",
-                    new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), null));
+                    new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
         }
     }
 
