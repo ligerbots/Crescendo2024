@@ -42,6 +42,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
+        m_autonomousCommand = m_chosenAuto.getSelected();
+
+        // set initial robot position after flipping it based on alliance color
+        m_robotContainer.getDriveTrain().setPose(FieldConstants.flipPose(m_autonomousCommand.getInitialPose()));
+
     }
 
     @Override

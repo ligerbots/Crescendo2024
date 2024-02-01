@@ -48,8 +48,8 @@ public class FieldConstants {
             Rotation2d rot = pose.getRotation();
             // reflect the pose over center line, flip both the X and the rotation
             return new Pose2d(FIELD_LENGTH - pose.getX(), pose.getY(), new Rotation2d(-rot.getCos(), rot.getSin()));
+        }else{        
+            return pose;
         }
-        
-        return pose;
     }
 }
