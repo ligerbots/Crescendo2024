@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -43,16 +45,16 @@ public class FieldConstants {
     public static final Pose2d START_3 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
     public static Pose2d flipPose(Pose2d pose) {
-        if(DriverStation.getAlliance().isEmpty())
-            return pose;
-
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        
         // flip pose when red (have to do this because PathPlanner flips a path only)
-        if (DriverStation.getAlliance().get() == Alliance.Red){
+        if (alliance.isPresent() && alliance.get() == Alliance.Red){
             Rotation2d rot = pose.getRotation();
             // reflect the pose over center line, flip both the X and the rotation
             return new Pose2d(FIELD_LENGTH - pose.getX(), pose.getY(), new Rotation2d(-rot.getCos(), rot.getSin()));
-        }else{        
-            return pose;
         }
+
+        // return the original pose
+        return pose;
     }
 }
