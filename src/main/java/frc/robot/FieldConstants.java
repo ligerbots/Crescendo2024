@@ -17,7 +17,7 @@ public class FieldConstants {
      * S = stage
      * M = Midline
      */
-    private static final double NOTE_C_X = 8.28;
+    private static final double NOTE_C_X = FIELD_LENGTH / 2.0;
     private static final double NOTE_S_X = 2.89;
     private static final double NOTE_CHECK_X = 6.85;
 
