@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -20,12 +20,15 @@ public class RobotContainer {
     private final CommandXboxController m_controller = new CommandXboxController(0);
     private final Joystick m_farm = new Joystick(1);
 
-    private final Vision m_vision = new Vision();
-    private final DriveTrain m_driveTrain = new DriveTrain(m_vision);
+    private final NoteVision m_noteVision = new NoteVision();
+    private final AprilTagVision m_aprilTagVision = new AprilTagVision();
+    private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
-    private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
+    // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
     private final Elevator m_elevator = new Elevator();
+
+
 
     public RobotContainer() {
         configureBindings();
@@ -37,11 +40,12 @@ public class RobotContainer {
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 10));
+        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 
+                () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
         
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
-            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
-            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
             
         m_controller.x().onTrue(new Shoot(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
@@ -58,6 +62,12 @@ public class RobotContainer {
         farm3.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
         farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     
+
+        // JoystickButton farm1 = new JoystickButton(m_farm, 1);
+        // farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
+        
+        // JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        // farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
     }
 
     public Command getAutonomousCommand() {
@@ -100,5 +110,9 @@ public class RobotContainer {
 
     public DriveTrain getDriveTrain() {
         return m_driveTrain;
+    }
+    
+    public NoteVision getNoteVision() {
+        return m_noteVision;
     }
 }
