@@ -15,12 +15,23 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import static edu.wpi.first.units.MutableMeasure.mutable;
+
+import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
@@ -37,6 +48,13 @@ public class Shooter extends SubsystemBase {
     SparkPIDController m_leftPidController, m_rightPidController;
     private RelativeEncoder m_leftEncoder;
     private RelativeEncoder m_rightEncoder;
+    private SysIdRoutine sysIdRoutine;
+
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Units.Volts.of(0));
+    private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
+    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
+
+
 
     // lookup table for upper hub speeds
     public static class ShooterSpeeds {
@@ -74,6 +92,9 @@ public class Shooter extends SubsystemBase {
         setPidController(m_rightPidController);
         m_leftEncoder = m_leftShooterMotor.getEncoder();
         m_rightEncoder = m_rightShooterMotor.getEncoder();
+
+        setSysIdRoutine();
+
 
         // RPMs for testing
         SmartDashboard.putNumber("shooter/test_left_rpm", 0);
@@ -140,14 +161,24 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    void setVoltage(Measure<Voltage> voltage) {}    
+    public void setSysIdRoutine() {
+        sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
+            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / RobotController.getBatteryVoltage()),
+            log -> {
+                log.motor("left motor")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            m_leftShooterMotor.get() * RobotController.getBatteryVoltage(), Units.Volts))
+                    .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), Units.Rotations))
+                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RotationsPerSecond));
+            }, this));
+    }
 
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
 
-    void calculateShooterSpeedData(double increase, double time) {
-        
-        SysIdRoutine routine = new SysIdRoutine(
-            new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(this::setVoltage, log::r, this)
-        );
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
     }
 }
