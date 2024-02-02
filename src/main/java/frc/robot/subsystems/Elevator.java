@@ -22,7 +22,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
     private static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
-    public static final double ELEVATOR_OFFSET_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Find tolorence
+    // Tolerance for commands
+    public static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
 
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
@@ -46,11 +47,15 @@ public class Elevator extends TrapezoidProfileSubsystem {
     //Offset for command
     public static final double OFFSET_TOLERANCE_METERS = 1; //TODO: pick value, used in the command SetElevator length and used to be REACHER_OFFSET_TOLERANCE_METERS
 
-    // Define the motor and encoders
+    // constants 
+    public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
+    public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
+
+        // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;
 
-    //initializing Potentiometer
+    // initializing Potentiometer
     private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
     private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
     private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
@@ -58,15 +63,12 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private final SparkPIDController m_PIDController;
 
-    private double m_kPElevator;
     private boolean m_coastMode = false;
     private double m_goal = 0;
 
     /** Creates a new Elevator. */
     public Elevator() {
         super(new TrapezoidProfile.Constraints(ELEVATOR_MAX_VEL_METER_PER_SEC, ELEVATOR_MAX_ACC_METER_PER_SEC_SQ));
-
-        m_kPElevator = ELEVATOR_K_P;
 
         // Create the motor, PID Controller and encoder.
         m_motor = new CANSparkMax(Constants.ELEVATOR_CAN_ID, CANSparkMax.MotorType.kBrushless);
@@ -93,11 +95,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
         setCoastMode(false);
         SmartDashboard.putBoolean("Elevator/coastMode", m_coastMode);
 
-        SmartDashboard.putNumber("Elevator/P Gain", m_kPElevator);
-
-        // constants 
-        public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
-        public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
+        // Create SD values needed during testing. Here so that they are visible in NetworkTables
+        SmartDashboard.putNumber("Elevator/testGoalLength", 0);
     }
 
     @Override
