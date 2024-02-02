@@ -128,13 +128,24 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
+    public void resetShooterRpms() {
+        setShooterRpms(0, 0);
+    }
     public void setShooterRpms(double leftRpm, double rightRpm) {
         m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
 
+    public void resetFeederSpeed() {
+        setFeederSpeed(0);
+    }
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
+    }
+
+    public void resetShooter() {
+        resetShooterRpms();
+        resetFeederSpeed();
     }
 
     public void turnOnFeeder() {
