@@ -6,19 +6,20 @@
 /*----------------------------------------------------------------------------*/
 package frc.robot.subsystems;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -140,14 +141,25 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    void setVoltage(Measure<Voltage> voltage) {}    
+    void setMotorVoltage(Measure<Voltage> voltage) {
+        m_leftShooterMotor.set(voltage.in(Units.Volts));
+    }    
+    void logMotorRpm(SysIdRoutineLog log) {
+        SmartDashboard.putNumber("LeftShooterMotor/Voltage", m_leftShooterMotor.getBusVoltage());
+        SmartDashboard.putNumber("LeftShooterMotor/RPM", getLeftRpm());
+    }
 
-
-    void calculateShooterSpeedData(double increase, double time) {
-        
-        SysIdRoutine routine = new SysIdRoutine(
+    SysIdRoutine m_sysIdRoutine;
+    public void setupSysId() {
+        m_sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(),
-            new SysIdRoutine.Mechanism(this::setVoltage, log::r, this)
+            new SysIdRoutine.Mechanism(this::setMotorVoltage, this::logMotorRpm, this)
         );
+    }
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction);
+    }
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction);
     }
 }
