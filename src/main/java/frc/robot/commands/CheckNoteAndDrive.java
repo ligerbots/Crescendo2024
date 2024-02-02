@@ -18,6 +18,7 @@ import com.pathplanner.lib.path.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
@@ -104,7 +105,7 @@ public class CheckNoteAndDrive extends Command {
   @Override
   public void end(boolean interrupted) {
     // if interrupted, stop the follow trajectory
-    System.out.println("NoteCheckAndDrive end interrupted = " + interrupted);
+    DriverStation.reportError(String.format("%s: %s", "NoteCheckAndDrive end interrupted = " + interrupted), false);
 
     if (m_followTrajectory != null)
       m_followTrajectory.end(interrupted);
