@@ -12,10 +12,12 @@ import java.util.TreeMap;
 
 import javax.swing.text.Position;
 
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.PathPlannerTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
@@ -45,13 +47,13 @@ public class CheckNoteAndDrive extends Command {
 
   };
 
-  private static final Map<Integer, String> ROBOT_PATHS = new HashMap<Integer, String>() {
+  private static final Map<Integer, PathPlannerPath> ROBOT_PATHS = new HashMap<Integer, PathPlannerPath>() {
     {
-      put(1, "/this/is/a/placeholder");
-      put(2, "/this/is/a/placeholder");
-      put(3, "/this/is/a/placeholder");
-      put(4, "/this/is/a/placeholder");
-      put(5, "/this/is/a/placeholder");
+      put(1, PathPlannerPath.fromPathFile("Test"));
+      put(2, PathPlannerPath.fromPathFile("Test"));
+      put(3, PathPlannerPath.fromPathFile("Test"));
+      put(4, PathPlannerPath.fromPathFile("Test"));
+      put(5, PathPlannerPath.fromPathFile("Test"));
     }
 
   };
@@ -70,15 +72,17 @@ public class CheckNoteAndDrive extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    List<Pose2d> notes = m_noteVision.getNotes();
+    //field relative note positions 
+    List<Pose2d> notes = m_noteVision.getNotes(m_driveTrain.getPose());
     if (notes.isEmpty()) {
       m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
 
     }
+    Translation2d wantedNoteTranslation= NOTE_POSITIONS.get(m_wantedNote).getTranslation();
     for (Pose2d note : notes) {
       // goes through the notes in the note list and checks if the wanted note pose is
       // in there .2 is arbitrary and will need to be tuned for accuracy
-      if (note.getTranslation().getDistance(NOTE_POSITIONS.get(m_wantedNote).getTranslation()) <= .2) {
+      if (note.getTranslation().getDistance(wantedNoteTranslation) <= .2) {
         m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
       } else {
         m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
