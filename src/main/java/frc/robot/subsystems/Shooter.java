@@ -6,6 +6,7 @@
 /*----------------------------------------------------------------------------*/
 package frc.robot.subsystems;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,9 +14,13 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
@@ -133,5 +138,16 @@ public class Shooter extends SubsystemBase {
 
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
+    }
+
+    void setVoltage(Measure<Voltage> voltage) {}    
+
+
+    void calculateShooterSpeedData(double increase, double time) {
+        
+        SysIdRoutine routine = new SysIdRoutine(
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(this::setVoltage, log::r, this)
+        );
     }
 }
