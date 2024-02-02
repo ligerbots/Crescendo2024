@@ -39,6 +39,8 @@ public class Shooter extends SubsystemBase {
     private RelativeEncoder m_leftEncoder;
     private RelativeEncoder m_rightEncoder;
 
+    SysIdRoutine m_sysIdRoutine;
+
     // lookup table for upper hub speeds
     public static class ShooterSpeeds {
         public double top, bottom, chute;
@@ -75,6 +77,9 @@ public class Shooter extends SubsystemBase {
         setPidController(m_rightPidController);
         m_leftEncoder = m_leftShooterMotor.getEncoder();
         m_rightEncoder = m_rightShooterMotor.getEncoder();
+
+        // SysId stuff
+        setupSysId();
 
         // RPMs for testing
         SmartDashboard.putNumber("shooter/test_left_rpm", 0);
@@ -160,8 +165,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("LeftShooterMotor/RPM", getLeftRpm());
     }
 
-    SysIdRoutine m_sysIdRoutine;
-    public void setupSysId() {
+    private void setupSysId() {
         m_sysIdRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(),
             new SysIdRoutine.Mechanism(this::setMotorVoltage, this::logMotorRpm, this)

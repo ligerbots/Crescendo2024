@@ -51,9 +51,6 @@ public class RobotContainer {
         m_controller.x().onTrue(new Shoot(m_shooter,
             () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
             () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
-
-        // SysId stuff
-        m_shooter.setupSysId();
         
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
