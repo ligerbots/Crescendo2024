@@ -73,24 +73,24 @@ public class CheckNoteAndDrive extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //field relative note positions 
+    // field relative note positions
+    m_followTrajectory = null;
     List<Pose2d> notes = m_noteVision.getNotes(m_driveTrain.getPose());
-    if (notes.isEmpty()) {
-      m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
 
-    }
-    Translation2d wantedNoteTranslation= NOTE_POSITIONS.get(m_wantedNote).getTranslation();
+    Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote).getTranslation();
     for (Pose2d note : notes) {
       // goes through the notes in the note list and checks if the wanted note pose is
       // in there .2 is arbitrary and will need to be tuned for accuracy
       if (note.getTranslation().getDistance(wantedNoteTranslation) <= .2) {
         m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
-      } else {
-        m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
+        break;
       }
 
-      m_followTrajectory.initialize();
     }
+    if (m_followTrajectory.equals(null)) {
+      m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
+    }
+    m_followTrajectory.initialize();
 
   }
 
