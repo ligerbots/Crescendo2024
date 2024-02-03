@@ -11,7 +11,7 @@ import frc.robot.Constants;
 
 // LigerBots DriveController for Swerve
 
-public class NeoDriveController {
+public class NeoDriveController implements DriveController {
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;
 
@@ -58,16 +58,19 @@ public class NeoDriveController {
     }
 
     // set the drive voltage
+    @Override
     public void setReferenceVoltage(double voltage) {
         m_motor.setVoltage(voltage);
     }
 
     // get the drive velocity
+    @Override
     public double getStateVelocity() {
         return m_encoder.getVelocity();
     }
 
-    //get wheel distance        
+    //get wheel distance
+    @Override
     public double getWheelDistance(){
         return m_encoder.getPosition();
     }

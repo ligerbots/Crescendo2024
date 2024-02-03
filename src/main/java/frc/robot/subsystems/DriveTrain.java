@@ -162,6 +162,8 @@ public class DriveTrain extends SubsystemBase {
                 new frc.robot.swerve.NeoSteerController(Constants.BACK_RIGHT_MODULE_STEER_MOTOR,
                         Constants.BACK_RIGHT_MODULE_STEER_ENCODER, Constants.BACK_RIGHT_MODULE_STEER_OFFSET));
 
+        
+
         // initialize the odometry class
         // needs to be done after the Modules are created and initialized
         // TODO add in the uncertainty matrices for encoders vs vision measurements
