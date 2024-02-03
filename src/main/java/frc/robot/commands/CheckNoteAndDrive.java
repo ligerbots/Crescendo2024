@@ -59,29 +59,29 @@ public class CheckNoteAndDrive extends Command {
         m_wantedNote = wantedNote;
     }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    // field relative note positions
-    m_followTrajectory = null;
-    List<Pose2d> notes = m_noteVision.getNotes(m_driveTrain.getPose());
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+        m_followTrajectory = null;
 
-    Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote).getTranslation();
-    for (Pose2d note : notes) {
-      // goes through the notes in the note list and checks if the wanted note pose is
-      // in there .2 is arbitrary and will need to be tuned for accuracy
-      if (note.getTranslation().getDistance(wantedNoteTranslation) <= .2) {
-        m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
-        break;
-      }
+        // field relative note positions
+        List<Pose2d> notes = m_noteVision.getNotes(m_driveTrain.getPose());
 
+        Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote).getTranslation();
+        for (Pose2d note : notes) {
+            // goes through the notes in the note list and checks if the wanted note pose is
+            // in there .2 is arbitrary and will need to be tuned for accuracy
+            if (note.getTranslation().getDistance(wantedNoteTranslation) <= 0.2) {
+                m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
+                break;
+            }
+
+        }
+        if (m_followTrajectory == null)
+            m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
+
+        m_followTrajectory.initialize();
     }
-    if (m_followTrajectory.equals(null)) {
-      m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
-    }
-    m_followTrajectory.initialize();
-
-  }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override

@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
         m_robotContainer = new RobotContainer();
         DriveTrain driveTrain = m_robotContainer.getDriveTrain();
         // Initialize the list of available Autonomous routines
-        m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(driveTrain));
+        // m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(driveTrain));
 
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
