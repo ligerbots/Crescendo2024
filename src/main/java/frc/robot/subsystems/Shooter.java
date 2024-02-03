@@ -35,6 +35,8 @@ public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
 
+    public static final double RPM_TOLERANCE = 100; // TODO Tune this later
+
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
     static final double K_P = 5.5e-4;//2.0766E-06;
