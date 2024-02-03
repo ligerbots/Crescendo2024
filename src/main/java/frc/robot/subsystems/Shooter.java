@@ -48,13 +48,12 @@ public class Shooter extends SubsystemBase {
     SparkPIDController m_leftPidController, m_rightPidController;
     private RelativeEncoder m_leftEncoder;
     private RelativeEncoder m_rightEncoder;
-    private SysIdRoutine sysIdRoutine;
 
+    // SysId data collection
+    private SysIdRoutine m_sysIdRoutine;
     private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Units.Volts.of(0));
     private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
-
-
 
     // lookup table for upper hub speeds
     public static class ShooterSpeeds {
@@ -94,7 +93,6 @@ public class Shooter extends SubsystemBase {
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
         setSysIdRoutine();
-
 
         // RPMs for testing
         SmartDashboard.putNumber("shooter/test_left_rpm", 0);
@@ -173,7 +171,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setSysIdRoutine() {
-        sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
+        m_sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
             (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / RobotController.getBatteryVoltage()),
             log -> {
                 log.motor("left motor")
@@ -181,15 +179,15 @@ public class Shooter extends SubsystemBase {
                         m_appliedVoltage.mut_replace(
                             m_leftShooterMotor.get() * RobotController.getBatteryVoltage(), Units.Volts))
                     .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), Units.Rotations))
-                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RotationsPerSecond));
+                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RPM));
             }, this));
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return sysIdRoutine.quasistatic(direction);
+        return m_sysIdRoutine.quasistatic(direction);
     }
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return sysIdRoutine.dynamic(direction);
+        return m_sysIdRoutine.dynamic(direction);
     }
 }
