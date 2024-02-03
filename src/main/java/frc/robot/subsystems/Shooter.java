@@ -22,7 +22,6 @@ import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,10 +36,10 @@ public class Shooter extends SubsystemBase {
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
-    static final double K_P = 1.9306E-06;
+    static final double K_P = 5.5e-4;//2.0766E-06;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF = 0.11057 / 60.0;
+    static final double K_FF = 0.0001575; //0.1111 / 60.0 / 12.0;
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
@@ -103,9 +102,9 @@ public class Shooter extends SubsystemBase {
         pidController.setP(K_P);
         pidController.setI(K_I);
         pidController.setD(K_D);
-        // pidController.setIZone(kIz);
+        pidController.setIZone(0);
         pidController.setFF(K_FF);
-        // pidController.setOutputRange(kMinOutput, kMaxOutput);
+        pidController.setOutputRange(-1.0, 1.0);
     }
 
     public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
@@ -145,8 +144,14 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
-    public void resetShooterRpms() {
-        setShooterRpms(0, 0);
+    public void resetShooterSpeeds() {
+        setShooterSpeeds(0, 0);
+    }
+
+    // set speeds -1 -> 1
+    public void setShooterSpeeds(double leftSpeed, double rightSpeed) {
+        m_leftShooterMotor.set(leftSpeed);
+        m_rightShooterMotor.set(rightSpeed);
     }
 
     public void setShooterRpms(double leftRpm, double rightRpm) {
@@ -160,12 +165,13 @@ public class Shooter extends SubsystemBase {
     public void resetFeederSpeed() {
         setFeederSpeed(0);
     }
+
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
     }
 
     public void resetShooter() {
-        resetShooterRpms();
+        resetShooterSpeeds();
         resetFeederSpeed();
     }
 
@@ -176,12 +182,12 @@ public class Shooter extends SubsystemBase {
     // Data collection for SysId
     private void setSysIdRoutine() {
         m_sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
-            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / RobotController.getBatteryVoltage()),
+            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / Constants.MAX_VOLTAGE),
             log -> {
                 log.motor("left motor")
                     .voltage(
                         m_appliedVoltage.mut_replace(
-                            m_leftShooterMotor.get() * RobotController.getBatteryVoltage(), Units.Volts))
+                            m_leftShooterMotor.get() * Constants.MAX_VOLTAGE, Units.Volts))
                     .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), Units.Rotations))
                     .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RPM));
             }, this));
