@@ -14,17 +14,18 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import static edu.wpi.first.units.MutableMeasure.mutable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+// Used for the SysId data collection
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static edu.wpi.first.units.MutableMeasure.mutable;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 
@@ -144,16 +145,13 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
-    public void resetShooterSpeeds() {
-        setShooterSpeeds(0, 0);
-    }
-
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {
         m_leftShooterMotor.set(leftSpeed);
         m_rightShooterMotor.set(rightSpeed);
     }
 
+    // set shooter RPMs, under PID control
     public void setShooterRpms(double leftRpm, double rightRpm) {
         SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
         SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
@@ -162,21 +160,25 @@ public class Shooter extends SubsystemBase {
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
 
-    public void resetFeederSpeed() {
-        setFeederSpeed(0);
+    public void turnOnFeeder() {
+        setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void turnOffShooter() {
+        turnOffShooterWheels();
+        turnOffFeeder();
     }
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
     }
 
-    public void resetShooter() {
-        resetShooterSpeeds();
-        resetFeederSpeed();
+    public void turnOffShooterWheels() {
+        setShooterSpeeds(0, 0);
     }
 
-    public void turnOnFeeder() {
-        setFeederSpeed(FEEDER_SPEED);
+    public void turnOffFeeder() {
+        setFeederSpeed(0);
     }
 
     // Data collection for SysId

@@ -28,8 +28,6 @@ public class RobotContainer {
     // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
     private final Elevator m_elevator = new Elevator();
 
-
-
     public RobotContainer() {
         configureBindings();
         m_driveTrain.setDefaultCommand(getDriveCommand());
@@ -50,24 +48,24 @@ public class RobotContainer {
         m_controller.x().onTrue(new Shoot(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
-    
-        
+
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        JoystickButton farm3 = new JoystickButton(m_farm, 3);
-        JoystickButton farm4 = new JoystickButton(m_farm, 4);
-
-        farm1.onTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        farm2.onTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        farm3.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    
-
-        // JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        // farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
+        farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
         
+        JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
+
+        // -----------------------------------------------
+        // commands to run the characterization for the shooter
+        // JoystickButton farm1 = new JoystickButton(m_farm, 1);
         // JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        // farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
+        // JoystickButton farm3 = new JoystickButton(m_farm, 3);
+        // JoystickButton farm4 = new JoystickButton(m_farm, 4);
+
+        // farm1.onTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // farm2.onTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // farm3.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
