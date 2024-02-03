@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -82,9 +83,16 @@ public class Shooter extends SubsystemBase {
     // encoders, and SmartDashboard data
     public Shooter() {
         m_feederMotor = new CANSparkMax(Constants.FEEDER_CAN_ID, MotorType.kBrushless);
-
+        m_feederMotor.restoreFactoryDefaults();
+        m_feederMotor.setInverted(true);
+        m_feederMotor.setIdleMode(IdleMode.kBrake);
+        
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
+        m_leftShooterMotor.restoreFactoryDefaults();
+        m_leftShooterMotor.setInverted(true);
+
         m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
+        m_rightShooterMotor.restoreFactoryDefaults();
 
         m_leftPidController = m_leftShooterMotor.getPIDController();
         setPidController(m_leftPidController);
