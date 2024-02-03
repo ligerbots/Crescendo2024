@@ -6,7 +6,6 @@
 /*----------------------------------------------------------------------------*/
 package frc.robot.subsystems;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,13 +19,11 @@ import static edu.wpi.first.units.MutableMeasure.mutable;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -38,10 +35,12 @@ public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
 
-    static final double KP = 1.0e-3;
-    static final double KI = 0.0;
-    static final double KD = 0.0;
-    static final double KF = 0.0;
+    // constants for side shooter, from SysId
+    // Not right. There is a units problem!
+    static final double K_P = 1.9306E-06;
+    static final double K_I = 0.0;
+    static final double K_D = 0.0;
+    static final double K_FF = 0.11057 / 60.0;
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
@@ -50,7 +49,7 @@ public class Shooter extends SubsystemBase {
     private RelativeEncoder m_rightEncoder;
 
     // SysId data collection
-    private SysIdRoutine m_sysIdRoutine;
+    private SysIdRoutine m_sysIdRoutine = null;
     private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Units.Volts.of(0));
     private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
@@ -92,20 +91,20 @@ public class Shooter extends SubsystemBase {
         m_leftEncoder = m_leftShooterMotor.getEncoder();
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
-        setSysIdRoutine();
-
         // RPMs for testing
         SmartDashboard.putNumber("shooter/test_left_rpm", 0);
         SmartDashboard.putNumber("shooter/test_right_rpm", 0);
+        SmartDashboard.putNumber("shooter/left_rpm_target", 0);
+        SmartDashboard.putNumber("shooter/right_rpm_target", 0);
     }
 
     private void setPidController(SparkPIDController pidController) {
         // set PID coefficients
-        pidController.setP(KP);
-        pidController.setI(KI);
-        pidController.setD(KD);
+        pidController.setP(K_P);
+        pidController.setI(K_I);
+        pidController.setD(K_D);
         // pidController.setIZone(kIz);
-        // pidController.setFF(kFF);
+        pidController.setFF(K_FF);
         // pidController.setOutputRange(kMinOutput, kMaxOutput);
     }
 
@@ -149,7 +148,11 @@ public class Shooter extends SubsystemBase {
     public void resetShooterRpms() {
         setShooterRpms(0, 0);
     }
+
     public void setShooterRpms(double leftRpm, double rightRpm) {
+        SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
+        SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
+
         m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
@@ -170,7 +173,8 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    public void setSysIdRoutine() {
+    // Data collection for SysId
+    private void setSysIdRoutine() {
         m_sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
             (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / RobotController.getBatteryVoltage()),
             log -> {
@@ -184,10 +188,16 @@ public class Shooter extends SubsystemBase {
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        if (m_sysIdRoutine == null)
+            setSysIdRoutine();
+
         return m_sysIdRoutine.quasistatic(direction);
     }
 
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        if (m_sysIdRoutine == null)
+            setSysIdRoutine();
+
         return m_sysIdRoutine.dynamic(direction);
     }
 }

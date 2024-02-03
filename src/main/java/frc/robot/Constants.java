@@ -42,8 +42,8 @@ public class Constants {
 
     public static final int SHOOTER_PIVOT_CAN_ID = 17; //TODO: REPLACE WITH REAL ID
 
-    public static final int LEFT_SHOOTER_CAN_ID = 10;
-    public static final int RIGHT_SHOOTER_CAN_ID = 11;
+    public static final int LEFT_SHOOTER_CAN_ID = 9;
+    public static final int RIGHT_SHOOTER_CAN_ID = 10;
     public static final int FEEDER_CAN_ID = 22;
 
 }
