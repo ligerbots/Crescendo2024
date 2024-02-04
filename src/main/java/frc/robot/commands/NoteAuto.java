@@ -7,6 +7,7 @@ package frc.robot.commands;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 
@@ -16,16 +17,22 @@ import frc.robot.subsystems.DriveTrain;
 public class NoteAuto extends AutoCommandInterface {
     private DriveTrain m_driveTrain;
     private Pose2d m_initPose;
+
     /** Creates a new NoteAuto. */
     public NoteAuto(DriveTrain driveTrain) {
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         m_driveTrain = driveTrain;
 
-        PathPlannerPath startPath = PathPlannerPath.fromPathFile("Note_C_1 to Shoot_1");
-        m_initPose = startPath.getStartingDifferentialPose();
-        
-        addCommands(m_driveTrain.makePathFollowingCommand(startPath));
+        try {
+            PathPlannerPath startPath = PathPlannerPath.fromPathFile("Note_C_1 to Shoot_1");
+            m_initPose = startPath.getStartingDifferentialPose();
+            addCommands(m_driveTrain.makePathFollowingCommand(startPath));
+
+        } catch (Exception e) {
+            DriverStation.reportError("Unable to load PP path Test", true);
+            m_initPose = new Pose2d();
+        }
     }
 
     @Override
