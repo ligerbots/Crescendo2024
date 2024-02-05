@@ -20,8 +20,9 @@ import frc.robot.subsystems.DriveTrain;
 public class TurnToHeadingWithDriving extends Command {
 
   private final DriveTrain m_driveTrain;
-  private PIDController turnHeadingPID;
-  private Rotation2d m_wantedHeading;
+  private final PIDController turnHeadingPID;
+  private Double wantedDegrees;
+  private final Supplier<Rotation2d> m_wantedHeadingSupplier;
   private final DoubleSupplier m_translationXSupplier;
   private final DoubleSupplier m_translationYSupplier;
   private final double kp = 0.2; 
@@ -34,7 +35,7 @@ public class TurnToHeadingWithDriving extends Command {
   public TurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier) {
     m_driveTrain = driveTrain;
-    m_wantedHeading = wantedHeading.get();
+    m_wantedHeadingSupplier = wantedHeading;
     m_translationXSupplier = translationXSupplier;
     m_translationYSupplier = translationYSupplier;
 
@@ -47,13 +48,14 @@ public class TurnToHeadingWithDriving extends Command {
   @Override
   public void initialize() {
     turnHeadingPID.reset();
+    wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     // auto aiming using PID
-      double speed = turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedHeading.getDegrees());
+      double speed = turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), wantedDegrees);
       m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
   }
 
@@ -66,6 +68,6 @@ public class TurnToHeadingWithDriving extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedHeading.getDegrees()) < DriveTrain.DRIVETRAIN_ANGLE_TOLERANCE;
+    return Math.abs(m_driveTrain.getHeading().getDegrees() - wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES;
   }
 }
