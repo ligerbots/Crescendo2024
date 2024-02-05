@@ -25,9 +25,9 @@ public class TurnToHeadingWithDriving extends Command {
   private final Supplier<Rotation2d> m_wantedHeadingSupplier;
   private final DoubleSupplier m_translationXSupplier;
   private final DoubleSupplier m_translationYSupplier;
-  private final double kp = 0.2; 
-  private final double ki = 0.0; 
-  private final double kd = 0.0; 
+  private final static double kp = 0.2; 
+  private final static double ki = 0.0; 
+  private final static double kd = 0.0; 
 
   /**
    * Creates a new autoAim.
