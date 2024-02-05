@@ -15,7 +15,6 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -104,10 +103,10 @@ public class NoteVision extends SubsystemBase {
 
             // the pi is because the camera is on the back
             double noteAngle = robotRotation - Math.PI + yaw;
-            double felidCentricNoteX = robotX + d * Math.cos(noteAngle);
-            double felidCentricNoteY = robotY + d * Math.sin(noteAngle);
+            double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
+            double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
 
-            poses.add(new Pose2d(felidCentricNoteX, felidCentricNoteY, new Rotation2d(0)));
+            poses.add(new Pose2d(fieldCentricNoteX, fieldCentricNoteY, new Rotation2d(0)));
         }
         return poses;
     }
