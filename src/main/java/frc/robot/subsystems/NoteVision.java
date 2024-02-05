@@ -86,28 +86,26 @@ public class NoteVision extends SubsystemBase {
     public List<Pose2d> getNotes(Pose2d pose) {
         List<Pose2d> poses = new ArrayList<Pose2d>();
 
-
         if (!m_noteCamera.isConnected()) {
             return poses;
         }
 
         var results = m_noteCamera.getLatestResult();
         List<PhotonTrackedTarget> targets = results.getTargets();
-
+        double robotX = pose.getX();
+        double robotY = pose.getY();
+        double robotRotation = pose.getRotation().getRadians();
         for (PhotonTrackedTarget tgt : targets) {
             // this calc assumes pitch angle is positive UP, so flip the camera's pitch
             // note that PV target angles are in degrees
             double d = Math.abs(m_robotToNoteCam.getZ() /
                     Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
             double yaw = Math.toRadians(tgt.getYaw());
-            double robotX = pose.getX();
-            double robotY = pose.getY();
-            double robotRotation = pose.getRotation().getRadians();
+
             // the pi is because the camera is on the back
             double noteAngle = robotRotation - Math.PI + yaw;
             double felidCentricNoteX = robotX + d * Math.cos(noteAngle);
             double felidCentricNoteY = robotY + d * Math.sin(noteAngle);
-                    
 
             poses.add(new Pose2d(felidCentricNoteX, felidCentricNoteY, new Rotation2d(0)));
         }
