@@ -58,7 +58,7 @@ public class NoteVision extends SubsystemBase {
     public void updateSimulation(Pose2d pose) {
         m_visionSim.update(pose);
     }
-    
+
     public List<Pose2d> getNotes() {
         List<Pose2d> poses = new ArrayList<Pose2d>();
 
@@ -72,12 +72,41 @@ public class NoteVision extends SubsystemBase {
         for (PhotonTrackedTarget tgt : targets) {
             // this calc assumes pitch angle is positive UP, so flip the camera's pitch
             // note that PV target angles are in degrees
-            double d = Math.abs(m_robotToNoteCam.getZ() / 
-                Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
+            double d = Math.abs(m_robotToNoteCam.getZ() /
+                    Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
             double yaw = Math.toRadians(tgt.getYaw());
             double x = d * Math.cos(yaw);
             double y = d * Math.sin(yaw);
             poses.add(new Pose2d(x, y, new Rotation2d(0)));
+        }
+        return poses;
+    }
+
+    public List<Pose2d> getNotes(Pose2d pose) {
+        List<Pose2d> poses = new ArrayList<Pose2d>();
+
+        if (!m_noteCamera.isConnected()) {
+            return poses;
+        }
+
+        var results = m_noteCamera.getLatestResult();
+        List<PhotonTrackedTarget> targets = results.getTargets();
+        double robotX = pose.getX();
+        double robotY = pose.getY();
+        double robotRotation = pose.getRotation().getRadians();
+        for (PhotonTrackedTarget tgt : targets) {
+            // this calc assumes pitch angle is positive UP, so flip the camera's pitch
+            // note that PV target angles are in degrees
+            double d = Math.abs(m_robotToNoteCam.getZ() /
+                    Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
+            double yaw = Math.toRadians(tgt.getYaw());
+
+            // the pi is because the camera is on the back
+            double noteAngle = robotRotation - Math.PI + yaw;
+            double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
+            double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
+
+            poses.add(new Pose2d(fieldCentricNoteX, fieldCentricNoteY, new Rotation2d(0)));
         }
         return poses;
     }
@@ -104,9 +133,12 @@ public class NoteVision extends SubsystemBase {
         prop.setAvgLatencyMs(10.0);
         prop.setLatencyStdDevMs(3.0);
 
-        // Note: NetworkTables does not update the timestamp of an entry if the value does not change.
-        // The timestamp is used by PVLib to know if there is a new frame, so in a simulation
-        // with no uncertainty, it thinks that it is not detecting a tag if the robot is static.
+        // Note: NetworkTables does not update the timestamp of an entry if the value
+        // does not change.
+        // The timestamp is used by PVLib to know if there is a new frame, so in a
+        // simulation
+        // with no uncertainty, it thinks that it is not detecting a tag if the robot is
+        // static.
         // So, always have a little bit of uncertainty.
         prop.setCalibError(0.1, 0.03);
 
@@ -115,7 +147,8 @@ public class NoteVision extends SubsystemBase {
         m_visionSim.addCamera(cam, m_robotToNoteCam);
 
         // Add the Auto notes on the field
-        TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14), Units.inchesToMeters(2));
+        TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14),
+                Units.inchesToMeters(2));
         for (Pose2d notePose : List.of(
                 FieldConstants.NOTE_C_1,
                 FieldConstants.NOTE_C_2,
@@ -124,9 +157,7 @@ public class NoteVision extends SubsystemBase {
                 FieldConstants.NOTE_C_5,
                 FieldConstants.NOTE_S_1,
                 FieldConstants.NOTE_S_2,
-                FieldConstants.NOTE_S_3
-            ))
-        {
+                FieldConstants.NOTE_S_3)) {
             m_visionSim.addVisionTargets("note",
                     new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
         }
@@ -153,5 +184,3 @@ public class NoteVision extends SubsystemBase {
     }
 
 }
-
- 
