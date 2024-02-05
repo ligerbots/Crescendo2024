@@ -44,7 +44,14 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_K_D = 0.0;
     private static final double ELEVATOR_K_FF = 0.0;
 
-    // Define the motor and encoders
+    //Offset for command
+    public static final double OFFSET_TOLERANCE_METERS = 1; //TODO: pick value, used in the command SetElevator length and used to be REACHER_OFFSET_TOLERANCE_METERS
+
+    // constants 
+    public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
+    public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
+
+        // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;
 
