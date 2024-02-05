@@ -25,9 +25,9 @@ public class TurnToHeadingWithDriving extends Command {
   private final Supplier<Rotation2d> m_wantedHeadingSupplier;
   private final DoubleSupplier m_translationXSupplier;
   private final DoubleSupplier m_translationYSupplier;
-  private final static double kp = 0.2; 
-  private final static double ki = 0.0; 
-  private final static double kd = 0.0; 
+  private final static double KP = 0.2; 
+  private final static double KI = 0.0; 
+  private final static double KD = 0.0; 
 
   /**
    * Creates a new autoAim.
@@ -39,7 +39,7 @@ public class TurnToHeadingWithDriving extends Command {
     m_translationXSupplier = translationXSupplier;
     m_translationYSupplier = translationYSupplier;
 
-    turnHeadingPID = new PIDController(kp,ki,kd);// random number TODO
+    turnHeadingPID = new PIDController(KP,KI,KD);// random number TODO
     addRequirements(m_driveTrain);
     // Use addRequirements() here to declare subsystem dependencies.
   }
