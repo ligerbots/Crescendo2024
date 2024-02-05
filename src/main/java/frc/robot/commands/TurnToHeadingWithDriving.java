@@ -7,38 +7,38 @@
 
 package frc.robot.commands;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
-import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
-
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.DriveTrain;
 
-public class TurnToHeading extends Command {
+
+public class TurnToHeadingWithDriving extends Command {
 
   private final DriveTrain m_driveTrain;
-  private ChassisSpeeds chassisSpeeds;
-  private PhoenixPIDController turnHeadingPID;
-  private double m_wantedHeading;
+  private PIDController turnHeadingPID;
+  private Rotation2d m_wantedHeading;
   private final DoubleSupplier m_translationXSupplier;
   private final DoubleSupplier m_translationYSupplier;
+  private final double kp = 0.2; 
+  private final double ki = 0.0; 
+  private final double kd = 0.0; 
 
   /**
    * Creates a new autoAim.
    */
-  public TurnToHeading(DriveTrain driveTrain, double wantedHeading, DoubleSupplier translationXSupplier,
+  public TurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier,
       DoubleSupplier translationYSupplier) {
     m_driveTrain = driveTrain;
-    m_wantedHeading = wantedHeading;
+    m_wantedHeading = wantedHeading.get();
     this.m_translationXSupplier = translationXSupplier;
     this.m_translationYSupplier = translationYSupplier;
 
-    turnHeadingPID = new PhoenixPIDController(0.1, 0, 0);// random number TODO
+    turnHeadingPID = new PIDController(kp,ki,kd);// random number TODO
     addRequirements(m_driveTrain);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -53,7 +53,7 @@ public class TurnToHeading extends Command {
   @Override
   public void execute() {
     // auto aiming using PID
-      double speed = turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedHeading, 0);
+      double speed = turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedHeading.getDegrees());
       m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
   }
 
@@ -66,6 +66,6 @@ public class TurnToHeading extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedHeading) < 0.1;
+    return Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedHeading.getDegrees()) < DriveTrain.DRIVETRAIN_ANGLE_TOLERANCE;
   }
 }
