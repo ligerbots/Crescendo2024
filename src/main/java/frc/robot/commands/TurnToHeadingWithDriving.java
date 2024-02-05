@@ -35,8 +35,8 @@ public class TurnToHeadingWithDriving extends Command {
       DoubleSupplier translationYSupplier) {
     m_driveTrain = driveTrain;
     m_wantedHeading = wantedHeading.get();
-    this.m_translationXSupplier = translationXSupplier;
-    this.m_translationYSupplier = translationYSupplier;
+    m_translationXSupplier = translationXSupplier;
+    m_translationYSupplier = translationYSupplier;
 
     turnHeadingPID = new PIDController(kp,ki,kd);// random number TODO
     addRequirements(m_driveTrain);
