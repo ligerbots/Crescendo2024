@@ -20,7 +20,7 @@ import frc.robot.subsystems.DriveTrain;
 public class TurnToHeadingWithDriving extends Command {
 
   private final DriveTrain m_driveTrain;
-  private final PIDController turnHeadingPID;
+  private final PIDController m_turnHeadingPID;
   private Double wantedDegrees;
   private final Supplier<Rotation2d> m_wantedHeadingSupplier;
   private final DoubleSupplier m_translationXSupplier;
@@ -39,7 +39,7 @@ public class TurnToHeadingWithDriving extends Command {
     m_translationXSupplier = translationXSupplier;
     m_translationYSupplier = translationYSupplier;
 
-    turnHeadingPID = new PIDController(KP,KI,KD);// random number TODO
+    m_turnHeadingPID = new PIDController(KP,KI,KD);// random number TODO
     addRequirements(m_driveTrain);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -47,7 +47,7 @@ public class TurnToHeadingWithDriving extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turnHeadingPID.reset();
+    m_turnHeadingPID.reset();
     wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
   }
 
@@ -55,7 +55,7 @@ public class TurnToHeadingWithDriving extends Command {
   @Override
   public void execute() {
     // auto aiming using PID
-      double speed = turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), wantedDegrees);
+      double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), wantedDegrees);
       m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
   }
 
