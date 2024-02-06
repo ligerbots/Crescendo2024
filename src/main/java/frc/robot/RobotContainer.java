@@ -25,7 +25,8 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
-    // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
+    // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO:
+    // find encoder
     private final Elevator m_elevator = new Elevator();
 
     public RobotContainer() {
@@ -38,22 +39,38 @@ public class RobotContainer {
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 
+        m_controller.b().onTrue(new SetElevatorLength(m_elevator,
                 () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
-        
+
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
-            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
-            
+                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+
         m_controller.x().onTrue(new Shoot(m_shooter,
-            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
-            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+                () -> {
+                    return SmartDashboard.getNumber("shooter/test_left_rpm", 0);
+                },
+                () -> {
+                    return SmartDashboard.getNumber("shooter/test_right_rpm", 0);
+                }));
+        // this is pseudo code
+        // m_controller.leftTrigger().onTrue(if(ampState = false){new Shoot(m_shooter,
+        // null, null)} else if(ampState = true){
+        // {new Shoot(m_shooter, null, null)}
+        // });
+        // m_controller.leftBumper().OnTrue(new set)
+        // m_controller.rightTrigger().whileTrue(new StartEndCommand(m_intake::intake,
+        // m_intake::stop, m_intake));
+        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake,
+        // m_intake::stop, m_intake));
+        // m_controller.a().whileTrue(new autoAimAndFire());
+        // m_controller.b().whileTrue(new setDefendedMode())
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
-        
+        farm1.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_RAISE_ELEVATOR));
+
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
+        farm2.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_LOWER_ELEVATOR));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -109,7 +126,7 @@ public class RobotContainer {
     public DriveTrain getDriveTrain() {
         return m_driveTrain;
     }
-    
+
     public NoteVision getNoteVision() {
         return m_noteVision;
     }
