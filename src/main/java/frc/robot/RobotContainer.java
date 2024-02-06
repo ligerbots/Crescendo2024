@@ -5,12 +5,12 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 import frc.robot.commands.*;
@@ -27,6 +27,8 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO: find encoder
     private final Elevator m_elevator = new Elevator();
+
+    private final SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
 
     public RobotContainer() {
         configureBindings();
@@ -68,8 +70,15 @@ public class RobotContainer {
         // farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
-    public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+    public void initAutoSendableChooser(){
+        // Initialize the list of available Autonomous routines
+        // m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(driveTrain));
+
+        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
+    }
+
+    public AutoCommandInterface getAutonomousCommand() {
+        return m_chosenAuto.getSelected();
     }
 
     public Command getDriveCommand() {
