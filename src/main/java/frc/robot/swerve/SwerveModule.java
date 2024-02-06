@@ -8,10 +8,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 public class SwerveModule {
     private final String m_moduleName;
-    private final NeoDriveController m_driveController;
+    private final FalconDriveController m_driveController;
     private final NeoSteerController m_steerController;
 
-    public SwerveModule(String moduleName, NeoDriveController driveController, NeoSteerController steerController) {
+    public SwerveModule(String moduleName, FalconDriveController driveController, NeoSteerController steerController) {
         m_moduleName = moduleName;
         m_driveController = driveController;
         m_steerController = steerController;

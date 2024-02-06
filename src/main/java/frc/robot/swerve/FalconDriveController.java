@@ -1,11 +1,16 @@
 package frc.robot.swerve;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import frc.robot.subsystems.DriveTrain;
+
 public class FalconDriveController implements DriveController {
     private final TalonFX m_motor;
+    
 
+    private static final double FALCON_DISTANCE_PER_UNIT = (Math.PI * DriveTrain.WHEEL_DIAMETER) / 6.75 / 2048.0 ;
     // private static final double CURRENT_LIMIT = 9999;
     private static final boolean MOTOR_INVERTED = true;
 
@@ -25,12 +30,12 @@ public class FalconDriveController implements DriveController {
 
     @Override
     public double getStateVelocity() {
-        return m_motor.getVelocity().getValueAsDouble();
+        return m_motor.getVelocity().getValueAsDouble() * FALCON_DISTANCE_PER_UNIT;
     }
 
     @Override
     public double getWheelDistance() {
-        return m_motor.getPosition().getValueAsDouble();
+        return m_motor.getPosition().getValueAsDouble() * FALCON_DISTANCE_PER_UNIT;
     }
 
 }
