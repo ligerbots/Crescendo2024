@@ -21,7 +21,7 @@ public class TurnToHeadingWithDriving extends Command {
 
   private final DriveTrain m_driveTrain;
   private final PIDController m_turnHeadingPID;
-  private Double wantedDegrees;
+  private Double m_wantedDegrees;
   private final Supplier<Rotation2d> m_wantedHeadingSupplier;
   private final DoubleSupplier m_translationXSupplier;
   private final DoubleSupplier m_translationYSupplier;
@@ -48,14 +48,14 @@ public class TurnToHeadingWithDriving extends Command {
   @Override
   public void initialize() {
     m_turnHeadingPID.reset();
-    wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
+    m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     // auto aiming using PID
-      double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), wantedDegrees);
+      double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
       m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
   }
 
@@ -68,6 +68,6 @@ public class TurnToHeadingWithDriving extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(m_driveTrain.getHeading().getDegrees() - wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES;
+    return Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES;
   }
 }
