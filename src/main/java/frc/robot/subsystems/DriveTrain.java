@@ -7,6 +7,11 @@ package frc.robot.subsystems;
 import java.util.Optional;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.pathplanner.lib.commands.FollowPathHolonomic;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -23,6 +28,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -32,7 +38,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import frc.robot.Constants;
 import frc.robot.Robot;
-
 import frc.robot.swerve.*;
 
 public class DriveTrain extends SubsystemBase {
@@ -50,6 +55,10 @@ public class DriveTrain extends SubsystemBase {
      */
     private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
+    private static final double DRIVE_BASE_RADIUS_METERS = Math.sqrt(TRACKWIDTH_METERS*TRACKWIDTH_METERS + WHEELBASE_METERS*WHEELBASE_METERS) / 2.0;
+
+    public  static final double  ANGLE_TOLERANCE_DEGREES = 5;
+    
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
@@ -84,7 +93,8 @@ public class DriveTrain extends SubsystemBase {
     /**
      * The maximum velocity of the robot in meters per second.
      * <p>
-     * This is a measure of how fast the robot should be able to drive in a straight line.
+     * This is a measure of how fast the robot should be able to drive in a straight
+     * line.
      */
     private static final double MAX_VELOCITY_METERS_PER_SECOND = 5880.0 / 60.0 *
             NeoDriveController.DRIVE_REDUCTION * NeoDriveController.WHEEL_DIAMETER * Math.PI;
@@ -102,8 +112,8 @@ public class DriveTrain extends SubsystemBase {
     private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
             Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
 
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = 
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0;
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+            / 6.0;
 
     private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
             // Front left
@@ -124,14 +134,17 @@ public class DriveTrain extends SubsystemBase {
     // the odometry class to keep track of where the robot is on the field
     private final SwerveDrivePoseEstimator m_odometry;
 
-    private final Vision m_vision;
-
+    private final AprilTagVision m_aprilTagVision;
+    
+    // this is needed for the simulation
+    private final NoteVision m_noteVision;
+    
     // simulation variables
     private static final double SIM_LOOP_TIME = 0.020;
     private Pose2d m_simPose = new Pose2d();
     // remember the current chassis speeds so we can update the robot position
     private ChassisSpeeds m_simChassisSpeeds = new ChassisSpeeds();
-    
+
     private final Field2d m_field = new Field2d();
 
     // PID controller for swerve
@@ -141,7 +154,13 @@ public class DriveTrain extends SubsystemBase {
             0, 0,
             new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
 
-    public DriveTrain(Vision vision) {
+    // TODO: test if using MAX_VELOCITY_METERS_PER_SECOND of whole robot for Max
+    // Module Speed per module is appropriate
+    private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+            new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
+            DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
+
+    public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
@@ -170,7 +189,8 @@ public class DriveTrain extends SubsystemBase {
         m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
                 new Pose2d());
 
-        m_vision = vision;
+        m_aprilTagVision = apriltagVision;
+        m_noteVision = noteVision;
 
         // as late as possible, re-sync the swerve angle encoders
         for (SwerveModule module : m_swerveModules) {
@@ -202,7 +222,7 @@ public class DriveTrain extends SubsystemBase {
             m_simChassisSpeeds = new ChassisSpeeds();
         }
 
-        m_odometry.resetPosition(getGyroscopeRotation(), getModulePositions(), pose);		
+        m_odometry.resetPosition(getGyroscopeRotation(), getModulePositions(), pose);
     }
 
     public Rotation2d getHeading() {
@@ -232,7 +252,8 @@ public class DriveTrain extends SubsystemBase {
 
     // know the robot heading and get pitch and roll
     private Translation3d getNormalVector3d() {
-        Rotation3d tilt = new Rotation3d(Units.degreesToRadians(m_navx.getRoll()), Units.degreesToRadians(m_navx.getPitch()), 0);
+        Rotation3d tilt = new Rotation3d(Units.degreesToRadians(m_navx.getRoll()),
+                Units.degreesToRadians(m_navx.getPitch()), 0);
         return new Translation3d(0, 0, 1).rotateBy(tilt);
     }
 
@@ -256,10 +277,10 @@ public class DriveTrain extends SubsystemBase {
         double newInputRotation = m_rotationLimiter.calculate(inputRotation);
 
         // prevents a drive call with parameters of 0 0 0
-        if (Math.abs(newInputX) < 0.01 && Math.abs(newInputY) < 0.01 && Math.abs(newInputRotation) < 0.01){
+        if (Math.abs(newInputX) < 0.01 && Math.abs(newInputY) < 0.01 && Math.abs(newInputRotation) < 0.01) {
             stop();
             return;
-        } 
+        }
 
         ChassisSpeeds chassisSpeeds;
         // when in field-relative mode
@@ -288,9 +309,12 @@ public class DriveTrain extends SubsystemBase {
 
     public void drive(ChassisSpeeds chassisSpeeds) {
         // // for debugging
-        // SmartDashboard.putNumber("drivetrain/chassisX", chassisSpeeds.vxMetersPerSecond);
-        // SmartDashboard.putNumber("drivetrain/chassisY", chassisSpeeds.vyMetersPerSecond);
-        // SmartDashboard.putNumber("drivetrain/chassisAngle", Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond));
+        // SmartDashboard.putNumber("drivetrain/chassisX",
+        // chassisSpeeds.vxMetersPerSecond);
+        // SmartDashboard.putNumber("drivetrain/chassisY",
+        // chassisSpeeds.vyMetersPerSecond);
+        // SmartDashboard.putNumber("drivetrain/chassisAngle",
+        // Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond));
 
         SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
@@ -301,7 +325,7 @@ public class DriveTrain extends SubsystemBase {
         }
 
         // simulation
-        m_simChassisSpeeds = m_kinematics.toChassisSpeeds(states);;
+        m_simChassisSpeeds = m_kinematics.toChassisSpeeds(states);
     }
 
     public void stop() {
@@ -329,15 +353,15 @@ public class DriveTrain extends SubsystemBase {
         setPrecisionMode(!m_precisionMode);
     }
 
-    public void setFieldCentricMode(boolean fieldCentricMode){
+    public void setFieldCentricMode(boolean fieldCentricMode) {
         m_fieldCentric = fieldCentricMode;
     }
 
-    public void setPrecisionMode(boolean precisionMode){
+    public void setPrecisionMode(boolean precisionMode) {
         m_precisionMode = precisionMode;
         m_maxVelocity = m_precisionMode ? MAX_VELOCITY_PRECISION_MODE : MAX_VELOCITY_METERS_PER_SECOND;
         m_maxAngularVelocity = m_precisionMode ? MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE
-            : MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+                : MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
     }
 
     // lock wheels in x position to resist pushing
@@ -364,7 +388,7 @@ public class DriveTrain extends SubsystemBase {
         return Rotation2d.fromDegrees(m_navx.getRoll());
     }
 
-    public Field2d getField2d(){
+    public Field2d getField2d() {
         return m_field;
     }
 
@@ -385,23 +409,44 @@ public class DriveTrain extends SubsystemBase {
         }
     }
 
+    // return robot relative chassis speeds
+    private ChassisSpeeds getChassisSpeeds() {
+        return m_simChassisSpeeds;
+    }
+
+    public Command makePathFollowingCommand(PathPlannerPath path) {
+
+        return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
+                () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red
+                    // alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                }, this);
+    }
+
     @Override
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
-        if (Constants.SIMULATION_SUPPORT) {
-            m_vision.updateSimulation(getPose());
-        }
-
         // Have the vision system update based on the Apriltags, if seen
-        m_vision.updateOdometry(m_odometry, m_field);
+        // need to add the pipeline result 
+        m_aprilTagVision.updateOdometry(m_odometry, m_field);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
         
         // Pose2d pose = m_odometry.getEstimatedPosition();
         // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
         // SmartDashboard.putNumber("drivetrain/yPosition", pose.getY());
-        // SmartDashboard.putNumber("drivetrain/heading", pose.getRotation().getDegrees());
-        // SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
+        // SmartDashboard.putNumber("drivetrain/heading",
+        // pose.getRotation().getDegrees());
+        // SmartDashboard.putNumber("drivetrain/gyro",
+        // getGyroscopeRotation().getDegrees());
 
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
         // SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
@@ -417,10 +462,13 @@ public class DriveTrain extends SubsystemBase {
     @Override
     public void simulationPeriodic() {
         Rotation2d head = m_simPose.getRotation();
-        double newX = m_simPose.getX() + SIM_LOOP_TIME * (head.getCos() * m_simChassisSpeeds.vxMetersPerSecond - head.getSin() * m_simChassisSpeeds.vyMetersPerSecond);
-        double newY = m_simPose.getY() + SIM_LOOP_TIME * (head.getSin() * m_simChassisSpeeds.vxMetersPerSecond + head.getCos() * m_simChassisSpeeds.vyMetersPerSecond);
-        double newHeading = m_simPose.getRotation().getRadians() + m_simChassisSpeeds.omegaRadiansPerSecond * SIM_LOOP_TIME;
-                
+        double newX = m_simPose.getX() + SIM_LOOP_TIME * (head.getCos() * m_simChassisSpeeds.vxMetersPerSecond
+                - head.getSin() * m_simChassisSpeeds.vyMetersPerSecond);
+        double newY = m_simPose.getY() + SIM_LOOP_TIME * (head.getSin() * m_simChassisSpeeds.vxMetersPerSecond
+                + head.getCos() * m_simChassisSpeeds.vyMetersPerSecond);
+        double newHeading = m_simPose.getRotation().getRadians()
+                + m_simChassisSpeeds.omegaRadiansPerSecond * SIM_LOOP_TIME;
+
         // set the sim variable, and force the odometry to match
         setPose(new Pose2d(newX, newY, Rotation2d.fromRadians(newHeading)));
         m_field.setRobotPose(m_simPose);
@@ -428,5 +476,10 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/simX", newX);
         SmartDashboard.putNumber("drivetrain/simY", newY);
         SmartDashboard.putNumber("drivetrain/simHeading", Math.toDegrees(newHeading));
+
+        // update the Apriltag sim. Needs the robot pose
+        Pose2d robotPose = getPose();
+        m_aprilTagVision.updateSimulation(robotPose);
+        m_noteVision.updateSimulation(robotPose);
     }
 }
