@@ -36,6 +36,7 @@ import frc.robot.FieldConstants;
 public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
+    private static final double ALLOWED_NOTE_AMBIGUITY = .2;
 
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
@@ -46,15 +47,6 @@ public class NoteVision extends SubsystemBase {
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
             new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(180.0)));
 
-    private static final Map<Integer, Pose2d> NOTE_POSITIONS = new HashMap<Integer, Pose2d>() {
-        {
-            put(1, FieldConstants.NOTE_C_1);
-            put(2, FieldConstants.NOTE_C_2);
-            put(3, FieldConstants.NOTE_C_3);
-            put(4, FieldConstants.NOTE_C_4);
-            put(5, FieldConstants.NOTE_C_5);
-        }
-    };
 
     // Simulation support
     private VisionSystemSim m_visionSim;
@@ -125,15 +117,15 @@ public class NoteVision extends SubsystemBase {
         return poses;
     }
 
-    public boolean checkForNote(DriveTrain driveTrain, int wantedNote, NoteVision noteVision) {
+    public boolean checkForNote(Pose2d robotPose, Pose2d wantedNote) {
         
-        List<Pose2d> notes = noteVision.getNotes(driveTrain.getPose());
+        List<Pose2d> notes = getNotes(robotPose);
 
-        Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(wantedNote).getTranslation();
+        Translation2d wantedNoteTranslation = wantedNote.getTranslation();
         for (Pose2d note : notes) {
             // goes through the notes in the note list and checks if the wanted note pose is
             // in there .2 is arbitrary and will need to be tuned for accuracy
-            if (note.getTranslation().getDistance(wantedNoteTranslation) <= 0.2) {
+            if (note.getTranslation().getDistance(wantedNoteTranslation) <= ALLOWED_NOTE_AMBIGUITY) {
                 return true;
             }
 
