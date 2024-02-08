@@ -5,10 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -27,7 +24,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -36,7 +32,7 @@ import frc.robot.FieldConstants;
 public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
-    private static final double ALLOWED_NOTE_AMBIGUITY = .2;
+    private static final double ALLOWED_POSITION_ERROR = .2;
 
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
@@ -46,7 +42,6 @@ public class NoteVision extends SubsystemBase {
     private final Transform3d m_robotToNoteCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0), 0, Units.inchesToMeters(22.0)),
             new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(180.0)));
-
 
     // Simulation support
     private VisionSystemSim m_visionSim;
@@ -118,17 +113,31 @@ public class NoteVision extends SubsystemBase {
     }
 
     public boolean checkForNote(Pose2d robotPose, Pose2d wantedNote) {
-        
-        List<Pose2d> notes = getNotes(robotPose);
 
         Translation2d wantedNoteTranslation = wantedNote.getTranslation();
-        for (Pose2d note : notes) {
-            // goes through the notes in the note list and checks if the wanted note pose is
-            // in there .2 is arbitrary and will need to be tuned for accuracy
-            if (note.getTranslation().getDistance(wantedNoteTranslation) <= ALLOWED_NOTE_AMBIGUITY) {
+
+        // goes through the notes in the note list and checks if the wanted note pose is
+        // in there .2 is arbitrary and will need to be tuned for accuracy
+        var results = m_noteCamera.getLatestResult();
+        List<PhotonTrackedTarget> targets = results.getTargets();
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotRotation = robotPose.getRotation().getRadians();
+        for (PhotonTrackedTarget tgt : targets) {
+            // this calc assumes pitch angle is positive UP, so flip the camera's pitch
+            // note that PV target angles are in degrees
+            double d = Math.abs(m_robotToNoteCam.getZ() /
+                    Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
+            double yaw = Math.toRadians(tgt.getYaw());
+
+            // the pi is because the camera is on the back
+            double noteAngle = robotRotation - Math.PI + yaw;
+            double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
+            double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
+            Pose2d notePosition = new Pose2d(fieldCentricNoteX, fieldCentricNoteY, new Rotation2d(0));
+            if (notePosition.getTranslation().getDistance(wantedNoteTranslation) <= ALLOWED_POSITION_ERROR) {
                 return true;
             }
-
         }
 
         return false;
