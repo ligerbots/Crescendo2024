@@ -47,7 +47,7 @@ public class DriveTrain extends SubsystemBase {
      * Should be measured from center to center.
      */
     private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
-
+    
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
@@ -162,24 +162,26 @@ public class DriveTrain extends SubsystemBase {
 
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
-                new frc.robot.swerve.NeoDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
+                new frc.robot.swerve.FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
                         Constants.FRONT_LEFT_MODULE_STEER_ENCODER, Constants.FRONT_LEFT_MODULE_STEER_OFFSET));
 
         m_swerveModules[1] = new frc.robot.swerve.SwerveModule("frontRight",
-                new frc.robot.swerve.NeoDriveController(Constants.FRONT_RIGHT_MODULE_DRIVE_MOTOR),
+                new frc.robot.swerve.FalconDriveController(Constants.FRONT_RIGHT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.FRONT_RIGHT_MODULE_STEER_MOTOR,
                         Constants.FRONT_RIGHT_MODULE_STEER_ENCODER, Constants.FRONT_RIGHT_MODULE_STEER_OFFSET));
 
         m_swerveModules[2] = new frc.robot.swerve.SwerveModule("backLeft",
-                new frc.robot.swerve.NeoDriveController(Constants.BACK_LEFT_MODULE_DRIVE_MOTOR),
+                new frc.robot.swerve.FalconDriveController(Constants.BACK_LEFT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.BACK_LEFT_MODULE_STEER_MOTOR,
                         Constants.BACK_LEFT_MODULE_STEER_ENCODER, Constants.BACK_LEFT_MODULE_STEER_OFFSET));
 
         m_swerveModules[3] = new frc.robot.swerve.SwerveModule("backRight",
-                new frc.robot.swerve.NeoDriveController(Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR),
+                new frc.robot.swerve.FalconDriveController(Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.BACK_RIGHT_MODULE_STEER_MOTOR,
                         Constants.BACK_RIGHT_MODULE_STEER_ENCODER, Constants.BACK_RIGHT_MODULE_STEER_OFFSET));
+
+        
 
         // initialize the odometry class
         // needs to be done after the Modules are created and initialized
