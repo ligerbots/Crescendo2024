@@ -1,5 +1,6 @@
 package frc.robot.swerve;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -7,7 +8,7 @@ import edu.wpi.first.math.util.Units;
 
 public class FalconDriveController implements DriveController {
     private final TalonFX m_motor;
-    
+    private final CurrentLimitsConfigs m_motorCurrentConfigs;
     private static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
     // This is the L2 gearing
     private static final double DRIVE_REDUCTION = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0);
@@ -20,7 +21,11 @@ public class FalconDriveController implements DriveController {
     public FalconDriveController(int id) {
         m_motor = new TalonFX(id);
         m_motor.setInverted(MOTOR_INVERTED);
+        m_motorCurrentConfigs = new CurrentLimitsConfigs();
+        m_motorCurrentConfigs.withStatorCurrentLimit(CURRENT_LIMIT);
+        m_motorCurrentConfigs.withStatorCurrentLimitEnable(true);
         // TODO current limit
+        m_motor.getConfigurator().apply(m_motorCurrentConfigs);
         m_motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
