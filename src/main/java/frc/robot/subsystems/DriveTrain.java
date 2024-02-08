@@ -43,7 +43,6 @@ public class DriveTrain extends SubsystemBase {
      */
     private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
     
-    public static  final double WHEEL_DIAMETER = 4.0;
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
