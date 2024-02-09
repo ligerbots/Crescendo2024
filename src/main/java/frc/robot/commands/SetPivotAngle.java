@@ -4,25 +4,32 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterPivot;
 
 public class SetPivotAngle extends Command {
   /** Creates a new SetShooterPivot. */
   ShooterPivot m_shooterPivot;
-  Double m_angle;
+  DoubleSupplier m_angleRadians;
 
-  public SetPivotAngle(ShooterPivot shooterPivot, Double angle) {
+  public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_shooterPivot = shooterPivot;
-    m_angle = angle;
+    m_angleRadians = angleRadians;
     addRequirements(m_shooterPivot);
+  }
+
+  public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians) {
+    // Use addRequirements() here to declare subsystem dependencies.
+      this(shooterPivot, () -> angleRadians);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_shooterPivot.setAngle(m_angle);
+    m_shooterPivot.setAngle(m_angleRadians.getAsDouble());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -40,7 +47,7 @@ public class SetPivotAngle extends Command {
   @Override
   public boolean isFinished() {
     double currAngle = m_shooterPivot.getAngleRadians();
-    return (Math.abs(currAngle - m_angle) < ShooterPivot.ANGLE_TOLERANCE_RADIAN);
+    return (Math.abs(currAngle - m_angleRadians.getAsDouble()) < ShooterPivot.ANGLE_TOLERANCE_RADIAN);
     
   }
 }
