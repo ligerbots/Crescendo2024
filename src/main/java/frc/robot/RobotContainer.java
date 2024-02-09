@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 import frc.robot.commands.*;
@@ -41,6 +42,8 @@ public class RobotContainer {
         // Intake
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+
+        m_controller.a().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
 
         m_controller.b().onTrue(new SetElevatorLength(m_elevator, 
                 () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
