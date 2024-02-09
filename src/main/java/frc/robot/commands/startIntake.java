@@ -18,7 +18,7 @@ import frc.robot.subsystems.Shooter;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class StartIntake extends SequentialCommandGroup {
   /** Creates a new startIntake. */
-  public StartIntake(Intake intake, Elevator elevator, DoubleSupplier length, Shooter shooter, XboxController xbox) {
+  public StartIntake(Intake intake, Shooter shooter, XboxController xbox, Elevator elevator, DoubleSupplier length, DoubleSupplier angle) /*add shooter pivot*/{
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -27,7 +27,7 @@ public class StartIntake extends SequentialCommandGroup {
       new InstantCommand(shooter::turnOnFeeder),
       new InstantCommand(intake::intake),
       new InstantCommand(intake::stop),
-      //backup command
+      new BackupFeed(shooter),
       new Rumble(xbox)
     );
   }
