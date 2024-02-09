@@ -4,16 +4,31 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class startIntake extends SequentialCommandGroup {
+public class StartIntake extends SequentialCommandGroup {
   /** Creates a new startIntake. */
-  public startIntake() {
+  public StartIntake(Intake intake, Elevator elevator, DoubleSupplier length, Shooter shooter, XboxController xbox) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(
+      new SetElevatorLength(elevator, length),
+      // set angle???
+      new InstantCommand(shooter::turnOnFeeder),
+      new InstantCommand(intake::intake),
+      new InstantCommand(intake::stop),
+      //backup command
+      new Rumble(xbox)
+    );
   }
 }
