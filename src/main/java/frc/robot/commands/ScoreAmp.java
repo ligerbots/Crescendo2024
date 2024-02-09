@@ -19,8 +19,9 @@ public class ScoreAmp extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new InstantCommand(shooter::turnOnFeeder)
-    // new setElevatorLength(number).alongWith(setShooterAngle(number))
+        new InstantCommand(shooter::feederShoot),
+        new InstantCommand(shooter::turnOffShooter),
+        new SetElevatorLength(elevator, 1.0).alongWith(new setShooterAngle(shooterPivot, 1.0))
 
     );
   }
