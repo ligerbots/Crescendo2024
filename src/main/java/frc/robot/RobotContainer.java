@@ -50,10 +50,10 @@ public class RobotContainer {
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR, true));
+        farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
         
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR, true));
+        farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
