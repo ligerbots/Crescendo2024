@@ -90,12 +90,11 @@ public class NoteVision extends SubsystemBase {
             return poses;
         }
 
-        var results = m_noteCamera.getLatestResult();
-        List<PhotonTrackedTarget> targets = results.getTargets();
         double robotX = pose.getX();
         double robotY = pose.getY();
         double robotRotation = pose.getRotation().getRadians();
-        for (PhotonTrackedTarget tgt : targets) {
+        
+        for (PhotonTrackedTarget tgt : m_noteCamera.getLatestResult().getTargets()) {
             // this calc assumes pitch angle is positive UP, so flip the camera's pitch
             // note that PV target angles are in degrees
             double d = Math.abs(m_robotToNoteCam.getZ() /
@@ -113,17 +112,18 @@ public class NoteVision extends SubsystemBase {
     }
 
     public boolean checkForNote(Pose2d robotPose, Pose2d wantedNote) {
+        if (!m_noteCamera.isConnected()) {
+            return false;
+        }
 
         Translation2d wantedNoteTranslation = wantedNote.getTranslation();
 
-        // goes through the notes in the note list and checks if the wanted note pose is
-        // in there .2 is arbitrary and will need to be tuned for accuracy
-        var results = m_noteCamera.getLatestResult();
-        List<PhotonTrackedTarget> targets = results.getTargets();
         double robotX = robotPose.getX();
         double robotY = robotPose.getY();
         double robotRotation = robotPose.getRotation().getRadians();
-        for (PhotonTrackedTarget tgt : targets) {
+
+        // goes through the found targets and checks if the wanted note pose is visible.
+        for (PhotonTrackedTarget tgt : m_noteCamera.getLatestResult().getTargets()) {
             // this calc assumes pitch angle is positive UP, so flip the camera's pitch
             // note that PV target angles are in degrees
             double d = Math.abs(m_robotToNoteCam.getZ() /
@@ -134,14 +134,14 @@ public class NoteVision extends SubsystemBase {
             double noteAngle = robotRotation - Math.PI + yaw;
             double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
             double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
-            Pose2d notePosition = new Pose2d(fieldCentricNoteX, fieldCentricNoteY, new Rotation2d(0));
-            if (notePosition.getTranslation().getDistance(wantedNoteTranslation) <= ALLOWED_POSITION_ERROR) {
+            Translation2d notePosition = new Translation2d(fieldCentricNoteX, fieldCentricNoteY);
+
+            if (notePosition.getDistance(wantedNoteTranslation) <= ALLOWED_POSITION_ERROR) {
                 return true;
             }
         }
 
         return false;
-
     }
 
     @Override
