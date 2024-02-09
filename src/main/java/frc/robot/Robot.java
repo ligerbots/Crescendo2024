@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AutoCommandInterface;
-import frc.robot.commands.NoteAuto;
 
 public class Robot extends TimedRobot {
     private AutoCommandInterface m_autonomousCommand;
@@ -18,8 +17,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         m_robotContainer = new RobotContainer();
-
-        m_robotContainer.initAutoSendableChooser();
     }
 
     @Override
