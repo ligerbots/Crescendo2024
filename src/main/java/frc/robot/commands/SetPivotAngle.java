@@ -13,6 +13,7 @@ public class SetPivotAngle extends Command {
   /** Creates a new SetShooterPivot. */
   ShooterPivot m_shooterPivot;
   DoubleSupplier m_angleRadians;
+  double m_wantedAngleRadians;
 
   public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -30,6 +31,7 @@ public class SetPivotAngle extends Command {
   @Override
   public void initialize() {
     m_shooterPivot.setAngle(m_angleRadians.getAsDouble());
+    m_wantedAngleRadians = m_angleRadians.getAsDouble();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
