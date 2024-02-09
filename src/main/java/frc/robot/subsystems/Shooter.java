@@ -21,6 +21,8 @@ import frc.robot.Constants;
 public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
+    // This is negative to push the note out slowly
+    public static final double BACKUP_FEED_SPEED = -0.1;
 
     static final double KP = 1.0e-3;
     static final double KI = 0.0;
