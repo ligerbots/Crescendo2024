@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AutoCommandInterface;
 
 public class Robot extends TimedRobot {
-    private AutoCommandInterface m_autonomousCommand;
+    private AutoCommandInterface m_autonomousCommand = null;
     private AutoCommandInterface m_prevAutoCommand = null;
     
     private RobotContainer m_robotContainer;
@@ -67,7 +67,8 @@ public class Robot extends TimedRobot {
             m_autonomousCommand = null;
         }
 
-        m_robotContainer.getDriveCommand().schedule();
+        // don't think we need this, since it is set as the default command
+        // m_robotContainer.getDriveCommand().schedule();
     }
 
     @Override

@@ -32,10 +32,8 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        // Initialize the list of available Autonomous routines
-        // m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(driveTrain));
-        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
-        
+        configureAutos();
+
         m_driveTrain.setDefaultCommand(getDriveCommand());
     }
 
@@ -72,6 +70,12 @@ public class RobotContainer {
         // farm2.onTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
         // farm3.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
         // farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    }
+
+    private void configureAutos() {
+        // Initialize the list of available Autonomous routines
+        m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(m_driveTrain));
+        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 
     public AutoCommandInterface getAutonomousCommand() {
