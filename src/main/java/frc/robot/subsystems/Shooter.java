@@ -35,6 +35,7 @@ import frc.robot.Constants;
 public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
+    static final double AMP_SHOOT_SPEED = -1.0;
 
     public static final double RPM_TOLERANCE = 100; // TODO Tune this later
 
@@ -172,6 +173,10 @@ public class Shooter extends SubsystemBase {
 
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void feederShoot(){
+        setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
     public void turnOffShooter() {

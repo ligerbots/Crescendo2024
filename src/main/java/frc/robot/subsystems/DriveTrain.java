@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
@@ -47,7 +48,15 @@ public class DriveTrain extends SubsystemBase {
      * Should be measured from center to center.
      */
     private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
-    
+
+    // TODO get correct values
+    public static final double PATH_PLANNER_MAX_VELOCITY = 3.5;
+    public static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
+
+    public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 3.5;
+
+    public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 3.5;
+
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
@@ -55,10 +64,11 @@ public class DriveTrain extends SubsystemBase {
      */
     private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
-    private static final double DRIVE_BASE_RADIUS_METERS = Math.sqrt(TRACKWIDTH_METERS*TRACKWIDTH_METERS + WHEELBASE_METERS*WHEELBASE_METERS) / 2.0;
+    private static final double DRIVE_BASE_RADIUS_METERS = Math
+            .sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
 
-    public  static final double  ANGLE_TOLERANCE_DEGREES = 5;
-    
+    public static final double ANGLE_TOLERANCE_DEGREES = 5;
+
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
@@ -135,10 +145,10 @@ public class DriveTrain extends SubsystemBase {
     private final SwerveDrivePoseEstimator m_odometry;
 
     private final AprilTagVision m_aprilTagVision;
-    
+
     // this is needed for the simulation
     private final NoteVision m_noteVision;
-    
+
     // simulation variables
     private static final double SIM_LOOP_TIME = 0.020;
     private Pose2d m_simPose = new Pose2d();
@@ -180,8 +190,6 @@ public class DriveTrain extends SubsystemBase {
                 new frc.robot.swerve.FalconDriveController(Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR),
                 new frc.robot.swerve.NeoSteerController(Constants.BACK_RIGHT_MODULE_STEER_MOTOR,
                         Constants.BACK_RIGHT_MODULE_STEER_ENCODER, Constants.BACK_RIGHT_MODULE_STEER_OFFSET));
-
-        
 
         // initialize the odometry class
         // needs to be done after the Modules are created and initialized
@@ -431,15 +439,33 @@ public class DriveTrain extends SubsystemBase {
                 }, this);
     }
 
+    public Command FollowPath(Supplier<PathPlannerPath> path) {
+
+        return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
+                PATH_FOLLOWER_CONFIG,
+                () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red
+                    // alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                }, this);
+    }
+
     @Override
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
 
         // Have the vision system update based on the Apriltags, if seen
-        // need to add the pipeline result 
+        // need to add the pipeline result
         m_aprilTagVision.updateOdometry(m_odometry, m_field);
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
-        
+
         // Pose2d pose = m_odometry.getEstimatedPosition();
         // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
         // SmartDashboard.putNumber("drivetrain/yPosition", pose.getY());

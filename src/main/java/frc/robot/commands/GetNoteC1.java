@@ -17,10 +17,14 @@ import com.pathplanner.lib.path.PathPoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
+import frc.robot.subsystems.Shooter;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -32,7 +36,6 @@ public class GetNoteC1 extends SequentialCommandGroup {
   private PathPlannerPath m_longPath = PathPlannerPath.fromPathFile("long Path");
   private PathPlannerPath m_middlePath = PathPlannerPath.fromPathFile("long Path");
   private PathPlannerPath m_returnPath = PathPlannerPath.fromPathFile("Return Path");
-
 
   private PathPlannerPath getInitialPath() {
     Pose2d pose = m_robotPoseSupplier.get();
@@ -58,27 +61,18 @@ public class GetNoteC1 extends SequentialCommandGroup {
 
   }
 
-  public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision) {
+  public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
 
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-      addCommands(
-      //6.0 is just a random number and should be made a constant 
-      // driveTrain.makePathFollowingCommand(() -> getInitialPath())
-      (new MonitorForNote(m_robotPoseSupplier, FieldConstants.NOTE_C_1, noteVision, this)),
-      driveTrain.makePathFollowingCommand(m_returnPath).
 
+    addCommands(
+        driveTrain.FollowPath(() -> getInitialPath()),
+        new MonitorForNote(m_robotPoseSupplier, FieldConstants.NOTE_C_1, noteVision, this),
+        new InstantCommand(intake::intake),
+        driveTrain.makePathFollowingCommand(m_returnPath)
+    // .alongWith(new prepShooter()))
 
-      
-
-      
-      
-      
-      
-
-    
-
-      
     );
   }
 }
