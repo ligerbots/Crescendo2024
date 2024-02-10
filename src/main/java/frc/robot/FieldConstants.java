@@ -12,8 +12,8 @@ public class FieldConstants {
     public static final double FIELD_LENGTH = 16.54;
     public static final double FIELD_WIDTH = 8.21;
 
-    public static final Pose2d BLUE_WHITE_LINE_X_METERS = new Pose2d(1.93294, 0.0, new Rotation2d(0));
-    public static final Pose2d BLUE_WING_LINE_X_METERS = new Pose2d(5.87248, 0, new Rotation2d(0));
+    public static final double BLUE_WHITE_LINE_X_METERS = 1.93294;
+    public static final double BLUE_WING_LINE_X_METERS = 5.87248;
 
     /*
      * C = center
