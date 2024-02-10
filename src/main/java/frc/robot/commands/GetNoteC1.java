@@ -4,21 +4,17 @@
 
 package frc.robot.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathPlannerTrajectory;
 import com.pathplanner.lib.path.PathPoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
@@ -29,16 +25,38 @@ import frc.robot.subsystems.Shooter;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class GetNoteC1 extends SequentialCommandGroup {
+public class GetNoteC1 extends AutoCommandInterface {
   /** Creates a new GetNoteC1. */
 
-  private Supplier<Pose2d> m_robotPoseSupplier;
-  private PathPlannerPath m_longPath = PathPlannerPath.fromPathFile("long Path");
-  private PathPlannerPath m_middlePath = PathPlannerPath.fromPathFile("long Path");
-  private PathPlannerPath m_returnPath = PathPlannerPath.fromPathFile("Return Path");
+  private PathPlannerPath m_longPath = PathPlannerPath.fromPathFile("Start_2 to Note_C_1");
+  private PathPlannerPath m_middlePath = PathPlannerPath.fromPathFile("Start_2 to Note_C_1");
+  private PathPlannerPath m_returnPath = PathPlannerPath.fromPathFile("Note_C_1 to Shoot_1");
+  private DriveTrain m_driveTrain;
+
+  
+
+
+  public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    m_driveTrain = driveTrain;
+    // Add your commands in the addCommands() call, e.g.
+    // addCommands(new FooCommand(), new BarCommand());
+
+    addCommands(
+        driveTrain.FollowPath(() -> getInitialPath()).alongWith(new MonitorForNote(()-> m_driveTrain.getPose(), FieldConstants.NOTE_C_1, noteVision, this)),
+
+        new InstantCommand(intake::intake),
+        driveTrain.makePathFollowingCommand(m_returnPath)
+    // .alongWith(new prepShooter())j
+
+    );
+  }
+ 
+  public Pose2d getInitialPose(){
+    return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose()); 
+  };
 
   private PathPlannerPath getInitialPath() {
-    Pose2d pose = m_robotPoseSupplier.get();
+    Pose2d pose = m_driveTrain.getPose();
     Pose2d poseBlue = FieldConstants.flipPose(pose);
     if (poseBlue.getX() < FieldConstants.BLUE_WHITE_LINE_X_METERS) {
       return m_longPath;
@@ -60,19 +78,5 @@ public class GetNoteC1 extends SequentialCommandGroup {
     return m_middlePath;
 
   }
-
-  public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
-
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
-
-    addCommands(
-        driveTrain.FollowPath(() -> getInitialPath()),
-        new MonitorForNote(m_robotPoseSupplier, FieldConstants.NOTE_C_1, noteVision, this),
-        new InstantCommand(intake::intake),
-        driveTrain.makePathFollowingCommand(m_returnPath)
-    // .alongWith(new prepShooter()))
-
-    );
-  }
+  
 }
