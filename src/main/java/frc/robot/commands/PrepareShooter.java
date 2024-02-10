@@ -20,14 +20,17 @@ public class PrepareShooter extends Command {
   private final ShooterPivot m_shooterPivot;
   private final Pose2d m_robotPosition;
   private final SetShooterSpeedAndWait m_setShooterSpeedAndWaitCommand;
-  private final DoubleSupplier distance = () -> {m_robotPosition.getTranslation().getDistance(FieldConstants.flipPose(FieldConstants.SPEAKER).getTranslation());};
+  private final DoubleSupplier distance;
 
   public PrepareShooter(Shooter shooter, ShooterPivot shooterPivot, Pose2d robotPosition) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_shooter = shooter;
     m_shooterPivot = shooterPivot;
     m_robotPosition = robotPosition;
-    m_setShooterSpeedAndWaitCommand = new SetShooterSpeedAndWait(m_shooter,() -> {shooter.calculateShooterSpeeds(distance.getAsDouble()).getLeftRpm();},() -> {shooter.calculateShooterSpeeds(distance.getAsDouble()).getRightRpm();});
+    distance = () -> m_robotPosition.getTranslation().getDistance(FieldConstants.flipPose(FieldConstants.SPEAKER).getTranslation());
+    DoubleSupplier leftSpeedSupplier = () -> Shooter.calculateShooterSpeeds(distance.getAsDouble()).leftSpeed;
+    DoubleSupplier rightSpeedSupplier = () -> Shooter.calculateShooterSpeeds(distance.getAsDouble()).rightSpeed;
+    m_setShooterSpeedAndWaitCommand = new SetShooterSpeedAndWait(m_shooter,leftSpeedSupplier,rightSpeedSupplier);
   }
 
   // Called when the command is initially scheduled.
