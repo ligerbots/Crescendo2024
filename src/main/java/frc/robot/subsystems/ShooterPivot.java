@@ -17,8 +17,10 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class ShooterPivot extends TrapezoidProfileSubsystem {
-    private static final double MAX_ANGLE = Math.toRadians(30.0); //TODO update, need to talk to CAD
-    private static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO update, need to talk to CAD
+    //Note: Current values for limits are refrenced with the shooter being flat facing fowards as zero.
+    //As of writing the above note we still may want to change the limits
+    private static final double MAX_ANGLE = Math.toRadians(90.0); //TODO update, need to talk to CAD
+    private static final double MIN_ANGLE = Math.toRadians(11.430453); //TODO update, need to talk to CAD
     //NOTE: All constants were taken from the 2023 arm 
     public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: tune
 
