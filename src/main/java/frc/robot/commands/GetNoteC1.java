@@ -43,10 +43,10 @@ public class GetNoteC1 extends AutoCommandInterface {
 
     addCommands(
         driveTrain.FollowPath(() -> getInitialPath()).alongWith(new MonitorForNote(()-> m_driveTrain.getPose(), FieldConstants.NOTE_C_1, noteVision, this)),
+        driveTrain.FollowPath(m_returnPath),
 
-        new InstantCommand(intake::intake),
-        driveTrain.makePathFollowingCommand(m_returnPath)
-    // .alongWith(new prepShooter())j
+        new InstantCommand(intake::intake)
+    // .alongWith(new prepShooter())
 
     );
   }

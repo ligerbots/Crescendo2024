@@ -50,12 +50,12 @@ public class DriveTrain extends SubsystemBase {
     private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
 
     // TODO get correct values
-    public static final double PATH_PLANNER_MAX_VELOCITY = 3.5;
-    public static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
+    public static final double PATH_PLANNER_MAX_VELOCITY = 5.0;
+    public static final double PATH_PLANNER_MAX_ACCELERATION = 5.0;
 
-    public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 3.5;
+    public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
 
-    public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 3.5;
+    public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
     /**
      * The front-to-back distance between the drivetrain wheels.
@@ -422,7 +422,7 @@ public class DriveTrain extends SubsystemBase {
         return m_simChassisSpeeds;
     }
 
-    public Command makePathFollowingCommand(PathPlannerPath path) {
+    public Command FollowPath(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
                 () -> {
