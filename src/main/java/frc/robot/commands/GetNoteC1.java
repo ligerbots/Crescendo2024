@@ -63,24 +63,21 @@ public class GetNoteC1 extends AutoCommandInterface {
         Pose2d poseBlue = FieldConstants.flipPose(pose);
         if (poseBlue.getX() < FieldConstants.BLUE_WHITE_LINE_X_METERS) {
             return m_longPath;
-
         }
-        if (poseBlue.getX() > FieldConstants.BLUE_WHITE_LINE_X_METERS) {
-            Rotation2d heading = FieldConstants.NOTE_C_1.getTranslation().minus(poseBlue.getTranslation()).getAngle();
+        
+        if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
+            Rotation2d heading = FieldConstants.NOTE_C_1.minus(poseBlue.getTranslation()).getAngle();
             List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
-                    new PathPoint(FieldConstants.NOTE_C_1.getTranslation()));
+                    new PathPoint(FieldConstants.NOTE_C_1));
             return PathPlannerPath.fromPathPoints(
                     pathPoints, // position, heading
                     new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
                             DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
                             DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
                     new GoalEndState(0, heading, true)// velocity, acceleration
-
             );
-
         }
+
         return m_middlePath;
-
     }
-
 }

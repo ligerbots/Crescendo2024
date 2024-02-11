@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -19,14 +20,14 @@ public class MonitorForNote extends Command {
     private static final int NUM_SUCCESSIVE_FAILURES = 10;
 
     private final Supplier<Pose2d> m_poseProvider;
-    private final Pose2d m_notePose;
+    private final Translation2d m_notePose;
     private final NoteVision m_noteVision;
     private final Command m_commandToCancel;
 
     private int m_missedNoteCount;
     private double m_distanceToNote;
 
-    public MonitorForNote(NoteVision noteVision, Supplier<Pose2d> poseProvider, Pose2d notePose, Command commandToCancel) {
+    public MonitorForNote(NoteVision noteVision, Supplier<Pose2d> poseProvider, Translation2d notePose, Command commandToCancel) {
         m_poseProvider = poseProvider;
         m_notePose = notePose;
         m_noteVision = noteVision;
@@ -42,7 +43,7 @@ public class MonitorForNote extends Command {
     @Override
     public void execute() {
         Pose2d robotPose = m_poseProvider.get();
-        m_distanceToNote = robotPose.getTranslation().getDistance(m_notePose.getTranslation());
+        m_distanceToNote = robotPose.getTranslation().getDistance(m_notePose);
 
         if (m_distanceToNote >= NoteVision.MIN_VISIBLE_DISTANCE && m_distanceToNote <= NoteVision.MAX_VISIBLE_DISTANCE) {
             if (m_noteVision.checkForNote(robotPose, m_notePose)) 
