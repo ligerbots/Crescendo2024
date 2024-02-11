@@ -24,14 +24,14 @@ public class SetPivotAngle extends Command {
 
   public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians) {
     // Use addRequirements() here to declare subsystem dependencies.
-      this(shooterPivot, () -> angleRadians);
+    this(shooterPivot, () -> angleRadians);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_shooterPivot.setAngle(m_angleRadians.getAsDouble());
     m_wantedAngleRadians = m_angleRadians.getAsDouble();
+    m_shooterPivot.setAngle(m_wantedAngleRadians);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -49,7 +49,10 @@ public class SetPivotAngle extends Command {
   @Override
   public boolean isFinished() {
     double currAngle = m_shooterPivot.getAngleRadians();
-    return (Math.abs(currAngle - m_wantedAngleRadians) < ShooterPivot.ANGLE_TOLERANCE_RADIAN);
+    if (Math.abs(currAngle - m_wantedAngleRadians) < ShooterPivot.ANGLE_TOLERANCE_RADIAN){
+      return true;
+    }
+    return false;
     
   }
 }
