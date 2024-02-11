@@ -24,7 +24,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -34,6 +33,12 @@ public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
     private static final double ALLOWED_POSITION_ERROR = .2;
+
+    // farthest away we can reliably see a NOTE
+    public static final double MAX_VISIBLE_DISTANCE = 2.0;  // meters
+    
+    // closest we can see a NOTE. Obscured by intake, or below field of view
+    public static final double MIN_VISIBLE_DISTANCE = 0.2;  // meters
 
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);

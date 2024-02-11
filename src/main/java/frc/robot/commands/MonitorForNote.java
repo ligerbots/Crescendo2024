@@ -9,69 +9,73 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.FieldConstants;
+
 import frc.robot.subsystems.NoteVision;
 
 public class MonitorForNote extends Command {
-  /** Creates a new MonitorForNote. */
-  private final Supplier<Pose2d> m_poseProvider;
-  private final Pose2d m_notePose;
-  private boolean m_isNoteThere;
-  private int m_noteThereCount;
-  private final NoteVision m_noteVision;
-  private final Command m_commandToCancel;
+    // distance to NOTE where we just go for it
+    private static final double MIN_DISTANCE_END_CHECKS = 1.0; // meters
 
-  public MonitorForNote(Supplier<Pose2d> poseProvider, Pose2d notePose, NoteVision noteVision,
-      Command commandToCancel) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_poseProvider = poseProvider;
-    m_notePose = notePose;
-    m_noteVision = noteVision;
-    m_commandToCancel = commandToCancel;
-    m_isNoteThere = true;
+    private static final int NUM_SUCCESSIVE_FAILURES = 10;
 
-  }
+    private final Supplier<Pose2d> m_poseProvider;
+    private final Pose2d m_notePose;
+    private final NoteVision m_noteVision;
+    private final Command m_commandToCancel;
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-  }
+    private int m_missedNoteCount;
+    private double m_distanceToNote;
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    Pose2d robotPose = m_poseProvider.get();
-    m_isNoteThere = m_noteVision.checkForNote(robotPose, m_notePose);
-
-    if (m_isNoteThere == true || robotPose.getX() < 4.5 || robotPose.getX() > 6.0) {
-      m_noteThereCount = 0;
-    } else if (m_isNoteThere == false) {
-      m_noteThereCount++;
+    public MonitorForNote(NoteVision noteVision, Supplier<Pose2d> poseProvider, Pose2d notePose, Command commandToCancel) {
+        m_poseProvider = poseProvider;
+        m_notePose = notePose;
+        m_noteVision = noteVision;
+        m_commandToCancel = commandToCancel;
     }
 
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    // random nums
-    if (m_poseProvider.get().getTranslation().getDistance(FieldConstants.NOTE_C_1.getTranslation()) > 2.0) {
-      return false;
-    }
-    if (m_isNoteThere == false && m_noteThereCount > 10) {
-      CommandScheduler.getInstance().cancel(m_commandToCancel);
-      return true;
-    }
-    if (m_poseProvider.get().getTranslation().getDistance(FieldConstants.NOTE_C_1.getTranslation()) < 0.2) {
-      return true;
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
     }
 
-    return false;
-  }
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        Pose2d robotPose = m_poseProvider.get();
+        m_distanceToNote = robotPose.getTranslation().getDistance(m_notePose.getTranslation());
+
+        if (m_distanceToNote >= NoteVision.MIN_VISIBLE_DISTANCE && m_distanceToNote <= NoteVision.MAX_VISIBLE_DISTANCE) {
+            if (m_noteVision.checkForNote(robotPose, m_notePose)) 
+                m_missedNoteCount = 0;
+            else
+                m_missedNoteCount++;
+        }
+        else
+            m_missedNoteCount = 0;
+    }
+
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        if (m_distanceToNote < MIN_DISTANCE_END_CHECKS) {
+            // got to this distance seeing the NOTE, so just go for it. No more checks
+            return true;
+        }
+
+        // if we are in vision range of the NOTE and have not seen it for N cycles, 
+        //  abort this command group
+        if (m_missedNoteCount >= NUM_SUCCESSIVE_FAILURES) {
+            System.out.println("MonitorForNote cancelling command. distance=" + m_distanceToNote);
+            if (m_commandToCancel != null) 
+                CommandScheduler.getInstance().cancel(m_commandToCancel);
+            return true;
+        }
+
+        return false;
+    }
 }
