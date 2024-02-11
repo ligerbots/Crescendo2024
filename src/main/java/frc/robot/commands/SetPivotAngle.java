@@ -49,10 +49,7 @@ public class SetPivotAngle extends Command {
   @Override
   public boolean isFinished() {
     double currAngle = m_shooterPivot.getAngleRadians();
-    if (Math.abs(currAngle - m_wantedAngleRadians) < ShooterPivot.ANGLE_TOLERANCE_RADIAN){
-      return true;
-    }
-    return false;
+    return Math.abs(currAngle - m_wantedAngleRadians) < ShooterPivot.ANGLE_TOLERANCE_RADIAN;
     
   }
 }
