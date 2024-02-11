@@ -11,7 +11,8 @@ import frc.robot.commands.AutoCommandInterface;
 public class Robot extends TimedRobot {
     private AutoCommandInterface m_autonomousCommand = null;
     private AutoCommandInterface m_prevAutoCommand = null;
-    
+    private boolean m_prevIsRedAlliance = true;
+
     private RobotContainer m_robotContainer;
 
     @Override
@@ -32,11 +33,13 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
+        boolean isRedAlliance = FieldConstants.isRedAlliance();
         AutoCommandInterface autoCommand = m_robotContainer.getAutonomousCommand();
-        if (autoCommand != null && autoCommand != m_prevAutoCommand) {
+        if (isRedAlliance != m_prevIsRedAlliance || (autoCommand != null && autoCommand != m_prevAutoCommand)) {
             m_robotContainer.getDriveTrain().setPose(autoCommand.getInitialPose());
             m_prevAutoCommand = autoCommand;
         }
+        m_prevIsRedAlliance = isRedAlliance;
     }
 
     @Override
