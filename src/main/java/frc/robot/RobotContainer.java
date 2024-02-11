@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
@@ -74,7 +74,8 @@ public class RobotContainer {
 
     private void configureAutos() {
         // Initialize the list of available Autonomous routines
-        m_chosenAuto.setDefaultOption("Test Auto", new GetNoteC1(m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 

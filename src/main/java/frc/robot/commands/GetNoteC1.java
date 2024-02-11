@@ -5,7 +5,6 @@
 package frc.robot.commands;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -14,69 +13,74 @@ import com.pathplanner.lib.path.PathPoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
+// Note that AutoCommandInterface is a SequentialCommandGroup
 public class GetNoteC1 extends AutoCommandInterface {
-  /** Creates a new GetNoteC1. */
+    /** Creates a new GetNoteC1. */
 
-  private PathPlannerPath m_longPath = PathPlannerPath.fromPathFile("Start_2 to Note_C_1");
-  private PathPlannerPath m_middlePath = PathPlannerPath.fromPathFile("Start_2 to Note_C_1");
-  private PathPlannerPath m_returnPath = PathPlannerPath.fromPathFile("Note_C_1 to Shoot_1");
-  private DriveTrain m_driveTrain;
+    private PathPlannerPath m_longPath = loadPath("Start_2 to Note_C_1");
+    private PathPlannerPath m_middlePath = loadPath("Start_2 to Note_C_1");
+    private PathPlannerPath m_returnPath = loadPath("Note_C_1 to Shoot_1");
+    private DriveTrain m_driveTrain;
 
-  
+    public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+        m_driveTrain = driveTrain;
 
+        addCommands(
+                m_driveTrain.FollowPath(() -> getInitialPath())
+                        .alongWith(new MonitorForNote(() -> m_driveTrain.getPose(), FieldConstants.NOTE_C_1, noteVision, this)),
+                m_driveTrain.FollowPath(m_returnPath),
 
-  public GetNoteC1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
-    m_driveTrain = driveTrain;
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
+                new InstantCommand(intake::intake)
+        // .alongWith(new prepShooter())
 
-    addCommands(
-        driveTrain.FollowPath(() -> getInitialPath()).alongWith(new MonitorForNote(()-> m_driveTrain.getPose(), FieldConstants.NOTE_C_1, noteVision, this)),
-        driveTrain.FollowPath(m_returnPath),
+        );
+    }
 
-        new InstantCommand(intake::intake)
-    // .alongWith(new prepShooter())
+    public Pose2d getInitialPose() {
+        return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
+    };
 
-    );
-  }
- 
-  public Pose2d getInitialPose(){
-    return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose()); 
-  };
+    private static PathPlannerPath loadPath(String pathName) {
+        try {
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+            return path;
+        } catch (Exception e) {
+            DriverStation.reportError(String.format("Unable to load PP path %s", pathName), true);
+        }
+        return null;
+    }
 
-  private PathPlannerPath getInitialPath() {
-    Pose2d pose = m_driveTrain.getPose();
-    Pose2d poseBlue = FieldConstants.flipPose(pose);
-    if (poseBlue.getX() < FieldConstants.BLUE_WHITE_LINE_X_METERS) {
-      return m_longPath;
+    private PathPlannerPath getInitialPath() {
+        Pose2d pose = m_driveTrain.getPose();
+        Pose2d poseBlue = FieldConstants.flipPose(pose);
+        if (poseBlue.getX() < FieldConstants.BLUE_WHITE_LINE_X_METERS) {
+            return m_longPath;
+
+        }
+        if (poseBlue.getX() > FieldConstants.BLUE_WHITE_LINE_X_METERS) {
+            Rotation2d heading = FieldConstants.NOTE_C_1.getTranslation().minus(poseBlue.getTranslation()).getAngle();
+            List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
+                    new PathPoint(FieldConstants.NOTE_C_1.getTranslation()));
+            return PathPlannerPath.fromPathPoints(
+                    pathPoints, // position, heading
+                    new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
+                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
+                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
+                    new GoalEndState(0, heading, true)// velocity, acceleration
+
+            );
+
+        }
+        return m_middlePath;
 
     }
-    if (poseBlue.getX() > FieldConstants.BLUE_WHITE_LINE_X_METERS) {
-      Rotation2d heading = FieldConstants.NOTE_C_1.getTranslation().minus(poseBlue.getTranslation()).getAngle();
-      List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
-          new PathPoint(FieldConstants.NOTE_C_1.getTranslation()));
-      return PathPlannerPath.fromPathPoints(
-          pathPoints, // position, heading
-          new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
-              DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
-          new GoalEndState(0, heading, true)// velocity, acceleration
 
-      );
-
-    }
-    return m_middlePath;
-
-  }
-  
 }
