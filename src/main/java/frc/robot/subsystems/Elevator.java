@@ -63,7 +63,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private final SparkPIDController m_PIDController;
 
-    private boolean m_coastMode = false;
     private double m_goal = 0;
 
     /** Creates a new Elevator. */
@@ -90,30 +89,26 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
         m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
         // m_encoder.setPosition(ELEVATOR_OFFSET_METER);
-        m_encoder.setPosition(getPotentiometerReadingMeters());
+        updateMotorEncoderOffset();
 
-        setCoastMode(false);
-        SmartDashboard.putBoolean("Elevator/coastMode", m_coastMode);
+        SmartDashboard.putBoolean("elevator/coastMode", false);
+        setCoastMode();
 
         // Create SD values needed during testing. Here so that they are visible in NetworkTables
-        SmartDashboard.putNumber("Elevator/testGoalLength", 0);
+        SmartDashboard.putNumber("elevator/testGoalLength", 0);
     }
 
     @Override
     public void periodic() {
-        double encoderValue = m_encoder.getPosition();
-        SmartDashboard.putNumber("Elevator/encoder", Units.metersToInches(encoderValue));
-        SmartDashboard.putNumber("Elevator/encoderMeter", encoderValue);
-        SmartDashboard.putNumber("Elevator/goal", Units.metersToInches(m_goal));
-        // SmartDashboard.putBoolean("Elevator/mesetElevatorPos", m_resetElevatorPos);
-        
-        SmartDashboard.putNumber("Elevator/stringPotMeter", getPotentiometerReadingMeters());
+        SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(m_encoder.getPosition()));
+        SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
-        //Toggle to turn on and off cost mode
-        m_coastMode = SmartDashboard.getBoolean("Elevator/coastMode", m_coastMode);
-        if (m_coastMode) {
-            setCoastMode(m_coastMode);
-        }
+        // useful for initial calibration; comment out later?
+        SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
+        SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
+
+        setCoastMode();
+
         super.periodic();
     }
 
@@ -122,7 +117,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Remember that the encoder was already set to account for the gear ratios.
 
         m_PIDController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition); //(setPoint.position, ControlType.kPosition, 0); // , feedforward / 12.0);
-        SmartDashboard.putNumber("Elevator/setPoint", Units.metersToInches(setPoint.position));
+        SmartDashboard.putNumber("elevator/setPoint", Units.metersToInches(setPoint.position));
     }
 
     public double getLength() {
@@ -131,6 +126,10 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     public double getPotentiometerReadingMeters(){
         return m_stringPotentiometer.get();
+    }
+
+    public void updateMotorEncoderOffset() {
+        m_encoder.setPosition(getPotentiometerReadingMeters());
     }
 
     // this needs to be public so that commands can get the restricted distance. (safety, limits of to high)
@@ -142,9 +141,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
     public void setLength(double goal) {
         m_goal = limitElevatorLength(goal);
         super.setGoal(m_goal);
+        SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
     }
 
-    public void setCoastMode(boolean coastMode){
+    public void setCoastMode(){
+        boolean coastMode = SmartDashboard.getBoolean("elevator/coastMode", false);
         if (coastMode) {
             m_motor.setIdleMode(IdleMode.kCoast);
             m_motor.stopMotor();

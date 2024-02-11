@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -20,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -32,6 +32,7 @@ import frc.robot.FieldConstants;
 public class NoteVision extends SubsystemBase {
     // Plot vision solutions
     public static final boolean PLOT_NOTES = true;
+    private static final double ALLOWED_POSITION_ERROR = .2;
 
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
@@ -59,11 +60,12 @@ public class NoteVision extends SubsystemBase {
         m_visionSim.update(pose);
     }
 
-    public List<Pose2d> getNotes() {
-        List<Pose2d> poses = new ArrayList<Pose2d>();
+    // Get visible NOTEs in robot-centric coordinates
+    public List<Translation2d> getNotes() {
+        List<Translation2d> positions = new ArrayList<Translation2d>();
 
         if (!m_noteCamera.isConnected()) {
-            return poses;
+            return positions;
         }
 
         var results = m_noteCamera.getLatestResult();
@@ -77,24 +79,24 @@ public class NoteVision extends SubsystemBase {
             double yaw = Math.toRadians(tgt.getYaw());
             double x = d * Math.cos(yaw);
             double y = d * Math.sin(yaw);
-            poses.add(new Pose2d(x, y, new Rotation2d(0)));
+            positions.add(new Translation2d(x, y));
         }
-        return poses;
+        return positions;
     }
 
-    public List<Pose2d> getNotes(Pose2d pose) {
-        List<Pose2d> poses = new ArrayList<Pose2d>();
+    // get visible NOTEs, in field-centric positions
+    public List<Translation2d> getNotes(Pose2d robotPose) {
+        List<Translation2d> positions = new ArrayList<Translation2d>();
 
         if (!m_noteCamera.isConnected()) {
-            return poses;
+            return positions;
         }
 
-        var results = m_noteCamera.getLatestResult();
-        List<PhotonTrackedTarget> targets = results.getTargets();
-        double robotX = pose.getX();
-        double robotY = pose.getY();
-        double robotRotation = pose.getRotation().getRadians();
-        for (PhotonTrackedTarget tgt : targets) {
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotRotation = robotPose.getRotation().getRadians();
+        
+        for (PhotonTrackedTarget tgt : m_noteCamera.getLatestResult().getTargets()) {
             // this calc assumes pitch angle is positive UP, so flip the camera's pitch
             // note that PV target angles are in degrees
             double d = Math.abs(m_robotToNoteCam.getZ() /
@@ -106,18 +108,49 @@ public class NoteVision extends SubsystemBase {
             double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
             double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
 
-            poses.add(new Pose2d(fieldCentricNoteX, fieldCentricNoteY, new Rotation2d(0)));
+            positions.add(new Translation2d(fieldCentricNoteX, fieldCentricNoteY));
         }
-        return poses;
+        return positions;
+    }
+
+    public boolean checkForNote(Pose2d robotPose, Translation2d wantedNote) {
+        if (!m_noteCamera.isConnected()) {
+            return false;
+        }
+
+        double robotX = robotPose.getX();
+        double robotY = robotPose.getY();
+        double robotRotation = robotPose.getRotation().getRadians();
+
+        // goes through the found targets and checks if the wanted note pose is visible.
+        for (PhotonTrackedTarget tgt : m_noteCamera.getLatestResult().getTargets()) {
+            // this calc assumes pitch angle is positive UP, so flip the camera's pitch
+            // note that PV target angles are in degrees
+            double d = Math.abs(m_robotToNoteCam.getZ() /
+                    Math.tan(-m_robotToNoteCam.getRotation().getY() + Math.toRadians(tgt.getPitch())));
+            double yaw = Math.toRadians(tgt.getYaw());
+
+            // the pi is because the camera is on the back
+            double noteAngle = robotRotation - Math.PI + yaw;
+            double fieldCentricNoteX = robotX + d * Math.cos(noteAngle);
+            double fieldCentricNoteY = robotY + d * Math.sin(noteAngle);
+            Translation2d notePosition = new Translation2d(fieldCentricNoteX, fieldCentricNoteY);
+
+            if (notePosition.getDistance(wantedNote) <= ALLOWED_POSITION_ERROR) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
     public void periodic() {
         // DEBUG
-        List<Pose2d> notes = getNotes();
+        List<Translation2d> notes = getNotes();
         SmartDashboard.putNumber("noteVision/nFound", notes.size());
         if (notes.size() > 0) {
-            Pose2d p = notes.get(0);
+            Translation2d p = notes.get(0);
             SmartDashboard.putNumber("noteVision/x", p.getX());
             SmartDashboard.putNumber("noteVision/y", p.getY());
         }
@@ -149,7 +182,7 @@ public class NoteVision extends SubsystemBase {
         // Add the Auto notes on the field
         TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14),
                 Units.inchesToMeters(2));
-        for (Pose2d notePose : List.of(
+        for (Translation2d notePose : List.of(
                 FieldConstants.NOTE_C_1,
                 FieldConstants.NOTE_C_2,
                 FieldConstants.NOTE_C_3,

@@ -4,33 +4,19 @@
 
 package frc.robot;
 
-import java.util.List;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AutoCommandInterface;
-import frc.robot.commands.NoteAuto;
-import frc.robot.subsystems.DriveTrain;
 
 public class Robot extends TimedRobot {
-    private AutoCommandInterface m_autonomousCommand;
+    private AutoCommandInterface m_autonomousCommand = null;
     private AutoCommandInterface m_prevAutoCommand = null;
     
-    private SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
-
     private RobotContainer m_robotContainer;
 
     @Override
     public void robotInit() {
         m_robotContainer = new RobotContainer();
-        DriveTrain driveTrain = m_robotContainer.getDriveTrain();
-        // Initialize the list of available Autonomous routines
-        // m_chosenAuto.setDefaultOption("Test Auto", new NoteAuto(driveTrain));
-
-        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 
     @Override
@@ -46,7 +32,7 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
-        AutoCommandInterface autoCommand = m_chosenAuto.getSelected();
+        AutoCommandInterface autoCommand = m_robotContainer.getAutonomousCommand();
         if (autoCommand != null && autoCommand != m_prevAutoCommand) {
             m_robotContainer.getDriveTrain().setPose(autoCommand.getInitialPose());
             m_prevAutoCommand = autoCommand;
@@ -59,7 +45,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        m_autonomousCommand = m_chosenAuto.getSelected();
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
@@ -81,7 +67,8 @@ public class Robot extends TimedRobot {
             m_autonomousCommand = null;
         }
 
-        m_robotContainer.getDriveCommand().schedule();
+        // don't think we need this, since it is set as the default command
+        // m_robotContainer.getDriveCommand().schedule();
     }
 
     @Override
