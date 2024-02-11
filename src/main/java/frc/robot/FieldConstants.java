@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -54,7 +55,7 @@ public class FieldConstants {
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_START_3 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
 
-    public static final Pose2d SPEAKER = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0)); //TODO: replace with real pose
+    public static final Translation2d SPEAKER = new Translation2d(0, 0); //TODO: replace with real pose
     public static Pose2d flipPose(Pose2d pose) {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         
@@ -67,5 +68,9 @@ public class FieldConstants {
 
         // return the original pose
         return pose;
+    }
+
+    public static Translation2d flipTranslation(Translation2d translation) { 
+        return flipPose(new Pose2d(translation.getX(),translation.getY(),Rotation2d.fromDegrees(0))).getTranslation();
     }
 }

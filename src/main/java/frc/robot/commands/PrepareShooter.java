@@ -35,11 +35,11 @@ public class PrepareShooter extends ParallelCommandGroup {
   }
 
   private double getDistance() {
-    return m_robotPosition.getTranslation().getDistance(FieldConstants.flipPose(FieldConstants.SPEAKER).getTranslation());
+    return m_robotPosition.getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
   }
 
   private double getRightRPM() {
-     return Shooter.calculateShooterSpeeds(getDistance()).rightSpeed; //TODO: Will get distance update?
+     return Shooter.calculateShooterSpeeds(getDistance()).rightSpeed; //Will get distance update every time the function is called?
   }
 
   private double getLeftRPM() {
@@ -59,7 +59,6 @@ public class PrepareShooter extends ParallelCommandGroup {
   }
 
   private Rotation2d getWantedHeading() {
-    //TODO: Need to fill this in, have not gotton a chance yet. Will most likely do later today(2/10/2024) or tommorow
-    return new Rotation2d(2,2);
+    return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPosition.getTranslation()).getAngle();
   }
 }
