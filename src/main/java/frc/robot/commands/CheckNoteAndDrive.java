@@ -31,7 +31,7 @@ public class CheckNoteAndDrive extends Command {
     private int m_wantedNote;
     private int m_backUpNote;
 
-    private static final Map<Integer, Pose2d> NOTE_POSITIONS = new HashMap<Integer, Pose2d>() {
+    private static final Map<Integer, Translation2d> NOTE_POSITIONS = new HashMap<Integer, Translation2d>() {
         {
             put(1, FieldConstants.NOTE_C_1);
             put(2, FieldConstants.NOTE_C_2);
@@ -67,7 +67,7 @@ public class CheckNoteAndDrive extends Command {
         // field relative note positions
         List<Pose2d> notes = m_noteVision.getNotes(m_driveTrain.getPose());
 
-        Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote).getTranslation();
+        Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote);
         for (Pose2d note : notes) {
             // goes through the notes in the note list and checks if the wanted note pose is
             // in there .2 is arbitrary and will need to be tuned for accuracy

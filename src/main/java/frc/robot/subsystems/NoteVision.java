@@ -182,7 +182,7 @@ public class NoteVision extends SubsystemBase {
         // Add the Auto notes on the field
         TargetModel noteModel = new TargetModel(Units.inchesToMeters(14), Units.inchesToMeters(14),
                 Units.inchesToMeters(2));
-        for (Pose2d notePose : List.of(
+        for (Translation2d notePose : List.of(
                 FieldConstants.NOTE_C_1,
                 FieldConstants.NOTE_C_2,
                 FieldConstants.NOTE_C_3,
