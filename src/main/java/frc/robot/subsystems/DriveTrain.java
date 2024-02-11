@@ -38,16 +38,18 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import frc.robot.Constants;
+import frc.robot.FieldConstants;
 import frc.robot.Robot;
 import frc.robot.swerve.*;
 
 public class DriveTrain extends SubsystemBase {
-    /**
-     * The left-to-right distance between the drivetrain wheels
-     *
-     * Should be measured from center to center.
-     */
+    // The left-to-right distance between the drivetrain wheels
+    // Should be measured from center to center.
     private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
+
+    // The front-to-back distance between the drivetrain wheels.
+    // Should be measured from center to center.
+    private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
     // TODO get correct values
     public static final double PATH_PLANNER_MAX_VELOCITY = 5.0;
@@ -56,13 +58,6 @@ public class DriveTrain extends SubsystemBase {
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
 
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
-
-    /**
-     * The front-to-back distance between the drivetrain wheels.
-     *
-     * Should be measured from center to center.
-     */
-    private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
     private static final double DRIVE_BASE_RADIUS_METERS = Math
             .sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
@@ -425,36 +420,13 @@ public class DriveTrain extends SubsystemBase {
     public Command FollowPath(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red
-                    // alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                }, this);
+                () -> FieldConstants.isRedAlliance(), this);
     }
 
     public Command FollowPath(Supplier<PathPlannerPath> path) {
 
         return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
-                PATH_FOLLOWER_CONFIG,
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red
-                    // alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                }, this);
+                PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
     }
 
     @Override

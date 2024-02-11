@@ -57,17 +57,20 @@ public class FieldConstants {
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_START_3 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
-    public static Pose2d flipPose(Pose2d pose) {
+    public static boolean isRedAlliance() {
         Optional<Alliance> alliance = DriverStation.getAlliance();
+        return alliance.isPresent() && alliance.get() == Alliance.Red;
+    }
 
-        // flip pose when red (have to do this because PathPlanner flips a path only)
-        if (alliance.isPresent() && alliance.get() == Alliance.Red) {
+    public static Pose2d flipPose(Pose2d pose) {
+        // flip pose when red
+        if (isRedAlliance()) {
             Rotation2d rot = pose.getRotation();
             // reflect the pose over center line, flip both the X and the rotation
             return new Pose2d(FIELD_LENGTH - pose.getX(), pose.getY(), new Rotation2d(-rot.getCos(), rot.getSin()));
         }
 
-        // return the original pose
+        // Blue or we don't know; return the original pose
         return pose;
     }
 }
