@@ -4,12 +4,10 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
@@ -20,22 +18,23 @@ import frc.robot.subsystems.ShooterPivot;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PrepareShooter extends ParallelCommandGroup {
   /** Creates a new PrepareShooter. */
-  private final Pose2d m_robotPosition;
+  private final Pose2d m_robotPose;
 
-  public PrepareShooter(Pose2d robotPosition, ShooterPivot ShooterPivot, Shooter Shooter, DriveTrain DriveTrain) {
-    m_robotPosition = robotPosition;
+  public PrepareShooter(ShooterPivot ShooterPivot, Shooter Shooter, DriveTrain DriveTrain, CommandXboxController CommandXboxController) {
+    m_robotPose = DriveTrain.getPose();
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ActiveTiltShooter(ShooterPivot, this::getShooterPitch),
+      //TODO: figure out if need to write new command for turn while driving for dynamic turning. Current one turns once.
       new TurnToHeadingWithDriving(DriveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
-      new ActiveSpeedUpShooter(Shooter, this::getLeftRPM, this::getRightRPM)
-      //TODO: Need to add rumble when done command. May want to add get goal offset methods to some subsystems.
+      new ActiveSpeedUpShooter(Shooter, this::getLeftRPM, this::getRightRPM),
+      new PrepareShooter(ShooterPivot, Shooter, DriveTrain, CommandXboxController)
     );
   }
 
   private double getDistance() {
-    return m_robotPosition.getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+    return m_robotPose.getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
   }
 
   private double getRightRPM() {
@@ -51,14 +50,14 @@ public class PrepareShooter extends ParallelCommandGroup {
   }
 
   private double getRobotX() {
-    return m_robotPosition.getX();
+    return m_robotPose.getX();
   }
 
   private double getRobotY() {
-    return m_robotPosition.getY();
+    return m_robotPose.getY();
   }
 
   private Rotation2d getWantedHeading() {
-    return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPosition.getTranslation()).getAngle();
+    return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPose.getTranslation()).getAngle();
   }
 }

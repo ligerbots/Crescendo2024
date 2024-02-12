@@ -57,6 +57,10 @@ public class Shooter extends SubsystemBase {
     private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
 
+    //Used for is on target
+    private double m_leftGoalRPM;
+    private double m_rightGoalRPM;
+
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double rightSpeed, leftSpeed, shootAngle;
@@ -167,6 +171,10 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
         SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
 
+        //Used in isWithinTolerenceFunc
+        m_leftGoalRPM = leftRpm;
+        m_rightGoalRPM = rightRpm;
+
         m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
@@ -218,5 +226,9 @@ public class Shooter extends SubsystemBase {
             setSysIdRoutine();
 
         return m_sysIdRoutine.dynamic(direction);
+    }
+
+    public boolean shooterSpeedIsWithinTolerence() {
+        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
     }
 }

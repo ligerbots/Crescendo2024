@@ -54,6 +54,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     private boolean m_coastMode = false;
 
+    //Used for checking if on goal
+    private double m_goalRAD;
+
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder dutyCycleEncoder) {
         super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ),
@@ -130,9 +133,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // set shooterPivot angle in radians
     public void setAngle(double angle) {
-        double goal = limitPivotAngle(angle);
-        super.setGoal(goal);
-        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(goal));
+        m_goalRAD = limitPivotAngle(angle);
+        super.setGoal(m_goalRAD);
+        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRAD));
     }
     public void resetGoal(){
         setAngle(getAngleRadians());
@@ -146,5 +149,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
             m_motor.stopMotor();
         } else
             m_motor.setIdleMode(IdleMode.kBrake);
+    }
+
+    public boolean isWithinTolerence() {
+        return Math.abs(m_goalRAD-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 }
