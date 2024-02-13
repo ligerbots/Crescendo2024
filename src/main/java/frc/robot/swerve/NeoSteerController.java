@@ -9,7 +9,7 @@ import frc.robot.Constants;
 
 // LigerBots SteerController for Swerve
 
-public class NeoSteerController {
+public class NeoSteerController implements SteerController {
     // we use this all over the place, so keep it as a constant
     private static final double TWO_PI = 2.0 * Math.PI;
 
@@ -87,11 +87,13 @@ public class NeoSteerController {
     }
 
     // get the angle setpoint, in radians
+    @Override
     public double getReferenceAngle() {
         return m_referenceAngleRadians;
     }
 
     // synchronize the angle encoder offsets
+    @Override
     public void syncAngleEncoders(boolean dontCheckTimer) {
         // Reset the NEO's encoder periodically when the module is not rotating.
         // Sometimes (~5% of the time) when we initialize, the absolute encoder isn't
@@ -118,6 +120,7 @@ public class NeoSteerController {
     }
 
     // set the angle we want for the wheel (radians)
+    @Override
     public void setReferenceAngle(double referenceAngleRadians) {
         double currentAngleRadians = m_motorEncoder.getPosition();
 
@@ -141,6 +144,7 @@ public class NeoSteerController {
     }
 
     // get the current module angle in radians
+    @Override
     public Rotation2d getStateAngle() {
         double motorAngleRadians = m_motorEncoder.getPosition();
         motorAngleRadians %= TWO_PI;
@@ -151,6 +155,7 @@ public class NeoSteerController {
         return Rotation2d.fromRadians(motorAngleRadians);
     }
 
+    @Override
     public void updateSmartDashboard(String sdPrefix) {
         SmartDashboard.putNumber(sdPrefix + "/angle", getStateAngle().getDegrees());
         SmartDashboard.putNumber(sdPrefix + "/cancoder", Math.toDegrees(m_absoluteEncoder.getAbsoluteAngleRadians()));

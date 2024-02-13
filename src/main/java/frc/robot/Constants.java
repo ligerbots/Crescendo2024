@@ -15,30 +15,30 @@ public class Constants {
     // CAN IDs and swerve angle offsets for the drivetrain
     // These controllers are all SparkMaxes, so need to be unique
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 1;
-    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 2;
-    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 9;
+    public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 1;
+    public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 1;
     public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(88.4);
 
-    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 3;
-    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 4;
-    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 10;
+    public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 2;
+    public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 2;
+    public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 2;
     public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(359.5);
 
-    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 5;
-    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 6;
-    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 11;
+    public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 3;
+    public static final int BACK_LEFT_MODULE_STEER_MOTOR = 3;
+    public static final int BACK_LEFT_MODULE_STEER_ENCODER = 3;
     public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(65.5);
 
-    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 7;
-    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 8;
-    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 12;
+    public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 4;
+    public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 4;
+    public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 4;
     public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(108.5);
 
     // Elevator
     public static final int ELEVATOR_CAN_ID = 18; //TODO: REPLACE WITH REAL CAN ID
 
-    public static final int INTAKE_MOTOR_CAN_ID = 15; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
-    public static final int CENTERING_MOTOR_CAN_ID = 16; //TODO: 1 IS A PLACEHOLDER, REPLACE IT
+    public static final int INTAKE_MOTOR_CAN_ID = 5;
+    public static final int CENTERING_MOTOR_CAN_ID = 6; 
 
     public static final int SHOOTER_PIVOT_CAN_ID = 17; //TODO: REPLACE WITH REAL ID
 
