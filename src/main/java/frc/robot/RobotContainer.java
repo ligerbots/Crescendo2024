@@ -79,6 +79,8 @@ public class RobotContainer {
     private void configureAutos() {
         // Initialize the list of available Autonomous routines
         m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("get two notes", new GetNotes(m_driveTrain, m_noteVision, m_shooter, m_intake));
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }

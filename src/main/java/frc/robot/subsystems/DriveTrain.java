@@ -429,6 +429,16 @@ public class DriveTrain extends SubsystemBase {
                 PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
     }
 
+    public static PathPlannerPath loadPath(String pathName) {
+        try {
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+            return path;
+        } catch (Exception e) {
+            DriverStation.reportError(String.format("Unable to load PP path %s", pathName), true);
+        }
+        return null;
+    }
+
     @Override
     public void periodic() {
         m_odometry.update(getGyroscopeRotation(), getModulePositions());
