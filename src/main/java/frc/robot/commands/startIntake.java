@@ -25,8 +25,7 @@ public class StartIntake extends SequentialCommandGroup {
       new SetElevatorLength(elevator, length),
       // set angle???
       new InstantCommand(shooter::turnOnFeeder),
-      new InstantCommand(intake::intake),
-      new InstantCommand(intake::stop),
+      new RunIntakeWaitNote(intake),
       new BackupFeed(shooter),
       new Rumble(xbox)
     );
