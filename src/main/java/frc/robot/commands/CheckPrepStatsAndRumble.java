@@ -25,7 +25,7 @@ public class CheckPrepStatsAndRumble extends Command {
     // Use addRequirements() here to declare subsystem dependencies.
     m_shooterPivotToPitch = () -> ShooterPivot.isWithinTolerence();
     m_shooterToSpeed = () -> Shooter.shooterSpeedIsWithinTolerence();
-    // m_driveTrainToAngle = () -> ; //TODO: Need to make func to check once active turn is sorted.
+    m_driveTrainToAngle = () -> DriveTrain.getOnGoalForActiveTurnRumble();
     m_controller = CommandXboxController;
   }
 

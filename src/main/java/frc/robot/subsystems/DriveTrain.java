@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
@@ -57,7 +58,8 @@ public class DriveTrain extends SubsystemBase {
 
     private static final double DRIVE_BASE_RADIUS_METERS = Math.sqrt(TRACKWIDTH_METERS*TRACKWIDTH_METERS + WHEELBASE_METERS*WHEELBASE_METERS) / 2.0;
 
-    public  static final double  ANGLE_TOLERANCE_DEGREES = 5;
+    public static final double ANGLE_TOLERANCE_DEGREES = 5;
+    private boolean m_onGoalForActiveTurnRumble;
     
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
@@ -159,7 +161,7 @@ public class DriveTrain extends SubsystemBase {
     private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
-
+            
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new frc.robot.swerve.FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
@@ -481,5 +483,13 @@ public class DriveTrain extends SubsystemBase {
         Pose2d robotPose = getPose();
         m_aprilTagVision.updateSimulation(robotPose);
         m_noteVision.updateSimulation(robotPose);
+    }
+
+    public boolean getOnGoalForActiveTurnRumble() {
+        return m_onGoalForActiveTurnRumble;
+    }
+
+    public void setOnGoalForActiveTurnRumble(boolean value) {
+        m_onGoalForActiveTurnRumble = value;
     }
 }

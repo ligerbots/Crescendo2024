@@ -26,10 +26,9 @@ public class PrepareShooter extends ParallelCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ActiveTiltShooter(ShooterPivot, this::getShooterPitch),
-      //TODO: figure out if need to write new command for turn while driving for dynamic turning. Current one turns once.
-      new TurnToHeadingWithDriving(DriveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
+      new ActiveTurnToHeadingWithDriving(DriveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
       new ActiveSpeedUpShooter(Shooter, this::getLeftRPM, this::getRightRPM),
-      new PrepareShooter(ShooterPivot, Shooter, DriveTrain, CommandXboxController)
+      new CheckPrepStatsAndRumble(ShooterPivot, Shooter, DriveTrain, CommandXboxController)
     );
   }
 
