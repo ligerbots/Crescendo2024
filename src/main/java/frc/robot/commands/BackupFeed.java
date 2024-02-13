@@ -34,7 +34,7 @@ public class BackupFeed extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_shooter.resetFeederSpeed();
+    m_shooter.turnOffFeeder();
   }
 
   // Returns true when the command should end.
