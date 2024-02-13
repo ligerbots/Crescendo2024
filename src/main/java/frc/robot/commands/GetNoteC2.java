@@ -23,7 +23,7 @@ import frc.robot.subsystems.Shooter;
 
 // Note that AutoCommandInterface is a SequentialCommandGroup
 public class GetNoteC2 extends AutoCommandInterface {
-    /** Creates a new GetNoteC1. */
+    /** Creates a new GetNoteC2. */
 
     private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_2");
     private PathPlannerPath m_middlePath = DriveTrain.loadPath("Shoot_1 to Note_C_2");

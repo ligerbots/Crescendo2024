@@ -17,12 +17,12 @@ import frc.robot.subsystems.Shooter;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class GetNotes extends AutoCommandInterface {
+public class GetNotesC1_C2 extends AutoCommandInterface {
   /** Creates a new GetNotes. */
   private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_1");
 
 
-  public GetNotes(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+  public GetNotesC1_C2(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     
