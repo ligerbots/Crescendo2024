@@ -14,48 +14,46 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
+
 import frc.robot.Constants;
 
 public class ShooterPivot extends TrapezoidProfileSubsystem {
-    private static final double MAX_ANGLE = Math.toRadians(30.0); //TODO update, need to talk to CAD
-    private static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO update, need to talk to CAD
+    private static final double MAX_ANGLE = Math.toRadians(30.0); //TODO set for 2024
+    private static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO set for 2024
     //NOTE: All constants were taken from the 2023 arm 
-    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: tune
+    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
 
     private static final int CURRENT_LIMIT = 10;
 
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
-    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: tune
-    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: tune
+    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
+    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
 
-    private static final double POSITION_OFFSET = 62.0/360.0; //TODO: Check if value good
+    private static final double POSITION_OFFSET = 62.0/360.0; //TODO: set for 2024
     private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
 
-    private static final double GEAR_RATIO = 1.0 / 22.5;  // TODO: check to see if changed before run on robot
+    private static final double GEAR_RATIO = 1.0 / 22.5;  // TODO: set for 2024
 
-    // PID Constants for the shooterPivot PID controller
-    // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 0.01;
+    // Constants for the shooterPivot PID controller
+    private static final double K_P = 0.01;  // TODO: set for 2024
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
-    private static final double K_FF = 0.0;
+    private static final double K_FF = 0.0;  // TODO: set for 2024
 
-    //Used in conversion factor
-    private static final double RADIAN_PER_ROTATION = 2 * Math.PI * GEAR_RATIO; //TODO:Check if valid
+    // Used in conversion factor
+    private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
 
-    private DutyCycleEncoder m_absoluteEncoder; //TODO:Check if using same encoder, if not need to update   
+    private final DutyCycleEncoder m_absoluteEncoder;  
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
     private final RelativeEncoder m_encoder;
 
-    private boolean m_coastMode = false;
-
     // Construct a new shooterPivot subsystem
-    public ShooterPivot(DutyCycleEncoder dutyCycleEncoder) {
+    public ShooterPivot(DutyCycleEncoder absEncoder) {
         super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ),
-                OFFSET_RADIAN - dutyCycleEncoder.getDistance() * 2 * Math.PI);
+                OFFSET_RADIAN - absEncoder.getDistance() * 2 * Math.PI);
        
         m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
@@ -68,36 +66,28 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
        
-        // Absolute encoder stuff:
-        m_absoluteEncoder = dutyCycleEncoder;
-
-        // Encoder distance is in radians
+        // Absolute encoder - set calibration to use radians
+        m_absoluteEncoder = absEncoder;
         m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
         m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
-        double initialAngle = getAbsEncoderAngleRadians();
-        // SmartDashboard.putNumber("shooterPivot/initAngle", Units.radiansToDegrees(initialAngle));
 
+        // motor encoder - set calibration and offset to match absolute encoder
         m_encoder = m_motor.getEncoder();
-        m_encoder.setPositionConversionFactor(RADIAN_PER_ROTATION);
-        // Set the motor encoder and Position setpoint to the initialAngle from the absolute encoder
-        m_encoder.setPosition(initialAngle);
+        m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
+        updateMotorEncoderOffset();
 
-        setCoastMode(m_coastMode);
-        SmartDashboard.putBoolean("shooterPivot/coastMode", m_coastMode);
+        SmartDashboard.putBoolean("shooterPivot/coastMode", false);
+        setCoastMode();
     }
 
     @Override
     public void periodic() {
         // Display current values on the SmartDashboard
-        // Add some extra numbers to diagnose the load on the motors
+        // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
-        // SmartDashboard.putBoolean("shooterPivot/m_resetPivotPos", m_resetPivotPos)
 
-        // m_coastMode = SmartDashboard.getBoolean("shooterPivot/coastMode", m_coastMode);
-
-        // if (m_coastMode)
-        //     setCoastMode(m_coastMode);
+        setCoastMode();
 
         // Execute the super class periodic method
         super.periodic();
@@ -108,7 +98,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // Remember that the encoder was already set to account for the gear ratios.
 
         m_pidController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition);
-        SmartDashboard.putNumber("shooterPivotPivot/setPoint", Math.toDegrees(setPoint.position));
+        SmartDashboard.putNumber("shooterPivot/setPoint", Math.toDegrees(setPoint.position));
     }
 
     // get the current pivot angle in radians
@@ -121,8 +111,13 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         return -m_absoluteEncoder.getDistance();
     }
 
+    // update the motor encoder offset to match the absolute encoder
+    public void updateMotorEncoderOffset() {
+        m_encoder.setPosition(getAbsEncoderAngleRadians());
+    }
+
     // needs to be public so that commands can get the restricted angle
-    public static double limitPivotAngle(double angle){
+    public static double limitPivotAngle(double angle) {
         return Math.min(MAX_ANGLE, Math.max(MIN_ANGLE, angle));
     }
 
@@ -132,13 +127,13 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         super.setGoal(goal);
         SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(goal));
     }
-    public void resetGoal(){
+
+    public void resetGoal() {
         setAngle(getAngleRadians());
-        // super.disable();
-        // m_superEnabled = false;
     }
 
-    public void setCoastMode(boolean coastMode){
+    public void setCoastMode() {
+        boolean coastMode = SmartDashboard.getBoolean("shooterPivot/coastMode", false);
         if (coastMode) {
             m_motor.setIdleMode(IdleMode.kCoast);
             m_motor.stopMotor();
