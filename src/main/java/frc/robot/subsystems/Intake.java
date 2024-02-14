@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -24,7 +25,10 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
+        SmartDashboard.putNumber("intake/intakeSpeed", m_intakeMotor.get());
+        SmartDashboard.putNumber("intake/centeringSpeed", m_centeringMotor.get());
+        SmartDashboard.putNumber("intake/intakeCurrent", m_intakeMotor.getOutputCurrent());
+        SmartDashboard.putNumber("intake/centeringCurrent", m_centeringMotor.getOutputCurrent());
     }
 
     public void run(double rollerSpeed, double centeringWheelSpeed) {
