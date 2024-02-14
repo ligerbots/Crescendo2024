@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -18,30 +20,30 @@ import frc.robot.subsystems.ShooterPivot;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class PrepareShooter extends ParallelCommandGroup {
   /** Creates a new PrepareShooter. */
-  private final Pose2d m_robotPose;
+  private final Supplier<Pose2d> m_robotPose;
 
-  public PrepareShooter(ShooterPivot ShooterPivot, Shooter Shooter, DriveTrain DriveTrain, CommandXboxController CommandXboxController) {
-    m_robotPose = DriveTrain.getPose();
+  public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain, CommandXboxController commandXboxController) {
+    m_robotPose = () -> driveTrain.getPose();
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ActiveTiltShooter(ShooterPivot, this::getShooterPitch),
-      new ActiveTurnToHeadingWithDriving(DriveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
-      new ActiveSpeedUpShooter(Shooter, this::getLeftRPM, this::getRightRPM),
-      new CheckPrepStatsAndRumble(ShooterPivot, Shooter, DriveTrain, CommandXboxController)
+      new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
+      new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
+      new ActiveSpeedUpShooter(shooter, this::getLeftRPM, this::getRightRPM),
+      new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, commandXboxController)
     );
   }
 
   private double getDistance() {
-    return m_robotPose.getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+    return m_robotPose.get().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
   }
 
   private double getRightRPM() {
-     return Shooter.calculateShooterSpeeds(getDistance()).rightSpeed; //Will get distance update every time the function is called?
+     return Shooter.calculateShooterSpeeds(getDistance()).leftRPM; //Will get distance update every time the function is called?
   }
 
   private double getLeftRPM() {
-    return Shooter.calculateShooterSpeeds(getDistance()).leftSpeed;
+    return Shooter.calculateShooterSpeeds(getDistance()).rightRPM;
   }
 
   private double getShooterPitch() {
@@ -49,14 +51,14 @@ public class PrepareShooter extends ParallelCommandGroup {
   }
 
   private double getRobotX() {
-    return m_robotPose.getX();
+    return m_robotPose.get().getX();
   }
 
   private double getRobotY() {
-    return m_robotPose.getY();
+    return m_robotPose.get().getY();
   }
 
   private Rotation2d getWantedHeading() {
-    return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPose.getTranslation()).getAngle();
+    return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPose.get().getTranslation()).getAngle();
   }
 }

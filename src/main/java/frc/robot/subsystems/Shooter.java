@@ -63,18 +63,18 @@ public class Shooter extends SubsystemBase {
 
     // lookup table for upper hub speeds
     public static class ShooterValues {
-        public double rightSpeed, leftSpeed, shootAngle;
+        public double leftRPM, rightRPM, shootAngle;
         
-        public ShooterValues(double rightSpeed, double leftSpeed, double shootAngle) {
-            this.rightSpeed = rightSpeed;
-            this.leftSpeed = leftSpeed;
+        public ShooterValues(double leftRPM, double rightRPM, double shootAngle) {
+            this.leftRPM = leftRPM;
+            this.rightRPM = rightRPM;
             this.shootAngle = shootAngle;
         }
 
         public ShooterValues interpolate(ShooterValues other, double ratio) {
             return new ShooterValues(
-                    rightSpeed + (other.rightSpeed - rightSpeed) * ratio,
-                    leftSpeed + (other.leftSpeed - leftSpeed) * ratio,
+                    leftRPM + (other.leftRPM - leftRPM) * ratio,
+                    rightRPM + (other.rightRPM - rightRPM) * ratio,
                     shootAngle + (other.shootAngle - shootAngle) * ratio);
         }
     }

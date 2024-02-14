@@ -15,11 +15,11 @@ public class ActiveTiltShooter extends Command {
   private final DoubleSupplier m_goalAngleSupplier;
 
   /** Creates a new ActiveTiltShooter. */
-  public ActiveTiltShooter(ShooterPivot ShooterPivot, DoubleSupplier GoalAngleSupplier) {
+  public ActiveTiltShooter(ShooterPivot shooterPivot, DoubleSupplier goalAngleSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(ShooterPivot);
-    m_shooterPivot = ShooterPivot;
-    m_goalAngleSupplier = GoalAngleSupplier;
+    addRequirements(shooterPivot);
+    m_shooterPivot = shooterPivot;
+    m_goalAngleSupplier = goalAngleSupplier;
   }
 
   // Called when the command is initially scheduled.

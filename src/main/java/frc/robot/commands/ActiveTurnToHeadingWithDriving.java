@@ -32,9 +32,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
   /**
    * Creates a new autoAim.
    */
-  public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier,
-
-  DoubleSupplier translationYSupplier) {
+  public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier) {
     m_driveTrain = driveTrain;
     m_wantedHeadingSupplier = wantedHeading;
     m_translationXSupplier = translationXSupplier;
@@ -71,5 +69,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
 
   // Returns true when the command should end.
   @Override
-  public boolean isFinished() {return false;}
+  public boolean isFinished() {
+    return false;
+  }
 }

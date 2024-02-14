@@ -15,18 +15,18 @@ import frc.robot.subsystems.ShooterPivot;
 
 public class CheckPrepStatsAndRumble extends Command {
   /** Creates a new CheckPrepStatsAndRumble. */
-  private final BooleanSupplier m_shooterPivotToPitch;
-  private final BooleanSupplier m_shooterToSpeed;
-  private final BooleanSupplier m_driveTrainToAngle;
+  private final ShooterPivot m_shooterPivot;
+  private final Shooter m_shooter;
+  private final DriveTrain m_driveTrain;
   private final CommandXboxController m_controller;
   private final double m_intensity = 0.3; //Value bewteen 0-1. 0 is nothing 1 is alot. 0.3 should be nonintrusive to the driver
 
-  public CheckPrepStatsAndRumble(ShooterPivot ShooterPivot, Shooter Shooter, DriveTrain DriveTrain, CommandXboxController CommandXboxController) {
+  public CheckPrepStatsAndRumble(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain, CommandXboxController commandXboxController) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_shooterPivotToPitch = () -> ShooterPivot.isWithinTolerence();
-    m_shooterToSpeed = () -> Shooter.shooterSpeedIsWithinTolerence();
-    m_driveTrainToAngle = () -> DriveTrain.getOnGoalForActiveTurnRumble();
-    m_controller = CommandXboxController;
+    m_shooterPivot = shooterPivot;
+    m_shooter = shooter;
+    m_driveTrain = driveTrain;
+    m_controller = commandXboxController;
   }
 
   // Called when the command is initially scheduled.
@@ -36,7 +36,7 @@ public class CheckPrepStatsAndRumble extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (m_shooterPivotToPitch.getAsBoolean() && m_shooterToSpeed.getAsBoolean() && m_driveTrainToAngle.getAsBoolean()) {
+    if (m_shooterPivot.isWithinTolerence() && m_shooter.shooterSpeedIsWithinTolerence() && m_driveTrain.getOnGoalForActiveTurnRumble()) {
       //Sets rumble
       m_controller.getHID().setRumble(RumbleType.kLeftRumble, m_intensity);
       m_controller.getHID().setRumble(RumbleType.kRightRumble, m_intensity);

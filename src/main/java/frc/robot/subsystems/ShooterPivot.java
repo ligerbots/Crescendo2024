@@ -54,7 +54,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private final RelativeEncoder m_encoder;
 
     //Used for checking if on goal
-    private double m_goalRAD;
+    private double m_goalRadians;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder absEncoder) {
@@ -129,9 +129,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // set shooterPivot angle in radians
     public void setAngle(double angle) {
-        m_goalRAD = limitPivotAngle(angle);
-        super.setGoal(m_goalRAD);
-        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRAD));
+        m_goalRadians = limitPivotAngle(angle);
+        super.setGoal(m_goalRadians);
+        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
     }
 
     public void resetGoal() {
@@ -148,6 +148,6 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     public boolean isWithinTolerence() {
-        return Math.abs(m_goalRAD-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 }
