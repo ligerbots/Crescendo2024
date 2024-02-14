@@ -438,15 +438,11 @@ public class DriveTrain extends SubsystemBase {
         // Have the vision system update based on the Apriltags, if seen
         // need to add the pipeline result 
         m_aprilTagVision.updateOdometry(m_odometry, m_field);
+
+        // log the pose into the Field2d object
         m_field.setRobotPose(m_odometry.getEstimatedPosition());
-        
-        // Pose2d pose = m_odometry.getEstimatedPosition();
-        // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
-        // SmartDashboard.putNumber("drivetrain/yPosition", pose.getY());
-        // SmartDashboard.putNumber("drivetrain/heading",
-        // pose.getRotation().getDegrees());
-        // SmartDashboard.putNumber("drivetrain/gyro",
-        // getGyroscopeRotation().getDegrees());
+        // also get the gyro, just in case
+        SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
 
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
         // SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
