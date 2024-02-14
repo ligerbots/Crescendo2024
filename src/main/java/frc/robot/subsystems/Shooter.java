@@ -35,7 +35,10 @@ import frc.robot.Constants;
 public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
-    static final double AMP_SHOOT_SPEED = -1.0;
+
+    // AMP shot, backwards out input end
+    static final double AMP_SHOOT_SPEED = -0.5;
+    
     // This is negative to push the note out slowly
     public static final double BACKUP_FEED_SPEED = -0.1;
 
@@ -177,7 +180,7 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    public void feederShoot(){
+    public void ampShot(){
         setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
