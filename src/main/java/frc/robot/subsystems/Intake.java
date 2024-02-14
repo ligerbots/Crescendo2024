@@ -8,8 +8,8 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
     
-    final static double INTAKE_SPEED = 0.1;
-    final static double INTAKE_CENTERING_SPEED = 0.1;
+    final static double INTAKE_SPEED = .5;
+    final static double INTAKE_CENTERING_SPEED = .5;
     final static double OUTTAKE_SPEED = -0.1;
     final static double OUTTAKE_CENTERING_SPEED = -0.1;
     CANSparkMax m_intakeMotor;
@@ -18,6 +18,8 @@ public class Intake extends SubsystemBase {
     public Intake(){
         m_intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
         m_centeringMotor = new CANSparkMax(Constants.CENTERING_MOTOR_CAN_ID, MotorType.kBrushless);
+        m_intakeMotor.setInverted(true);
+        m_centeringMotor.setInverted(false);
     }
 
     @Override
