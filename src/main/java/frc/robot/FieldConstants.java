@@ -60,6 +60,7 @@ public class FieldConstants {
     }
 
     public static final Translation2d SPEAKER = new Translation2d(0, 0); //TODO: replace with real pose
+    
     public static Pose2d flipPose(Pose2d pose) {
         // flip pose when red
         if (isRedAlliance()) {

@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,13 +23,13 @@ public class PrepareShooter extends ParallelCommandGroup {
   /** Creates a new PrepareShooter. */
   private final Supplier<Pose2d> m_robotPose;
 
-  public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain, CommandXboxController commandXboxController) {
+  public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain, CommandXboxController commandXboxController, DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier) {
     m_robotPose = () -> driveTrain.getPose();
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
-      new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, this::getRobotX, this::getRobotY),
+      new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, translationXSupplier, translationYSupplier),
       new ActiveSpeedUpShooter(shooter, this::getLeftRPM, this::getRightRPM),
       new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, commandXboxController)
     );
@@ -48,14 +49,6 @@ public class PrepareShooter extends ParallelCommandGroup {
 
   private double getShooterPitch() {
     return Shooter.calculateShooterSpeeds(getDistance()).shootAngle;
-  }
-
-  private double getRobotX() {
-    return m_robotPose.get().getX();
-  }
-
-  private double getRobotY() {
-    return m_robotPose.get().getY();
   }
 
   private Rotation2d getWantedHeading() {

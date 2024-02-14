@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -38,8 +36,9 @@ public class CheckPrepStatsAndRumble extends Command {
   public void execute() {
     if (m_shooterPivot.isWithinTolerence() && m_shooter.shooterSpeedIsWithinTolerence() && m_driveTrain.getOnGoalForActiveTurnRumble()) {
       //Sets rumble
-      m_controller.getHID().setRumble(RumbleType.kLeftRumble, m_intensity);
-      m_controller.getHID().setRumble(RumbleType.kRightRumble, m_intensity);
+      m_controller.getHID().setRumble(RumbleType.kBothRumble, m_intensity);
+    } else {
+      m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
     }
   }
 
@@ -47,8 +46,7 @@ public class CheckPrepStatsAndRumble extends Command {
   @Override
   public void end(boolean interrupted) {
     //Turns it off once done
-    m_controller.getHID().setRumble(RumbleType.kLeftRumble, 0);
-    m_controller.getHID().setRumble(RumbleType.kRightRumble, 0);
+    m_controller.getHID().setRumble(RumbleType.kBothRumble, 0);
   }
 
   // Returns true when the command should end.
