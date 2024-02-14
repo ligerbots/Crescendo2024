@@ -5,7 +5,9 @@
 package frc.robot.commands;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -22,23 +24,32 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
+
 // Note that AutoCommandInterface is a SequentialCommandGroup
-public class GetNoteC2 extends AutoCommandInterface {
+public class GetNotePathFactory extends AutoCommandInterface {
     /** Creates a new GetNoteC2. */
 
-    List<String> m_pathNames = new ArrayList<String>() {
-        {
-            add("Start_2 to Note_C_2");
-            add("Shoot_1 to Note_C_2");
-            add("Note_C_2 to Shoot_1");
-        }
+    private static final Map<String, Translation2d> noteLookup= new HashMap<>() {
+    {
+        put("NOTE_C_1", FieldConstants.NOTE_C_1);
+        put("NOTE_C_2", FieldConstants.NOTE_C_2);
+        put("NOTE_C_3", FieldConstants.NOTE_C_3);
+        put("NOTE_C_4", FieldConstants.NOTE_C_4);
+        put("NOTE_C_5", FieldConstants.NOTE_C_5);
+    }
     };
 
     List<PathPlannerPath> pathList = new ArrayList<PathPlannerPath>() {
         {
-            m_pathNames.forEach((n) -> add(DriveTrain.loadPath(n)));
+            add(DriveTrain.loadPath("Start_2 to Note_C_2"));
+            add(DriveTrain.loadPath("Shoot_1 to Note_C_2"));
+            add(DriveTrain.loadPath("Note_C_2 to Shoot_1"));
         }
     };
+
+    // private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_2");
+    // private PathPlannerPath m_middlePath = DriveTrain.loadPath("Shoot_1 to Note_C_2");
+    // private PathPlannerPath m_returnPath = DriveTrain.loadPath("Note_C_2 to Shoot_1");
 
     private PathPlannerPath m_longPath  =  pathList.get(0);
     private PathPlannerPath m_middlePath = pathList.get(1);
@@ -46,14 +57,12 @@ public class GetNoteC2 extends AutoCommandInterface {
     
     private DriveTrain m_driveTrain;
 
-    private final Translation2d m_targetNote = FieldConstants.NOTE_C_2;
-
-    public GetNoteC2(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetNotePathFactory(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         m_driveTrain = driveTrain;
 
         addCommands(
                 m_driveTrain.FollowPath(() -> getInitialPath())
-                        .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)),
+                        .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), FieldConstants.NOTE_C_2, this)),
                 m_driveTrain.FollowPath(m_returnPath),
 
                 new InstantCommand(intake::intake)
@@ -76,9 +85,9 @@ public class GetNoteC2 extends AutoCommandInterface {
         }
         
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
-            Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
+            Rotation2d heading = FieldConstants.NOTE_C_2.minus(poseBlue.getTranslation()).getAngle();
             List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
-                    new PathPoint(m_targetNote));
+                    new PathPoint(FieldConstants.NOTE_C_2));
             return PathPlannerPath.fromPathPoints(
                     pathPoints, // position, heading
                     new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,

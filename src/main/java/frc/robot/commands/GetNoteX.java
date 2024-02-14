@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.pathplanner.lib.path.GoalEndState;
@@ -23,33 +24,37 @@ import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
 // Note that AutoCommandInterface is a SequentialCommandGroup
-public class GetNoteC2 extends AutoCommandInterface {
-    /** Creates a new GetNoteC2. */
+public class GetNoteX extends AutoCommandInterface {
+ 
+    private PathPlannerPath m_longPath; 
+    private PathPlannerPath m_middlePath; 
+    private PathPlannerPath m_returnPath; 
 
-    List<String> m_pathNames = new ArrayList<String>() {
-        {
-            add("Start_2 to Note_C_2");
-            add("Shoot_1 to Note_C_2");
-            add("Note_C_2 to Shoot_1");
-        }
-    };
+    private void initPaths(String multiPathString) {
+        // String multiPathString = "Start_2 to Note_C_2,Shoot_1 to Note_C_2,Note_C_2 to Shoot_1";
 
-    List<PathPlannerPath> pathList = new ArrayList<PathPlannerPath>() {
-        {
-            m_pathNames.forEach((n) -> add(DriveTrain.loadPath(n)));
-        }
-    };
+        List<String> m_pathNames = Arrays.asList(multiPathString.split("\\s*,\\s*"));
 
-    private PathPlannerPath m_longPath  =  pathList.get(0);
-    private PathPlannerPath m_middlePath = pathList.get(1);
-    private PathPlannerPath m_returnPath = pathList.get(2);
-    
+        List<PathPlannerPath> pathList = new ArrayList<PathPlannerPath>() {
+            {
+                m_pathNames.forEach((n) -> add(DriveTrain.loadPath(n)));
+            }
+        };
+
+        m_longPath  =  pathList.get(0);
+        m_middlePath = pathList.get(1);
+        m_returnPath = pathList.get(2);
+    }
+
     private DriveTrain m_driveTrain;
 
-    private final Translation2d m_targetNote = FieldConstants.NOTE_C_2;
+    private final Translation2d m_targetNote; 
 
-    public GetNoteC2(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+        m_targetNote = targetNote;
         m_driveTrain = driveTrain;
+        String pathFileNames = FieldConstants.pathLookup.get(targetNote);
+        initPaths(pathFileNames);
 
         addCommands(
                 m_driveTrain.FollowPath(() -> getInitialPath())
