@@ -43,11 +43,9 @@ public class RobotContainer {
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.a().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+        m_controller.b().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
 
-        m_controller.b().onTrue(new SetElevatorLength(m_elevator, 
-                () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
-        
+       
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
             () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
             () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
@@ -55,12 +53,19 @@ public class RobotContainer {
         m_controller.x().onTrue(new Shoot(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+        
+        
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
         
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
         farm2.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_LOWER_ELEVATOR));
+
+        JoystickButton farm3 = new JoystickButton(m_farm, 3 );
+        farm3.onTrue(new SetElevatorLength(m_elevator, 
+                () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
+
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
