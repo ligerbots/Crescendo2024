@@ -13,26 +13,17 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class GetNotesC2_C1 extends AutoCommandInterface {
-  /** Creates a new GetNotes. */
-  private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_1");
+    private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_1");
 
+    public GetNotesC2_C1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+        addCommands(
+                new GetNoteC2(driveTrain, noteVision, shooter, intake),
+                new GetNoteC1(driveTrain, noteVision, shooter, intake)
+        );
+    }
 
-  public GetNotesC2_C1(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
-    
-    addCommands(
-      new GetNoteC2(driveTrain, noteVision, shooter, intake),
-      new GetNoteC1(driveTrain, noteVision, shooter, intake)
-      
-    );
-  }
-
-  public Pose2d getInitialPose() {
+    public Pose2d getInitialPose() {
         return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
     };
 }

@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
@@ -34,15 +35,15 @@ public class GetNoteC2 extends AutoCommandInterface {
         }
     };
 
-    List<PathPlannerPath> pathList = new ArrayList<PathPlannerPath>() {
+    List<PathPlannerPath> m_pathList = new ArrayList<PathPlannerPath>() {
         {
             m_pathNames.forEach((n) -> add(DriveTrain.loadPath(n)));
         }
     };
 
-    private PathPlannerPath m_longPath  =  pathList.get(0);
-    private PathPlannerPath m_middlePath = pathList.get(1);
-    private PathPlannerPath m_returnPath = pathList.get(2);
+    private PathPlannerPath m_longPath  =  m_pathList.get(0);
+    private PathPlannerPath m_middlePath = m_pathList.get(1);
+    private PathPlannerPath m_returnPath = m_pathList.get(2);
     
     private DriveTrain m_driveTrain;
 
@@ -65,8 +66,6 @@ public class GetNoteC2 extends AutoCommandInterface {
     public Pose2d getInitialPose() {
         return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
     };
-
-    
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
