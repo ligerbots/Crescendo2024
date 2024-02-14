@@ -5,14 +5,16 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
     
-    final static double INTAKE_SPEED = .5;
-    final static double INTAKE_CENTERING_SPEED = .5;
+    final static double INTAKE_SPEED = 0.5;
+    final static double INTAKE_CENTERING_SPEED = 0.5;
     final static double OUTTAKE_SPEED = -0.1;
     final static double OUTTAKE_CENTERING_SPEED = -0.1;
+
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;
 
@@ -32,8 +34,8 @@ public class Intake extends SubsystemBase {
     }
 
     public void run(double rollerSpeed, double centeringWheelSpeed) {
-        m_intakeMotor.set(rollerSpeed); //TODO: Find if posotive or negitive
-        m_centeringMotor.set(centeringWheelSpeed); //TODO: Find if posotive or negitive
+        m_intakeMotor.set(rollerSpeed);
+        m_centeringMotor.set(centeringWheelSpeed);
     }
 
     public void intake() {
@@ -45,7 +47,6 @@ public class Intake extends SubsystemBase {
     }
 
     public void stop() {
-        run(0,0);
+        run(0, 0);
     }
-
 }
