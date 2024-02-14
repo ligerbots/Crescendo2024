@@ -45,6 +45,9 @@ public class RobotContainer {
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
+        m_controller.b().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+
+       
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
             () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
             () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
@@ -52,6 +55,8 @@ public class RobotContainer {
         m_controller.x().onTrue(new Shoot(m_shooter,
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+        
+        
 
         m_controller.a().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 
