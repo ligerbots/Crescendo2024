@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.pathplanner.lib.path.GoalEndState;
@@ -30,20 +28,10 @@ public class GetNoteX extends AutoCommandInterface {
     private PathPlannerPath m_middlePath; 
     private PathPlannerPath m_returnPath; 
 
-    private void initPaths(String multiPathString) {
-        // String multiPathString = "Start_2 to Note_C_2,Shoot_1 to Note_C_2,Note_C_2 to Shoot_1";
-
-        List<String> m_pathNames = Arrays.asList(multiPathString.split("\\s*,\\s*"));
-
-        List<PathPlannerPath> pathList = new ArrayList<PathPlannerPath>() {
-            {
-                m_pathNames.forEach((n) -> add(DriveTrain.loadPath(n)));
-            }
-        };
-
-        m_longPath  =  pathList.get(0);
-        m_middlePath = pathList.get(1);
-        m_returnPath = pathList.get(2);
+    private void initPaths(String[] pathnameArray) {
+        m_longPath  =  DriveTrain.loadPath(pathnameArray[0]);
+        m_middlePath = DriveTrain.loadPath(pathnameArray[1]);
+        m_returnPath = DriveTrain.loadPath(pathnameArray[2]);
     }
 
     private DriveTrain m_driveTrain;
@@ -53,7 +41,7 @@ public class GetNoteX extends AutoCommandInterface {
     public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         m_targetNote = targetNote;
         m_driveTrain = driveTrain;
-        String pathFileNames = FieldConstants.pathLookup.get(targetNote);
+        String[] pathFileNames = FieldConstants.pathLookup.get(targetNote);
         initPaths(pathFileNames);
 
         addCommands(
