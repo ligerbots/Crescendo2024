@@ -53,7 +53,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private final SparkPIDController m_pidController;
     private final RelativeEncoder m_encoder;
 
-    //Used for checking if on goal
+    // Used for checking if on goal
     private double m_goalRadians;
 
     // Construct a new shooterPivot subsystem
