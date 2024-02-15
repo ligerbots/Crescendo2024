@@ -4,7 +4,9 @@
 
 package frc.robot.commands;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -23,7 +25,17 @@ import frc.robot.subsystems.Shooter;
 
 // Note that AutoCommandInterface is a SequentialCommandGroup
 public class GetNoteX extends AutoCommandInterface {
- 
+
+    public static final Map<Translation2d, String[]> s_pathLookup = new HashMap<>() {
+        {
+            put(FieldConstants.NOTE_C_1, new String[] { "Start_2 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
+            put(FieldConstants.NOTE_C_2, new String[] { "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
+            // put(FieldConstants.NOTE_C_3, "");
+            // put(FieldConstants.NOTE_C_4, "";
+            // put(FieldConstants.NOTE_C_5, "");
+        }
+    };
+
     private PathPlannerPath m_longPath; 
     private PathPlannerPath m_middlePath; 
     private PathPlannerPath m_returnPath; 
@@ -41,7 +53,7 @@ public class GetNoteX extends AutoCommandInterface {
     public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         m_targetNote = targetNote;
         m_driveTrain = driveTrain;
-        String[] pathFileNames = FieldConstants.pathLookup.get(targetNote);
+        String[] pathFileNames = s_pathLookup.get(targetNote);
         initPaths(pathFileNames);
 
         addCommands(
