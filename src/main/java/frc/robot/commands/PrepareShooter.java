@@ -23,12 +23,12 @@ public class PrepareShooter extends ParallelCommandGroup {
 
     public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
             XboxController xboxController, 
-            DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier) {
+            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
         m_robotPose = () -> driveTrain.getPose();
 
         addCommands(
                 new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
-                new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, translationXSupplier, translationYSupplier),
+                new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, joystickXSupplier, joystickYSupplier),
                 new ActiveSpeedUpShooter(shooter, this::getLeftRPM, this::getRightRPM),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
         );

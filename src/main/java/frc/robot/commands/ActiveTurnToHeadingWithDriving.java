@@ -16,60 +16,62 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.DriveTrain;
 
-
 public class ActiveTurnToHeadingWithDriving extends Command {
 
-  private final DriveTrain m_driveTrain;
-  private final PIDController m_turnHeadingPID;
-  private Double m_wantedDegrees;
-  private final Supplier<Rotation2d> m_wantedHeadingSupplier;
-  private final DoubleSupplier m_translationXSupplier;
-  private final DoubleSupplier m_translationYSupplier;
-  private final static double KP = 0.2; 
-  private final static double KI = 0.0; 
-  private final static double KD = 0.0; 
+    private final DriveTrain m_driveTrain;
+    private final Supplier<Rotation2d> m_wantedHeadingSupplier;
+    private final DoubleSupplier m_joystickXSupplier;
+    private final DoubleSupplier m_joystickYSupplier;
 
-  /**
-   * Creates a new autoAim.
-   */
-  public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier, DoubleSupplier translationYSupplier) {
-    m_driveTrain = driveTrain;
-    m_wantedHeadingSupplier = wantedHeading;
-    m_translationXSupplier = translationXSupplier;
-    m_translationYSupplier = translationYSupplier;
+    private final static double KP = 0.2; // TODO pick correct values
+    private final static double KI = 0.0;
+    private final static double KD = 0.0;
 
-    m_turnHeadingPID = new PIDController(KP,KI,KD);// random number TODO
-    addRequirements(m_driveTrain);
-    // Use addRequirements() here to declare subsystem dependencies.
-  }
+    private final PIDController m_turnHeadingPID;
+    private Double m_wantedDegrees;
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    m_turnHeadingPID.reset();
-  }
+    /**
+     * Creates a new autoAim.
+     */
+    public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
+            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
+        m_driveTrain = driveTrain;
+        m_wantedHeadingSupplier = wantedHeading;
+        m_joystickXSupplier = joystickXSupplier;
+        m_joystickYSupplier = joystickYSupplier;
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    // auto aiming using PID
-      m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
-      double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
-      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
+        m_turnHeadingPID = new PIDController(KP, KI, KD);
+        addRequirements(m_driveTrain);
+    }
 
-      //For rumble command
-      m_driveTrain.setOnGoalForActiveTurnRumble(Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
-  }
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+        m_turnHeadingPID.reset();
+    }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        // auto aiming using PID
+        m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
+        double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
 
-  }
+        m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), -speed);
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
+        // Record whether at the right heading, so that other commands can check
+        m_driveTrain.setOnGoalForActiveTurnRumble(
+            Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
+    }
+
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }
