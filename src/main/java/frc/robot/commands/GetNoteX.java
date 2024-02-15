@@ -53,8 +53,7 @@ public class GetNoteX extends AutoCommandInterface {
     public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         m_targetNote = targetNote;
         m_driveTrain = driveTrain;
-        String[] pathFileNames = s_pathLookup.get(targetNote);
-        initPaths(pathFileNames);
+        initPaths(s_pathLookup.get(targetNote));
 
         addCommands(
                 m_driveTrain.followPath(() -> getInitialPath())
@@ -70,8 +69,6 @@ public class GetNoteX extends AutoCommandInterface {
     public Pose2d getInitialPose() {
         return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
     };
-
-    
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
