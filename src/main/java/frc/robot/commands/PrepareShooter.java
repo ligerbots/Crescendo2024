@@ -5,9 +5,7 @@
 package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -19,12 +17,12 @@ import frc.robot.subsystems.ShooterPivot;
 
 public class PrepareShooter extends ParallelCommandGroup {
     /** Creates a new PrepareShooter. */
-    private final Supplier<Pose2d> m_robotPose;
+    private final DriveTrain m_driveTrain;
 
     public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
             XboxController xboxController, 
             DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
-        m_robotPose = () -> driveTrain.getPose();
+        m_driveTrain = driveTrain;
 
         addCommands(
                 new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
@@ -35,7 +33,7 @@ public class PrepareShooter extends ParallelCommandGroup {
     }
 
     private double getDistance() {
-        return m_robotPose.get().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+        return m_driveTrain.getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
     }
 
     private double getRightRPM() {
@@ -52,7 +50,7 @@ public class PrepareShooter extends ParallelCommandGroup {
     }
 
     private Rotation2d getWantedHeading() {
-        return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_robotPose.get().getTranslation())
+        return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
                 .getAngle();
     }
 }
