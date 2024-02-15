@@ -31,9 +31,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
@@ -51,28 +48,28 @@ public class DriveTrain extends SubsystemBase {
     // Should be measured from center to center.
     private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
 
+    private static final double DRIVE_BASE_RADIUS_METERS = 
+            Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
+
+    // used in lots of places, so create a local constant
+    private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
+
     // TODO get correct values
     public static final double PATH_PLANNER_MAX_VELOCITY = 5.0;
     public static final double PATH_PLANNER_MAX_ACCELERATION = 5.0;
-
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
-
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
-
-    private static final double DRIVE_BASE_RADIUS_METERS = Math
-            .sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
 
     public static final double ANGLE_TOLERANCE_DEGREES = 5;
 
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
-    private static final double THETA_PID_CONTROLLER_P = 4.0;
+    // private static final double THETA_PID_CONTROLLER_P = 4.0;
 
-    // the max velocity for drivetrain
+    // the max velocity and acceleration for drivetrain
     // adjusted when in precision driving mode
     private double m_maxVelocity = MAX_VELOCITY_METERS_PER_SECOND;
-
     private double m_maxAngularVelocity = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
 
     // if true, then robot is in field centric mode
@@ -86,25 +83,6 @@ public class DriveTrain extends SubsystemBase {
     private SlewRateLimiter m_yLimiter = new SlewRateLimiter(3);
     private SlewRateLimiter m_rotationLimiter = new SlewRateLimiter(3);
 
-    // FIXME Measure the drivetrain's maximum velocity or calculate the theoretical.
-    // The formula for calculating the theoretical maximum velocity is:
-    // <Motor free speed RPM> / 60 * <Drive reduction> * <Wheel diameter meters> *
-    // pi
-    // By default this value is setup for a Mk3 standard module using Falcon500s to
-    // drive.
-    // An example of this constant for a Mk4 L2 module with NEOs to drive is:
-    // 5880.0 / 60.0 / SdsModuleConfigurations.MK4_L2.getDriveReduction() *
-    // SdsModuleConfigurations.MK4_L2.getWheelDiameter() * Math.PI
-    /**
-     * The maximum velocity of the robot in meters per second.
-     * <p>
-     * This is a measure of how fast the robot should be able to drive in a straight
-     * line.
-     */
-    private static final double MAX_VELOCITY_METERS_PER_SECOND = 5880.0 / 60.0 *
-            NeoDriveController.DRIVE_REDUCTION * NeoDriveController.WHEEL_DIAMETER * Math.PI;
-
-    // TODO: tune and check this
     private static final double MAX_VELOCITY_PRECISION_MODE = MAX_VELOCITY_METERS_PER_SECOND / 6.0;
 
     /**
@@ -114,11 +92,11 @@ public class DriveTrain extends SubsystemBase {
      */
     // Here we calculate the theoretical maximum angular velocity. You can also
     // replace this with a measured amount.
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
-            Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
+            MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
 
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-            / 6.0;
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = 
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0;
 
     private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
             // Front left
@@ -152,12 +130,12 @@ public class DriveTrain extends SubsystemBase {
 
     private final Field2d m_field = new Field2d();
 
-    // PID controller for swerve
-    private final PIDController m_xController = new PIDController(X_PID_CONTROLLER_P, 0, 0);
-    private final PIDController m_yController = new PIDController(Y_PID_CONTROLLER_P, 0, 0);
-    private final ProfiledPIDController m_thetaController = new ProfiledPIDController(THETA_PID_CONTROLLER_P,
-            0, 0,
-            new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
+    // // PID controller for swerve
+    // private final PIDController m_xController = new PIDController(X_PID_CONTROLLER_P, 0, 0);
+    // private final PIDController m_yController = new PIDController(Y_PID_CONTROLLER_P, 0, 0);
+    // private final ProfiledPIDController m_thetaController = new ProfiledPIDController(THETA_PID_CONTROLLER_P,
+    //         0, 0,
+    //         new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
 
     // TODO: test if using MAX_VELOCITY_METERS_PER_SECOND of whole robot for Max
     // Module Speed per module is appropriate
@@ -167,30 +145,29 @@ public class DriveTrain extends SubsystemBase {
 
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
-                new frc.robot.swerve.FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
-                new frc.robot.swerve.NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
+                new FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
+                new NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
                         Constants.FRONT_LEFT_MODULE_STEER_ENCODER, Constants.FRONT_LEFT_MODULE_STEER_OFFSET));
 
-        m_swerveModules[1] = new frc.robot.swerve.SwerveModule("frontRight",
-                new frc.robot.swerve.FalconDriveController(Constants.FRONT_RIGHT_MODULE_DRIVE_MOTOR),
-                new frc.robot.swerve.NeoSteerController(Constants.FRONT_RIGHT_MODULE_STEER_MOTOR,
+        m_swerveModules[1] = new SwerveModule("frontRight",
+                new FalconDriveController(Constants.FRONT_RIGHT_MODULE_DRIVE_MOTOR),
+                new NeoSteerController(Constants.FRONT_RIGHT_MODULE_STEER_MOTOR,
                         Constants.FRONT_RIGHT_MODULE_STEER_ENCODER, Constants.FRONT_RIGHT_MODULE_STEER_OFFSET));
 
-        m_swerveModules[2] = new frc.robot.swerve.SwerveModule("backLeft",
-                new frc.robot.swerve.FalconDriveController(Constants.BACK_LEFT_MODULE_DRIVE_MOTOR),
-                new frc.robot.swerve.NeoSteerController(Constants.BACK_LEFT_MODULE_STEER_MOTOR,
+        m_swerveModules[2] = new SwerveModule("backLeft",
+                new FalconDriveController(Constants.BACK_LEFT_MODULE_DRIVE_MOTOR),
+                new NeoSteerController(Constants.BACK_LEFT_MODULE_STEER_MOTOR,
                         Constants.BACK_LEFT_MODULE_STEER_ENCODER, Constants.BACK_LEFT_MODULE_STEER_OFFSET));
 
-        m_swerveModules[3] = new frc.robot.swerve.SwerveModule("backRight",
-                new frc.robot.swerve.FalconDriveController(Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR),
-                new frc.robot.swerve.NeoSteerController(Constants.BACK_RIGHT_MODULE_STEER_MOTOR,
+        m_swerveModules[3] = new SwerveModule("backRight",
+                new FalconDriveController(Constants.BACK_RIGHT_MODULE_DRIVE_MOTOR),
+                new NeoSteerController(Constants.BACK_RIGHT_MODULE_STEER_MOTOR,
                         Constants.BACK_RIGHT_MODULE_STEER_ENCODER, Constants.BACK_RIGHT_MODULE_STEER_OFFSET));
 
         // initialize the odometry class
         // needs to be done after the Modules are created and initialized
         // TODO add in the uncertainty matrices for encoders vs vision measurements
-        m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
-                new Pose2d());
+        m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(), new Pose2d());
 
         m_aprilTagVision = apriltagVision;
         m_noteVision = noteVision;
