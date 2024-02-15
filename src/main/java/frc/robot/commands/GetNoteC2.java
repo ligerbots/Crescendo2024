@@ -53,9 +53,9 @@ public class GetNoteC2 extends AutoCommandInterface {
         m_driveTrain = driveTrain;
 
         addCommands(
-                m_driveTrain.FollowPath(() -> getInitialPath())
+                m_driveTrain.followPath(() -> getInitialPath())
                         .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)),
-                m_driveTrain.FollowPath(m_returnPath),
+                m_driveTrain.followPath(m_returnPath),
 
                 new InstantCommand(intake::intake)
         // .alongWith(new prepShooter())

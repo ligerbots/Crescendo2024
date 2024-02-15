@@ -417,13 +417,13 @@ public class DriveTrain extends SubsystemBase {
         return m_simChassisSpeeds;
     }
 
-    public Command FollowPath(PathPlannerPath path) {
+    public Command followPath(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
                 () -> FieldConstants.isRedAlliance(), this);
     }
 
-    public Command FollowPath(Supplier<PathPlannerPath> path) {
+    public Command followPath(Supplier<PathPlannerPath> path) {
 
         return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
                 PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
