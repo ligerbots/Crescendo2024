@@ -59,8 +59,8 @@ public class FieldConstants {
         return alliance.isPresent() && alliance.get() == Alliance.Red;
     }
 
-    public static final Translation2d SPEAKER = new Translation2d(0, 0); //TODO: replace with real pose
-    
+    public static final Translation2d SPEAKER = new Translation2d(0, 5.5461679526); //Pose should be correct
+
     public static Pose2d flipPose(Pose2d pose) {
         // flip pose when red
         if (isRedAlliance()) {
