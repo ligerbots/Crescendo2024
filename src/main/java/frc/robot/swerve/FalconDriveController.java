@@ -8,9 +8,13 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class FalconDriveController implements DriveController {
-    private static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
+    public static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
     // This is the L2 gearing
-    private static final double DRIVE_REDUCTION = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0);
+    public static final double DRIVE_REDUCTION = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0);
+
+    public static final double MAX_VELOCITY_METERS_PER_SECOND = 
+            6380.0 / 60.0 * DRIVE_REDUCTION * WHEEL_DIAMETER * Math.PI;
+    
     private static final double FALCON_DISTANCE_PER_UNIT = Math.PI * WHEEL_DIAMETER * DRIVE_REDUCTION / 2048.0 ;
     
     private static final double CURRENT_LIMIT = 35.0;  // Amps

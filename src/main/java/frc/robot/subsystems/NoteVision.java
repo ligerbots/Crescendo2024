@@ -34,6 +34,12 @@ public class NoteVision extends SubsystemBase {
     public static final boolean PLOT_NOTES = true;
     private static final double ALLOWED_POSITION_ERROR = .2;
 
+    // farthest away we can reliably see a NOTE
+    public static final double MAX_VISIBLE_DISTANCE = 2.0;  // meters
+    
+    // closest we can see a NOTE. Obscured by intake, or below field of view
+    public static final double MIN_VISIBLE_DISTANCE = 0.2;  // meters
+
     private static final String CAMERA_NAME = "NoteCamera";
     private final PhotonCamera m_noteCamera = new PhotonCamera(CAMERA_NAME);
 
