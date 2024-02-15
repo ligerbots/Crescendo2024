@@ -42,11 +42,11 @@ import frc.robot.swerve.*;
 public class DriveTrain extends SubsystemBase {
     // The left-to-right distance between the drivetrain wheels
     // Should be measured from center to center.
-    private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
+    private static final double TRACKWIDTH_METERS = Units.inchesToMeters(21.75);
 
     // The front-to-back distance between the drivetrain wheels.
     // Should be measured from center to center.
-    private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
+    private static final double WHEELBASE_METERS = Units.inchesToMeters(17.75);
 
     private static final double DRIVE_BASE_RADIUS_METERS = 
             Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
