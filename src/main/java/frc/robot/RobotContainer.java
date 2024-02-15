@@ -93,11 +93,11 @@ public class RobotContainer {
         m_chosenAuto.addOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
         m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.addOption("get two notes: C1 -> C2", new GetNotesC1_C2(m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("get two notes: C2 -> C1", new GetNotesC2_C1(m_driveTrain, m_noteVision, m_shooter, m_intake));
+        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
+        m_chosenAuto.addOption("get two notes generic: C1 -> C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
-        m_chosenAuto.addOption("get two notes generic: XC2 -> XC1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        Translation2d[] noteList2 = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
+        m_chosenAuto.addOption("get two notes generic: C2 -> C1", new GetMultiNoteGeneric(noteList2, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
