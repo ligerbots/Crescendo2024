@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -94,7 +95,10 @@ public class RobotContainer {
 
         m_chosenAuto.addOption("get two notes: C1 -> C2", new GetNotesC1_C2(m_driveTrain, m_noteVision, m_shooter, m_intake));
         m_chosenAuto.addOption("get two notes: C2 -> C1", new GetNotesC2_C1(m_driveTrain, m_noteVision, m_shooter, m_intake));
-        
+
+        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
+        m_chosenAuto.addOption("get two notes generic: XC2 -> XC1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }

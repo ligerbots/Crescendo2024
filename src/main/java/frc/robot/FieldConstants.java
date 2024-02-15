@@ -60,18 +60,9 @@ public class FieldConstants {
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_START_3 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
-    private static final Map<String, Translation2d> noteLookup= new HashMap<>() {
-    {
-        put("NOTE_C_1", FieldConstants.NOTE_C_1);
-        put("NOTE_C_2", FieldConstants.NOTE_C_2);
-        put("NOTE_C_3", FieldConstants.NOTE_C_3);
-        put("NOTE_C_4", FieldConstants.NOTE_C_4);
-        put("NOTE_C_5", FieldConstants.NOTE_C_5);
-    }};
-
     public static final Map<Translation2d, String> pathLookup = new HashMap<>() {
     {
-        put(FieldConstants.NOTE_C_1, "Start_2 to Note_C_1,Start_2 to Note_C_1,Note_C_1 to Shoot_1");
+        put(FieldConstants.NOTE_C_1, "Start_2 to Note_C_1, Start_2 to Note_C_1,Note_C_1 to Shoot_1");
         put(FieldConstants.NOTE_C_2, "Start_2 to Note_C_2,Shoot_1 to Note_C_2,Note_C_2 to Shoot_1");
         // put(FieldConstants.NOTE_C_3, "");
         // put(FieldConstants.NOTE_C_4, "";

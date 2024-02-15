@@ -24,9 +24,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-// Note that AutoCommandInterface is a SequentialCommandGroup
 public class GetNotePathFactory extends AutoCommandInterface {
-    /** Creates a new GetNoteC2. */
 
     private static final Map<String, Translation2d> noteLookup = new HashMap<>() {
         {
@@ -40,12 +38,6 @@ public class GetNotePathFactory extends AutoCommandInterface {
 
     List<PathPlannerPath> m_pathList;
 
-    // private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to
-    // Note_C_2");
-    // private PathPlannerPath m_middlePath = DriveTrain.loadPath("Shoot_1 to
-    // Note_C_2");
-    // private PathPlannerPath m_returnPath = DriveTrain.loadPath("Note_C_2 to
-    // Shoot_1");
 
     private PathPlannerPath m_longPath;
     private PathPlannerPath m_middlePath;
@@ -62,15 +54,6 @@ public class GetNotePathFactory extends AutoCommandInterface {
         m_middlePath = m_pathList.get(1);
         m_returnPath = m_pathList.get(2);
 
-        addCommands(
-                m_driveTrain.FollowPath(() -> getInitialPath())
-                        .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_wantedNote, this)),
-                m_driveTrain.FollowPath(m_returnPath),
-
-                new InstantCommand(intake::intake)
-        // .alongWith(new prepShooter())
-
-        );
     }
 
     public Pose2d getInitialPose() {
