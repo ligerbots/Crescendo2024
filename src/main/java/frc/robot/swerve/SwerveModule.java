@@ -78,6 +78,7 @@ public class SwerveModule {
 
     public void updateSmartDashboard() {
         m_steerController.updateSmartDashboard(String.format("drivetrain/%s/steer", m_moduleName));
+        m_driveController.updateSmartDashboard(String.format("drivetrain/%s/drive", m_moduleName));
     }
 
     public void syncAngleEncoders(boolean dontCheckTimer) {

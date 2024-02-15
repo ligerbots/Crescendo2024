@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class FalconDriveController implements DriveController {
     private static final double WHEEL_DIAMETER = Units.inchesToMeters(4.0);
@@ -45,5 +46,10 @@ public class FalconDriveController implements DriveController {
     @Override
     public double getWheelDistance() {
         return m_motor.getPosition().getValueAsDouble() * FALCON_DISTANCE_PER_UNIT;
+    }
+
+    @Override
+    public void updateSmartDashboard(String sdPrefix) {
+        SmartDashboard.putNumber(sdPrefix + "/speed", getStateVelocity());
     }
 }
