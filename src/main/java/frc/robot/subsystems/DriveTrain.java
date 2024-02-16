@@ -78,6 +78,9 @@ public class DriveTrain extends SubsystemBase {
     // if true, then robot is in precision mode
     private boolean m_precisionMode = true;
 
+    // store status of whether we are on goal for turning while driving
+    private boolean m_onGoalForActiveTurn;
+
     // limit the acceleration from 0 to full power to take 1/3 second.
     private SlewRateLimiter m_xLimiter = new SlewRateLimiter(3);
     private SlewRateLimiter m_yLimiter = new SlewRateLimiter(3);
@@ -142,7 +145,7 @@ public class DriveTrain extends SubsystemBase {
     private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
-
+            
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
@@ -462,5 +465,13 @@ public class DriveTrain extends SubsystemBase {
         Pose2d robotPose = getPose();
         m_aprilTagVision.updateSimulation(robotPose);
         m_noteVision.updateSimulation(robotPose);
+    }
+
+    public boolean getOnGoalForActiveTurn() {
+        return m_onGoalForActiveTurn;
+    }
+
+    public void setOnGoalForActiveTurn(boolean value) {
+        m_onGoalForActiveTurn = value;
     }
 }
