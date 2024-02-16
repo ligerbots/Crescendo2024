@@ -37,6 +37,8 @@ public class FieldConstants {
     public static final Translation2d NOTE_S_2 = new Translation2d(NOTE_S_X, 5.52);
     public static final Translation2d NOTE_S_3 = new Translation2d(NOTE_S_X, 7.00);   
    
+    public static final Translation2d SPEAKER = new Translation2d(0, 5.54);
+
     public static final Pose2d ROBOT_NOTE_C_1 = new Pose2d(7.85, 0.78, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_C_2 = new Pose2d(7.85, 2.44, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_C_3 = new Pose2d(7.85, 4.10, Rotation2d.fromDegrees(0));
