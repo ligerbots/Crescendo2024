@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
-        // m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
+        m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
         boolean isRedAlliance = FieldConstants.isRedAlliance();
         AutoCommandInterface autoCommand = m_robotContainer.getAutonomousCommand();
