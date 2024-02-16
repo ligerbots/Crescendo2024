@@ -92,6 +92,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
+        SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
 
         setCoastMode();
 
