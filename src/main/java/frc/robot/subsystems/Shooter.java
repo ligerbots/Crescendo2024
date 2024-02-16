@@ -59,7 +59,7 @@ public class Shooter extends SubsystemBase {
     private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
 
-    //Used for is on target
+    // Used for is on target
     private double m_leftGoalRPM;
     private double m_rightGoalRPM;
 
@@ -181,6 +181,10 @@ public class Shooter extends SubsystemBase {
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
 
+    public boolean rpmWithinTolerance() {
+        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
+    }
+
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
     }
@@ -228,9 +232,5 @@ public class Shooter extends SubsystemBase {
             setSysIdRoutine();
 
         return m_sysIdRoutine.dynamic(direction);
-    }
-
-    public boolean shooterSpeedIsWithinTolerence() {
-        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
     }
 }

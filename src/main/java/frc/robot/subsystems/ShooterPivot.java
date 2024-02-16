@@ -134,6 +134,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
     }
 
+    public boolean angleWithinTolerance() {
+        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+    }
+
     public void resetGoal() {
         setAngle(getAngleRadians());
     }
@@ -145,9 +149,5 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
             m_motor.stopMotor();
         } else
             m_motor.setIdleMode(IdleMode.kBrake);
-    }
-
-    public boolean isWithinTolerence() {
-        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 }
