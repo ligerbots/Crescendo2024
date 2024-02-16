@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -7,11 +9,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.subsystems.DriveTrain;
 
 public class FieldConstants {
 
     public static final double FIELD_LENGTH = 16.54;
     public static final double FIELD_WIDTH = 8.21;
+
+    public static final double BLUE_WHITE_LINE_X_METERS = 1.93294;
+    public static final double BLUE_WING_LINE_X_METERS = 5.87248;
 
     // C = center
     // S = stage
@@ -43,9 +49,9 @@ public class FieldConstants {
     public static final Pose2d ROBOT_NOTE_S_2 = new Pose2d(2.43, 5.55, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_S_3 = new Pose2d(2.49, 6.81, Rotation2d.fromDegrees(161.94));
 
-    // these are all placeholders and subject to change 
-    public static final Pose2d ROBOT_SHOOT_M_1 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_SHOOT_M_2 = new Pose2d(0, 0 ,Rotation2d.fromDegrees(0));
+    // these are all placeholders and subject to change
+    public static final Pose2d ROBOT_SHOOT_M_1 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+    public static final Pose2d ROBOT_SHOOT_M_2 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
     public static final Pose2d ROBOT_NOTE_CHECK_1 = new Pose2d(NOTE_CHECK_X, 0.78, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_CHECK_2 = new Pose2d(NOTE_CHECK_X, 2.44, Rotation2d.fromDegrees(0));
