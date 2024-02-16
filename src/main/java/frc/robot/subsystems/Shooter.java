@@ -158,6 +158,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/rightRpm", getRightRpm());
         SmartDashboard.putNumber("shooter/leftCurrent", m_leftShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
+        SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
+        SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
     }
 
     public double getLeftRpm() {
