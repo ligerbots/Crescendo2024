@@ -48,6 +48,8 @@ public class DriveTrain extends SubsystemBase {
     // Should be measured from center to center.
     private static final double WHEELBASE_METERS = Units.inchesToMeters(17.75);
 
+    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(-3), 0 );
+
     private static final double DRIVE_BASE_RADIUS_METERS = 
             Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
 
@@ -296,7 +298,7 @@ public class DriveTrain extends SubsystemBase {
         // SmartDashboard.putNumber("drivetrain/chassisAngle",
         // Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond));
 
-        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
+        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds, ROTATION_CENTER_OFFSET);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
         for (int i = 0; i < 4; i++) {
             m_swerveModules[i].set(
