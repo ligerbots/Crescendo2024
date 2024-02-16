@@ -60,9 +60,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
     private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
     private final AnalogPotentiometer m_stringPotentiometer;
-
+    //private final double STOW_HEIGHT_VALUE = 5.0; // check if it's all right
     private final SparkPIDController m_PIDController;
-
     private double m_goal = 0;
 
     /** Creates a new Elevator. */
@@ -152,4 +151,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
         } else
             m_motor.setIdleMode(IdleMode.kBrake);
     }
+
+    //public double getMainHeightValue(){
+        //return STOW_HEIGHT_VALUE; // ask what is going on here
+    //}
 }
