@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
@@ -59,7 +58,6 @@ public class DriveTrain extends SubsystemBase {
     private static final double DRIVE_BASE_RADIUS_METERS = Math.sqrt(TRACKWIDTH_METERS*TRACKWIDTH_METERS + WHEELBASE_METERS*WHEELBASE_METERS) / 2.0;
 
     public static final double ANGLE_TOLERANCE_DEGREES = 5;
-    private boolean m_onGoalForActiveTurnRumble;
     
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
@@ -77,6 +75,9 @@ public class DriveTrain extends SubsystemBase {
 
     // if true, then robot is in precision mode
     private boolean m_precisionMode = true;
+
+    // store status of whether we are on goal for turning while driving
+    private boolean m_onGoalForActiveTurn;
 
     // limit the acceleration from 0 to full power to take 1/3 second.
     private SlewRateLimiter m_xLimiter = new SlewRateLimiter(3);
@@ -485,11 +486,11 @@ public class DriveTrain extends SubsystemBase {
         m_noteVision.updateSimulation(robotPose);
     }
 
-    public boolean getOnGoalForActiveTurnRumble() {
-        return m_onGoalForActiveTurnRumble;
+    public boolean getOnGoalForActiveTurn() {
+        return m_onGoalForActiveTurn;
     }
 
-    public void setOnGoalForActiveTurnRumble(boolean value) {
-        m_onGoalForActiveTurnRumble = value;
+    public void setOnGoalForActiveTurn(boolean value) {
+        m_onGoalForActiveTurn = value;
     }
 }

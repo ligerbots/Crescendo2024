@@ -60,7 +60,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
         m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), -speed);
 
         // Record whether at the right heading, so that other commands can check
-        m_driveTrain.setOnGoalForActiveTurnRumble(
+        m_driveTrain.setOnGoalForActiveTurn(
             Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
     }
 

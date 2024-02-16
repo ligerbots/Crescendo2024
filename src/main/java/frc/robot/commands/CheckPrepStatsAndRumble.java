@@ -38,7 +38,7 @@ public class CheckPrepStatsAndRumble extends Command {
     @Override
     public void execute() {
         if (m_shooterPivot.isWithinTolerence() && m_shooter.shooterSpeedIsWithinTolerence()
-                && m_driveTrain.getOnGoalForActiveTurnRumble()) {
+                && m_driveTrain.getOnGoalForActiveTurn()) {
             // Sets rumble
             m_controller.setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY);
         } else {
