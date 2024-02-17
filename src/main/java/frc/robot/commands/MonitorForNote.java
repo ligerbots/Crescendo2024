@@ -37,13 +37,16 @@ public class MonitorForNote extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        System.out.println("Monitor for note starting:" + m_notePose);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        
         Pose2d robotPose = m_poseProvider.get();
         m_distanceToNote = robotPose.getTranslation().getDistance(m_notePose);
+        System.out.println("Monitor for note execute:" + m_notePose + "distance:" + m_distanceToNote);
 
         if (m_distanceToNote >= NoteVision.MIN_VISIBLE_DISTANCE && m_distanceToNote <= NoteVision.MAX_VISIBLE_DISTANCE) {
             if (m_noteVision.checkForNote(robotPose, m_notePose)) 
@@ -63,8 +66,10 @@ public class MonitorForNote extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
+
         if (m_distanceToNote < MIN_DISTANCE_END_CHECKS) {
             // got to this distance seeing the NOTE, so just go for it. No more checks
+            System.out.println("Monitor for note return success");
             return true;
         }
 

@@ -8,25 +8,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start_2 to NoteCheck_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "Note_C_1 to Shoot_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Shoot_1 to NoteCheck_2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Note_C_2 to shoot_1"
           }
         }
       ]
