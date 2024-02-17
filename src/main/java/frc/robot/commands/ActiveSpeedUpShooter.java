@@ -4,49 +4,45 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.Timer;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 
-public class RunIntakeWaitNote extends Command {
+public class ActiveSpeedUpShooter extends Command {
 
-    static final double TIME_TO_RUN_INTAKE = 3.0;
-    Intake m_intake;
-    Timer m_timer = new Timer();
+    private final Shooter m_shooter;
+    private final DoubleSupplier m_leftRpm;
+    private final DoubleSupplier m_rightRpm;
 
-    /** Creates a new RunIntakeWaitNote. */
-    public RunIntakeWaitNote(Intake intake) {
-        // Use addRequirements() here to declare subsystem dependencies.
-        m_intake = intake;
+    /** Creates a new ActiveSpeedUpShooter. */
+    public ActiveSpeedUpShooter(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
+        m_shooter = shooter;
+        m_leftRpm = leftRpm;
+        m_rightRpm = rightRpm;
 
-        addRequirements(m_intake);
+        addRequirements(shooter);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_timer.reset();
-        m_timer.start();
-
-        m_intake.intake();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        m_shooter.setShooterRpms(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble());
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        m_intake.stop(); 
     }
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return m_timer.hasElapsed(TIME_TO_RUN_INTAKE);
-        // another way could be a beam break sensor.
-        // another way could be how the motors slow down
+        return false;
     }
 }

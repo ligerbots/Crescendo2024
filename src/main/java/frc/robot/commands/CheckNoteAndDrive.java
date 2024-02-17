@@ -62,10 +62,10 @@ public class CheckNoteAndDrive extends Command {
         Translation2d wantedNoteTranslation = NOTE_POSITIONS.get(m_wantedNote);
 
         if (m_noteVision.checkForNote(m_driveTrain.getPose(), wantedNoteTranslation))
-            m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_wantedNote));
+            m_followTrajectory = m_driveTrain.followPath(ROBOT_PATHS.get(m_wantedNote));
 
         if (m_followTrajectory == null)
-            m_followTrajectory = m_driveTrain.makePathFollowingCommand(ROBOT_PATHS.get(m_backUpNote));
+            m_followTrajectory = m_driveTrain.followPath(ROBOT_PATHS.get(m_backUpNote));
 
         m_followTrajectory.initialize();
     }

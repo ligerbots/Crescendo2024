@@ -7,4 +7,7 @@ public interface DriveController {
     public double getStateVelocity();
     // get wheel distance
     public double getWheelDistance();
+        
+    // update the smart dashboard
+    public void updateSmartDashboard(String sdPrefix);
 }
