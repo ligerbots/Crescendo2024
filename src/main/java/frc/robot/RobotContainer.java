@@ -52,6 +52,8 @@ public class RobotContainer {
             ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
             ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
 
+        m_controller.b().onTrue(new Stow(m_shooterPivot, m_elevator, ()->Elevator.ELEVATOR_MIN_LENGTH_METERS, ()->ShooterPivot.MAX_ANGLE));
+
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, ()->Elevator.ONSTAGE_RAISE_ELEVATOR));
         

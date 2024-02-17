@@ -19,12 +19,13 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double ELEVATOR_GEAR_REDUCTION = 1/4; //TODO: Check if changed on real robot
 
-    private static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
-    private static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
+    public static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
+    public static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
     // Tolerance for commands
     public static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
-
+    
+    
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
     private static final double ELEVATOR_MAX_VEL_METER_PER_SEC = Units.inchesToMeters(100.0); //TODO: Find actual value
@@ -50,6 +51,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants 
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
+
 
         // Define the motor and encoders
     private final CANSparkMax m_motor;
