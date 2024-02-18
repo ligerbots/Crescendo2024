@@ -18,10 +18,9 @@ import frc.robot.subsystems.ShooterPivot;
 public class PrepareSpeakerShot extends ParallelCommandGroup {
     private final DriveTrain m_driveTrain;
 
-    /** Creates a new PrepareShooter. */
-    public PrepareSpeakerShot(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
-            XboxController xboxController, 
-            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
+    /** Creates a new PrepareSpeakerShot. */
+    public PrepareSpeakerShot(DriveTrain driveTrain, Shooter shooter, ShooterPivot shooterPivot,
+            XboxController xboxController, DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
         m_driveTrain = driveTrain;
 
         addCommands(
