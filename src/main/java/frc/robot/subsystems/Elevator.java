@@ -19,12 +19,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double ELEVATOR_GEAR_REDUCTION = 1/4; //TODO: Check if changed on real robot
 
-    public static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
-    public static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
+    private static final double ELEVATOR_MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
+    private static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
     // Tolerance for commands
     public static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
-    
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
@@ -35,7 +34,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
 
     private static final double ELEVATOR_METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*ELEVATOR_GEAR_REDUCTION); //TODO: Double check robot if correct when built
-
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
