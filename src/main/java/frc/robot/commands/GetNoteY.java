@@ -105,18 +105,19 @@ public class GetNoteY extends AutoCommandInterface {
         Pose2d pose = m_driveTrain.getPose();
         Pose2d poseBlue = FieldConstants.flipPose(pose);
 
-        // if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
-        //     Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
-        //     List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
-        //             new PathPoint(m_targetNote));
-        //     return PathPlannerPath.fromPathPoints(
-        //             pathPoints, // position, heading
-        //             new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
-        //                     DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
-        //                     DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
-        //             new GoalEndState(0, heading, true)// velocity, acceleration
-        //     );
-        // }
+        // this part used when in center note area, if intended center note is not found
+        if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
+            Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
+            List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
+                    new PathPoint(m_targetNote));
+            return PathPlannerPath.fromPathPoints(
+                    pathPoints, // position, heading
+                    new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
+                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
+                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
+                    new GoalEndState(0, heading, true)// velocity, acceleration
+            );
+        }
 
         Pose2d closestPathStart = pose.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         return m_candidateStartPaths.get(closestPathStart);       
