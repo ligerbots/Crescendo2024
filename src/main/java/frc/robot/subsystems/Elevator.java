@@ -38,7 +38,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
     private static final double ELEVATOR_K_P = 0.1; //TODO: Need to tune
-    // private static final double ELEVATOR_K_P1 = 100;
     private static final double ELEVATOR_K_I = 0.0;
     private static final double ELEVATOR_K_D = 0.0;
     private static final double ELEVATOR_K_FF = 0.0;
@@ -51,16 +50,16 @@ public class Elevator extends TrapezoidProfileSubsystem {
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
     public static final double STOW_LENGTH = ELEVATOR_MIN_LENGTH_METERS;
 
-        // Define the motor and encoders
-    private final CANSparkMax m_motor;
-    private final RelativeEncoder m_encoder;
-
     // initializing Potentiometer
     private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
     private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
     private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
+
+    // Define the motor and encoders
+    private final CANSparkMax m_motor;
+    private final RelativeEncoder m_encoder;
+
     private final AnalogPotentiometer m_stringPotentiometer;
-    //private final double STOW_HEIGHT_VALUE = 5.0; // check if it's all right
     private final SparkPIDController m_PIDController;
     private double m_goal = 0;
 
