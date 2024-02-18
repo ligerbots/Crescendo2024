@@ -9,11 +9,11 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 
-public class SetShooterSpeedAndWait extends Command {
+public class SetShooterRpmsAndWait extends Command {
     private final Shooter m_shooter;
     private final Supplier<Shooter.ShooterValues> m_valueSupplier;
 
-    public SetShooterSpeedAndWait(Shooter shooter, Supplier<Shooter.ShooterValues> valueSupplier) {
+    public SetShooterRpmsAndWait(Shooter shooter, Supplier<Shooter.ShooterValues> valueSupplier) {
         addRequirements(shooter);
         m_shooter = shooter;
         m_valueSupplier = valueSupplier;

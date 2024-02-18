@@ -22,7 +22,7 @@ public class TestShoot extends SequentialCommandGroup {
         m_rightRpm = rightRpm;
 
         addCommands(
-                new SetShooterSpeedAndWait(shooter, this::getShootValues),
+                new SetShooterRpmsAndWait(shooter, this::getShootValues),
                 new InstantCommand(shooter::turnOnFeeder),
                 new WaitCommand(2),
                 new InstantCommand(shooter::turnOffShooter));
