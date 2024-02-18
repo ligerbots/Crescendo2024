@@ -194,32 +194,38 @@ public class NoteVision extends SubsystemBase {
                 FieldConstants.NOTE_C_3,
                 FieldConstants.NOTE_C_4,
                 FieldConstants.NOTE_C_5,
+                // Blue Stage Notes
                 FieldConstants.NOTE_S_1,
                 FieldConstants.NOTE_S_2,
-                FieldConstants.NOTE_S_3)) {
+                FieldConstants.NOTE_S_3,
+                // Red Stage Notes
+                FieldConstants.flipTranslation(FieldConstants.NOTE_S_1),
+                FieldConstants.flipTranslation(FieldConstants.NOTE_S_2),
+                FieldConstants.flipTranslation(FieldConstants.NOTE_S_3)
+                )) {
             m_visionSim.addVisionTargets("note",
                     new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
         }
     }
 
-    // --- Routines to plot the vision solutions on a Field2d ---------
+    // // --- Routines to plot the vision solutions on a Field2d ---------
 
-    private void clearTagSolutions(Field2d field) {
-        if (field == null)
-            return;
-        field.getObject("tagSolutions").setPoses();
-        field.getObject("visionPose").setPoses();
-        field.getObject("visionAltPose").setPoses();
-        field.getObject("visibleTagPoses").setPoses();
-    }
+    // private void clearTagSolutions(Field2d field) {
+    //     if (field == null)
+    //         return;
+    //     field.getObject("tagSolutions").setPoses();
+    //     field.getObject("visionPose").setPoses();
+    //     field.getObject("visionAltPose").setPoses();
+    //     field.getObject("visibleTagPoses").setPoses();
+    // }
 
-    private void plotPose(Field2d field, String label, Pose2d pose) {
-        if (field == null)
-            return;
-        if (pose == null)
-            field.getObject(label).setPoses();
-        else
-            field.getObject(label).setPose(pose);
-    }
+    // private void plotPose(Field2d field, String label, Pose2d pose) {
+    //     if (field == null)
+    //         return;
+    //     if (pose == null)
+    //         field.getObject(label).setPoses();
+    //     else
+    //         field.getObject(label).setPose(pose);
+    // }
 
 }
