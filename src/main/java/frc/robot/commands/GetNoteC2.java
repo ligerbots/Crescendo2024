@@ -46,7 +46,6 @@ public class GetNoteC2 extends AutoCommandInterface {
     private PathPlannerPath m_returnPath = m_pathList.get(2);
     
     private DriveTrain m_driveTrain;
-
     private final Translation2d m_targetNote = FieldConstants.NOTE_C_2;
 
     public GetNoteC2(DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {

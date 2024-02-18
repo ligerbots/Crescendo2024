@@ -64,6 +64,10 @@ public class FieldConstants {
         return alliance.isPresent() && alliance.get() == Alliance.Red;
     }
 
+    public static boolean isCenterNote(Translation2d targetNote) {
+        return Math.abs(NOTE_C_X - targetNote.getX()) < 0.1;
+    }
+
     public static Pose2d flipPose(Pose2d pose) {
         // flip pose when red
         if (isRedAlliance()) {

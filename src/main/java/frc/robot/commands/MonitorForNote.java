@@ -44,6 +44,7 @@ public class MonitorForNote extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        
         Pose2d robotPose = m_poseProvider.get();
         m_distanceToNote = robotPose.getTranslation().getDistance(m_notePosition);
 
@@ -65,6 +66,7 @@ public class MonitorForNote extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
+
         if (m_distanceToNote < MIN_DISTANCE_END_CHECKS) {
             // got to this distance seeing the NOTE, so just go for it. No more checks
             return true;
