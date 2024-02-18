@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
     // This is negative to push the note out slowly
     public static final double BACKUP_FEED_SPEED = -0.1;
 
-    public static final double RPM_TOLERANCE = 100; // TODO Tune this later
+    public static final double RPM_TOLERANCE = 200; // TODO Tune this later
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
@@ -66,6 +66,8 @@ public class Shooter extends SubsystemBase {
     // Used for is on target
     private double m_leftGoalRPM;
     private double m_rightGoalRPM;
+
+    private boolean m_speakerShootMode = true;
 
     // lookup table for upper hub speeds
     public static class ShooterValues {
@@ -217,6 +219,14 @@ public class Shooter extends SubsystemBase {
 
     public void turnOffFeeder() {
         setFeederSpeed(0);
+    }
+
+    public void setSpeakerShootMode(boolean mode) {
+        m_speakerShootMode = mode;
+    }
+
+    public boolean getSpeakerShootMode() {
+        return m_speakerShootMode;
     }
 
     // Data collection for SysId

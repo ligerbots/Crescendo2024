@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import frc.robot.FieldConstants;
@@ -24,9 +25,12 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         m_driveTrain = driveTrain;
 
         addCommands(
+                // set shoot mode, so that TriggerShot can be a single command/button
+                new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
                 new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, joystickXSupplier, joystickYSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
+                // NOTE do NOT turn off the shooter wheels
         );
     }
 

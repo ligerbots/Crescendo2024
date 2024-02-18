@@ -51,6 +51,8 @@ public class RobotContainer {
         m_controller.a().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
         m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode, m_driveTrain::togglePrecisionMode, m_driveTrain));
 
+        // need buttons for PrepareSpeakerShot, TriggerShot and PrepareAmpShot
+        
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
 
