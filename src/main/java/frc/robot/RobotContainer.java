@@ -42,8 +42,8 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Intake
-        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-        m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+        m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
+        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
         m_controller.y().onTrue(new TestShootSpeed(m_shooter,
             () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
