@@ -6,7 +6,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.DriverStation;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
 // LigerBots DriveController for Swerve
@@ -78,4 +78,8 @@ public class NeoDriveController implements DriveController {
         return m_encoder.getPosition();
     }
 
+    @Override
+    public void updateSmartDashboard(String sdPrefix) {
+        SmartDashboard.putNumber(sdPrefix + "/speed", getStateVelocity());
+    }
 }

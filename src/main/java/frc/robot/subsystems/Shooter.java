@@ -63,28 +63,33 @@ public class Shooter extends SubsystemBase {
     private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
     private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
 
+    // Used for is on target
+    private double m_leftGoalRPM;
+    private double m_rightGoalRPM;
+
     // lookup table for upper hub speeds
-    public static class ShooterSpeeds {
-        public double top, bottom, chute;
+    public static class ShooterValues {
+        public double leftRPM, rightRPM, shootAngle;
         
-        public ShooterSpeeds(double top, double bottom, double chute) {
-            this.top = top;
-            this.bottom = bottom;
-            this.chute = chute;
+        public ShooterValues(double leftRPM, double rightRPM, double shootAngle) {
+            this.leftRPM = leftRPM;
+            this.rightRPM = rightRPM;
+            this.shootAngle = shootAngle;
         }
 
-        public ShooterSpeeds interpolate(ShooterSpeeds other, double ratio) {
-            return new ShooterSpeeds(
-                    top + (other.top - top) * ratio,
-                    bottom + (other.bottom - bottom) * ratio,
-                    chute + (other.chute - chute) * ratio);
+        public ShooterValues interpolate(ShooterValues other, double ratio) {
+            return new ShooterValues(
+                    leftRPM + (other.leftRPM - leftRPM) * ratio,
+                    rightRPM + (other.rightRPM - rightRPM) * ratio,
+                    shootAngle + (other.shootAngle - shootAngle) * ratio);
         }
     }
 
-    static final TreeMap<Double, ShooterSpeeds> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, FEEDER_SPEED)),      // actually lower hub, but safer to include
-            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, FEEDER_SPEED)))); // Revere
-            
+    static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
+        //TODO: Need to put in real values here
+        //Key is distance; ALL UNITS METRIC / RAD
+            Map.entry(0.3048, new ShooterValues(9.144, 9.144, 1.42284)), //Example values should work
+            Map.entry(4.8768, new ShooterValues(13.716, 13.716, 0.93382))));
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
     public Shooter() {
@@ -124,9 +129,9 @@ public class Shooter extends SubsystemBase {
         pidController.setOutputRange(-1.0, 1.0);
     }
 
-    public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
-        Map.Entry<Double, ShooterSpeeds> before = shooterSpeeds.floorEntry(distance);
-        Map.Entry<Double, ShooterSpeeds> after = shooterSpeeds.ceilingEntry(distance);
+    public static ShooterValues calculateShooterSpeeds(double distance) {
+        Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
+        Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
             if (after == null) {
                 return null; // this should never happen b/c shooterSpeeds should have at least 1 element
@@ -149,8 +154,12 @@ public class Shooter extends SubsystemBase {
     // periodically update the values of motors for shooter to SmartDashboard
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("shooter/left_rpm", getLeftRpm());
-        SmartDashboard.putNumber("shooter/right_rpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/leftRpm", getLeftRpm());
+        SmartDashboard.putNumber("shooter/rightRpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/leftCurrent", m_leftShooterMotor.getOutputCurrent());
+        SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
+        SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
+        SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
     }
 
     public double getLeftRpm() {
@@ -172,8 +181,16 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
         SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
 
+        //Used in isWithinTolerenceFunc
+        m_leftGoalRPM = leftRpm;
+        m_rightGoalRPM = rightRpm;
+
         m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
+    }
+
+    public boolean rpmWithinTolerance() {
+        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
     }
 
     public void turnOnFeeder() {

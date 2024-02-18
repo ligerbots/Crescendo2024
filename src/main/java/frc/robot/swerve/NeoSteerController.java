@@ -157,18 +157,20 @@ public class NeoSteerController implements SteerController {
 
     @Override
     public void updateSmartDashboard(String sdPrefix) {
-        SmartDashboard.putNumber(sdPrefix + "/angle", getStateAngle().getDegrees());
-        SmartDashboard.putNumber(sdPrefix + "/cancoder", Math.toDegrees(m_absoluteEncoder.getAbsoluteAngleRadians()));
+        Rotation2d stateAngle = getStateAngle();
+        SmartDashboard.putNumber(sdPrefix + "/angle", stateAngle.getDegrees());
+        double cancoderRadians = m_absoluteEncoder.getAbsoluteAngleRadians();
+        SmartDashboard.putNumber(sdPrefix + "/cancoder", Math.toDegrees(cancoderRadians));
 
         // Compute the calibration angle for this module
         // Only use the value if the wheels are physically aligned forward, with bevel gear on the left
         // NOTE: we want a negative angle, -2PI -> 0
-        double calibAngle = m_absoluteEncoder.getOffsetAngleRadians() - m_absoluteEncoder.getAbsoluteAngleRadians();
+        double calibAngle = m_absoluteEncoder.getOffsetAngleRadians() - cancoderRadians;
         if (calibAngle > 0.0) calibAngle -= TWO_PI;
         if (calibAngle < -TWO_PI) calibAngle += TWO_PI;
         SmartDashboard.putNumber(sdPrefix + "/calibrationAngle", Math.toDegrees(calibAngle));
 
-        double offset = getStateAngle().getRadians() - m_absoluteEncoder.getAbsoluteAngleRadians();
+        double offset = stateAngle.getRadians() - cancoderRadians;
         if (offset > Math.PI) offset -= TWO_PI;
         if (offset < -Math.PI) offset += TWO_PI;
         SmartDashboard.putNumber(sdPrefix + "/cancoder_offset", Math.toDegrees(offset));

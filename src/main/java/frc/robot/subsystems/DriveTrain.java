@@ -42,11 +42,13 @@ import frc.robot.swerve.*;
 public class DriveTrain extends SubsystemBase {
     // The left-to-right distance between the drivetrain wheels
     // Should be measured from center to center.
-    private static final double TRACKWIDTH_METERS = Units.inchesToMeters(19.5625);
+    private static final double TRACKWIDTH_METERS = Units.inchesToMeters(21.75);
 
     // The front-to-back distance between the drivetrain wheels.
     // Should be measured from center to center.
-    private static final double WHEELBASE_METERS = Units.inchesToMeters(24.625);
+    private static final double WHEELBASE_METERS = Units.inchesToMeters(17.75);
+
+    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(-3), 0 );
 
     private static final double DRIVE_BASE_RADIUS_METERS = 
             Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
@@ -77,6 +79,9 @@ public class DriveTrain extends SubsystemBase {
 
     // if true, then robot is in precision mode
     private boolean m_precisionMode = true;
+
+    // store status of whether we are on goal for turning while driving
+    private boolean m_onGoalForActiveTurn;
 
     // limit the acceleration from 0 to full power to take 1/3 second.
     private SlewRateLimiter m_xLimiter = new SlewRateLimiter(3);
@@ -142,7 +147,7 @@ public class DriveTrain extends SubsystemBase {
     private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
-
+            
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
@@ -296,7 +301,7 @@ public class DriveTrain extends SubsystemBase {
         // SmartDashboard.putNumber("drivetrain/chassisAngle",
         // Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond));
 
-        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
+        SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(chassisSpeeds, ROTATION_CENTER_OFFSET);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
         for (int i = 0; i < 4; i++) {
             m_swerveModules[i].set(
@@ -423,15 +428,11 @@ public class DriveTrain extends SubsystemBase {
         // Have the vision system update based on the Apriltags, if seen
         // need to add the pipeline result
         m_aprilTagVision.updateOdometry(m_odometry, m_field);
-        m_field.setRobotPose(m_odometry.getEstimatedPosition());
 
-        // Pose2d pose = m_odometry.getEstimatedPosition();
-        // SmartDashboard.putNumber("drivetrain/xPosition", pose.getX());
-        // SmartDashboard.putNumber("drivetrain/yPosition", pose.getY());
-        // SmartDashboard.putNumber("drivetrain/heading",
-        // pose.getRotation().getDegrees());
-        // SmartDashboard.putNumber("drivetrain/gyro",
-        // getGyroscopeRotation().getDegrees());
+        // log the pose into the Field2d object
+        m_field.setRobotPose(m_odometry.getEstimatedPosition());
+        // also get the gyro, just in case
+        SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
 
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
         // SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
@@ -466,5 +467,13 @@ public class DriveTrain extends SubsystemBase {
         Pose2d robotPose = getPose();
         m_aprilTagVision.updateSimulation(robotPose);
         m_noteVision.updateSimulation(robotPose);
+    }
+
+    public boolean getOnGoalForActiveTurn() {
+        return m_onGoalForActiveTurn;
+    }
+
+    public void setOnGoalForActiveTurn(boolean value) {
+        m_onGoalForActiveTurn = value;
     }
 }

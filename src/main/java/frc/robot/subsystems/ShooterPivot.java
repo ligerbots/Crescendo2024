@@ -9,6 +9,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -18,13 +19,19 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class ShooterPivot extends TrapezoidProfileSubsystem {
-    private static final double MAX_ANGLE = Math.toRadians(30.0); //TODO set for 2024
-    private static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO set for 2024
-    //NOTE: All constants were taken from the 2023 arm 
+    public static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO set for 2024
+    public static final double MAX_ANGLE = Math.toRadians(30.0); //TODO set for 2024
+    // NOTE: All constants were taken from the 2023 arm 
+    // Note: Current values for limits are refrenced with the shooter being flat
+    // facing fowards as zero.
+    // As of writing the above note we still may want to change the limits
     public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
 
     private static final int CURRENT_LIMIT = 10;
 
+    // position constants for commands
+    public static final double STOW_ANGLE = MAX_ANGLE;
+    
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
@@ -49,6 +56,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
     private final RelativeEncoder m_encoder;
+
+    // Used for checking if on goal
+    private double m_goalRadians;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder absEncoder) {
@@ -86,6 +96,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
+        SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
 
         setCoastMode();
 
@@ -118,14 +129,18 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // needs to be public so that commands can get the restricted angle
     public static double limitPivotAngle(double angle) {
-        return Math.min(MAX_ANGLE, Math.max(MIN_ANGLE, angle));
+        return MathUtil.clamp(angle, MIN_ANGLE, MAX_ANGLE);
     }
 
     // set shooterPivot angle in radians
     public void setAngle(double angle) {
-        double goal = limitPivotAngle(angle);
-        super.setGoal(goal);
-        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(goal));
+        m_goalRadians = limitPivotAngle(angle);
+        super.setGoal(m_goalRadians);
+        SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
+    }
+
+    public boolean angleWithinTolerance() {
+        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 
     public void resetGoal() {
