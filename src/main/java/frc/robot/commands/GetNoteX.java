@@ -4,7 +4,10 @@
 
 package frc.robot.commands;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +19,7 @@ import com.pathplanner.lib.path.PathPoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
@@ -30,24 +33,38 @@ public class GetNoteX extends AutoCommandInterface {
         {
             put(FieldConstants.NOTE_C_1, new String[] { "Start_2 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
             put(FieldConstants.NOTE_C_2, new String[] { "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
+
+            put(FieldConstants.NOTE_S_1, new String[] { "Start_2 to Note_S_1", "Note_S_2 to Note_S_1", null });
+            put(FieldConstants.NOTE_S_2, new String[] { "Start_2 to Note_S_2", "Note_S_1 to Note_S_2", "Note_S_3 to Note_S_2", null });
+            put(FieldConstants.NOTE_S_3, new String[] { "Start_2 to Note_S_3", "Note_S_2 to Note_S_3", null });
+
             // put(FieldConstants.NOTE_C_3, "");
             // put(FieldConstants.NOTE_C_4, "";
             // put(FieldConstants.NOTE_C_5, "");
         }
     };
 
-    private PathPlannerPath m_longPath; 
-    private PathPlannerPath m_middlePath; 
+    private final Map<Pose2d,PathPlannerPath> m_candidateStartPaths = new LinkedHashMap<>();
+
     private PathPlannerPath m_returnPath; 
 
     private void initPaths(String[] pathnameArray) {
-        m_longPath  =  DriveTrain.loadPath(pathnameArray[0]);
-        m_middlePath = DriveTrain.loadPath(pathnameArray[1]);
-        m_returnPath = DriveTrain.loadPath(pathnameArray[2]);
+        for(int i=0; i<pathnameArray.length-1; i++) {
+            PathPlannerPath path = DriveTrain.loadPath(pathnameArray[i]);
+            if (path != null) {
+                Pose2d startPose = path.getStartingDifferentialPose();
+                m_candidateStartPaths.put(startPose, path);
+            }
+        }
+
+        // return path is last item
+        if (null != pathnameArray[pathnameArray.length-1]) {
+            m_returnPath = DriveTrain.loadPath(pathnameArray[pathnameArray.length-1]);
+        }
+     
     }
 
-    private DriveTrain m_driveTrain;
-
+    private final DriveTrain m_driveTrain;
     private final Translation2d m_targetNote; 
 
     public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
@@ -55,28 +72,33 @@ public class GetNoteX extends AutoCommandInterface {
         m_driveTrain = driveTrain;
         initPaths(s_pathLookup.get(targetNote));
 
-        addCommands(
-                m_driveTrain.followPath(() -> getInitialPath())
-                        .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)),
-                m_driveTrain.followPath(m_returnPath),
+        addCommands(new PrintCommand("GetNoteX-- Starting Auto target note: "+ targetNote));
 
-                new InstantCommand(intake::intake)
-        // .alongWith(new prepShooter())
+        if (FieldConstants.isCenterNote(targetNote)) {
+            // Use note "monitoring" for center notes only
+            addCommands(m_driveTrain.followPath(() -> getInitialPath())
+                        .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)));
+        } else {
+            addCommands(m_driveTrain.followPath(() -> getInitialPath()));
+        }
 
-        );
+        if (null != m_returnPath) {
+            addCommands(m_driveTrain.followPath(m_returnPath));
+        }
+
+       addCommands(new PrintCommand("GetNoteX-- Finished target note: "+ targetNote));
     }
 
     public Pose2d getInitialPose() {
-        return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
+        PathPlannerPath firstPath = m_candidateStartPaths.values().iterator().next();
+        return FieldConstants.flipPose(firstPath.getStartingDifferentialPose());
     };
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
         Pose2d poseBlue = FieldConstants.flipPose(pose);
-        if (poseBlue.getX() < FieldConstants.BLUE_WHITE_LINE_X_METERS) {
-            return m_longPath;
-        }
-        
+
+        // this part used when in center note area, if intended center note is not found
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
             Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
             List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
@@ -90,6 +112,7 @@ public class GetNoteX extends AutoCommandInterface {
             );
         }
 
-        return m_middlePath;
+        Pose2d closestPathStart = pose.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
+        return m_candidateStartPaths.get(closestPathStart);       
     }
 }
