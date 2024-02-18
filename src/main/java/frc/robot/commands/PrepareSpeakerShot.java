@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
@@ -39,8 +40,9 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
     }
 
     private Shooter.ShooterValues getShootValues() {
-        // Will get distance update every time the function is called?
-        return Shooter.calculateShooterSpeeds(getDistance()); 
+        double distance = getDistance();
+        SmartDashboard.putNumber("shooter/speakDistance", distance);
+        return Shooter.calculateShooterSpeeds(distance); 
     }
 
     private Rotation2d getWantedHeading() {
