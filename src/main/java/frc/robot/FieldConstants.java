@@ -65,7 +65,7 @@ public class FieldConstants {
     }
 
     public static boolean isCenterNote(Translation2d targetNote) {
-        return targetNote.getX() == NOTE_C_X;
+        return Math.abs(NOTE_C_X - targetNote.getX()) < 0.1;
     }
 
     public static Pose2d flipPose(Pose2d pose) {
