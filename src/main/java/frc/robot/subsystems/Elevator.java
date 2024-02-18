@@ -25,7 +25,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
     // Tolerance for commands
-    public static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
+    private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
@@ -43,9 +43,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double ELEVATOR_K_I = 0.0;
     private static final double ELEVATOR_K_D = 0.0;
     private static final double ELEVATOR_K_FF = 0.0;
-
-    // Offset for command
-    public static final double OFFSET_TOLERANCE_METERS = 0.03;
 
     // constants for various commands
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
@@ -132,8 +129,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_encoder.setPosition(getPotentiometerReadingMeters());
     }
 
-    // this needs to be public so that commands can get the restricted distance. (safety, limits of to high)
-    public static double limitElevatorLength(double length){
+    private static double limitElevatorLength(double length){
         return MathUtil.clamp(length, ELEVATOR_MIN_LENGTH_METERS, ELEVATOR_MAX_LENGTH_METERS);
     }
 
@@ -142,6 +138,10 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_goal = limitElevatorLength(goal);
         super.setGoal(m_goal);
         SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
+    }
+
+    public boolean lengthWithinTolerance() {
+        return Math.abs(getLength() - m_goal) < LENGTH_TOLERANCE_METERS;
     }
 
     public void setCoastMode(){

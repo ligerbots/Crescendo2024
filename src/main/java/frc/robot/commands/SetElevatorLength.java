@@ -13,7 +13,6 @@ import frc.robot.subsystems.Elevator;
 public class SetElevatorLength extends Command {
     Elevator m_elevator;
     DoubleSupplier m_lengthSupplier;
-    double m_length;
 
     /** Creates a new SetElevatorLength. */
     public SetElevatorLength(Elevator elevator, DoubleSupplier length) {
@@ -31,8 +30,7 @@ public class SetElevatorLength extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_length = Elevator.limitElevatorLength(m_lengthSupplier.getAsDouble());
-        m_elevator.setLength(m_length);
+        m_elevator.setLength(m_lengthSupplier.getAsDouble());
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -48,7 +46,6 @@ public class SetElevatorLength extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        double curLength = m_elevator.getLength(); //Could use string pot but currently uses motor one
-        return Math.abs(curLength - m_length) < Elevator.LENGTH_TOLERANCE_METERS;
+        return m_elevator.lengthWithinTolerance();
     }
 }
