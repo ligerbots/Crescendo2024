@@ -19,12 +19,12 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-public class GetMultiNoteGenericNew extends AutoCommandInterface {
+public class GetMultiNoteGeneric extends AutoCommandInterface {
     private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_1");
 
-    public GetMultiNoteGenericNew(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         List<Command> commandList = new ArrayList<>();
-        Arrays.asList(noteLocations).forEach((n) -> commandList.add(new GetNoteY(n, driveTrain, noteVision, shooter, intake)));
+        Arrays.asList(noteLocations).forEach((n) -> commandList.add(new GetNoteX(n, driveTrain, noteVision, shooter, intake)));
 
         addCommands(commandList.toArray(new Command[commandList.size()]));
     }

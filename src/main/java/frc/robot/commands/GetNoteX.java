@@ -27,7 +27,7 @@ import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
 // Note that AutoCommandInterface is a SequentialCommandGroup
-public class GetNoteY extends AutoCommandInterface {
+public class GetNoteX extends AutoCommandInterface {
 
     public static final Map<Translation2d, String[]> s_pathLookup = new HashMap<>() {
         {
@@ -69,12 +69,12 @@ public class GetNoteY extends AutoCommandInterface {
 
     private final Translation2d m_targetNote; 
 
-    public GetNoteY(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
         m_targetNote = targetNote;
         m_driveTrain = driveTrain;
         initPaths(s_pathLookup.get(targetNote));
 
-        addCommands(new PrintCommand("GetNoteY-- Starting Auto target note: "+ targetNote));
+        addCommands(new PrintCommand("GetNoteX-- Starting Auto target note: "+ targetNote));
 
 
         if(FieldConstants.isCenterNote(targetNote)) {
@@ -89,7 +89,7 @@ public class GetNoteY extends AutoCommandInterface {
             addCommands(m_driveTrain.followPath(m_returnPath));
        }
 
-       addCommands(new PrintCommand("GetNoteY-- Finished target note: "+ targetNote));
+       addCommands(new PrintCommand("GetNoteX-- Finished target note: "+ targetNote));
                 // , new InstantCommand(intake::intake)
         // .alongWith(new prepShooter())
 
