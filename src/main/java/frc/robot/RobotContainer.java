@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -27,10 +26,10 @@ public class RobotContainer {
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
-    // private final Shooter m_shooter = new Shooter();
+    private final Shooter m_shooter = new Shooter();
     // Java problem: the encoder needs to be created outside the constructor
-    // private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
-    // private final Elevator m_elevator = new Elevator();
+    private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
+    private final Elevator m_elevator = new Elevator();
 
     private final SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
 
@@ -46,33 +45,41 @@ public class RobotContainer {
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        
+        m_controller.y().onTrue(new TestShootSpeed(m_shooter,
+            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+            
+        m_controller.x().onTrue(new Shoot(m_shooter,
+            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
+            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
 
-        // m_controller.rightTrigger(.8).onTrue(new TestShootSpeed(m_shooter,
-        //         () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-        //         () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+        m_controller.b().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        // m_controller.x().onTrue(new Shoot(m_shooter,
-        //         () -> {
-        //             return SmartDashboard.getNumber("shooter/test_left_rpm", 0);
-        //         },
-        //         () -> {
-        //             return SmartDashboard.getNumber("shooter/test_right_rpm", 0);
-        //         }));
+        m_controller.rightTrigger(.8).onTrue(new TestShootSpeed(m_shooter,
+                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+
+        m_controller.x().onTrue(new Shoot(m_shooter,
+                () -> {
+                    return SmartDashboard.getNumber("shooter/test_left_rpm", 0);
+                },
+                () -> {
+                    return SmartDashboard.getNumber("shooter/test_right_rpm", 0);
+                }));
        
         m_controller.b().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_controller.a().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
         m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode, m_driveTrain::togglePrecisionMode, m_driveTrain));
 
-        // JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        // farm1.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_RAISE_ELEVATOR));
+        JoystickButton farm1 = new JoystickButton(m_farm, 1);
+        farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
 
-        // JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        // farm2.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_LOWER_ELEVATOR));
+        JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        farm2.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_LOWER_ELEVATOR));
 
-        // JoystickButton farm3 = new JoystickButton(m_farm, 3);
-        // farm3.onTrue(new SetElevatorLength(m_elevator,
-        //         () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
+        JoystickButton farm3 = new JoystickButton(m_farm, 3);
+        farm3.onTrue(new SetElevatorLength(m_elevator,
+                () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
