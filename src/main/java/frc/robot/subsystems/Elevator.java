@@ -8,6 +8,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
@@ -132,7 +134,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // this needs to be public so that commands can get the restricted distance. (safety, limits of to high)
     public static double limitElevatorLength(double length){
-        return Math.min(ELEVATOR_MAX_LENGTH_METERS, Math.max(ELEVATOR_MIN_LENGTH_METERS, length));
+        return MathUtil.clamp(length, ELEVATOR_MIN_LENGTH_METERS, ELEVATOR_MAX_LENGTH_METERS);
     }
 
     // set reacher length in inches
@@ -150,8 +152,4 @@ public class Elevator extends TrapezoidProfileSubsystem {
         } else
             m_motor.setIdleMode(IdleMode.kBrake);
     }
-
-    //public double getMainHeightValue(){
-        //return STOW_HEIGHT_VALUE; // ask what is going on here
-    //}
 }

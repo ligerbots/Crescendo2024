@@ -9,6 +9,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -128,7 +129,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // needs to be public so that commands can get the restricted angle
     public static double limitPivotAngle(double angle) {
-        return Math.min(MAX_ANGLE, Math.max(MIN_ANGLE, angle));
+        return MathUtil.clamp(angle, MIN_ANGLE, MAX_ANGLE);
     }
 
     // set shooterPivot angle in radians
