@@ -11,19 +11,21 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
 public class SetElevatorLength extends Command {
-
-
-    /** Creates a new SetElevatorLength. */
     Elevator m_elevator;
     DoubleSupplier m_lengthSupplier;
     double m_length;
 
+    /** Creates a new SetElevatorLength. */
     public SetElevatorLength(Elevator elevator, DoubleSupplier length) {
-        // Use addRequirements() here to declare subsystem dependencies.
         m_elevator = elevator;
         m_lengthSupplier = length;
 
         addRequirements(m_elevator);
+    }
+
+    // convenience constructor, takes a constant
+    public SetElevatorLength(Elevator elevator, double length) {
+        this(elevator, ()->length);
     }
 
     // Called when the command is initially scheduled.

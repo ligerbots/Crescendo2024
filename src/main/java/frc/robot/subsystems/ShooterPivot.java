@@ -28,6 +28,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     private static final int CURRENT_LIMIT = 10;
 
+    // position constants for commands
+    public static final double STOW_ANGLE = MAX_ANGLE;
+    
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
