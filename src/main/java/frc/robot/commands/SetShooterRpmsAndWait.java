@@ -4,35 +4,31 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 
-public class ActiveSpeedUpShooter extends Command {
-
+public class SetShooterRpmsAndWait extends Command {
     private final Shooter m_shooter;
-    private final DoubleSupplier m_leftRpm;
-    private final DoubleSupplier m_rightRpm;
+    private final Supplier<Shooter.ShooterValues> m_valueSupplier;
 
-    /** Creates a new ActiveSpeedUpShooter. */
-    public ActiveSpeedUpShooter(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
-        m_shooter = shooter;
-        m_leftRpm = leftRpm;
-        m_rightRpm = rightRpm;
-
+    public SetShooterRpmsAndWait(Shooter shooter, Supplier<Shooter.ShooterValues> valueSupplier) {
         addRequirements(shooter);
+        m_shooter = shooter;
+        m_valueSupplier = valueSupplier;
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
+        Shooter.ShooterValues values = m_valueSupplier.get();
+        m_shooter.setShooterRpms(values.leftRPM, values.rightRPM);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        m_shooter.setShooterRpms(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble());
     }
 
     // Called once the command ends or is interrupted.
@@ -43,6 +39,6 @@ public class ActiveSpeedUpShooter extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return false;
+        return m_shooter.rpmWithinTolerance();
     }
 }

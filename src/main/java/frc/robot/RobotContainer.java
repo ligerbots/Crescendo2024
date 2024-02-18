@@ -45,33 +45,15 @@ public class RobotContainer {
         // Intake
         m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
-
-        m_controller.y().onTrue(new TestShootSpeed(m_shooter,
-            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
             
-        m_controller.x().onTrue(new Shoot(m_shooter,
-            ()->{ return SmartDashboard.getNumber("shooter/test_left_rpm", 0); },
-            ()->{ return SmartDashboard.getNumber("shooter/test_right_rpm", 0); }));
+        m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_controller.b().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
-
-        m_controller.rightTrigger(.8).onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
-
-        m_controller.x().onTrue(new Shoot(m_shooter,
-                () -> {
-                    return SmartDashboard.getNumber("shooter/test_left_rpm", 0);
-                },
-                () -> {
-                    return SmartDashboard.getNumber("shooter/test_right_rpm", 0);
-                }));
-       
         m_controller.b().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_controller.a().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
         m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode, m_driveTrain::togglePrecisionMode, m_driveTrain));
 
+        // need buttons for PrepareSpeakerShot, TriggerShot and PrepareAmpShot
+        
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
 
@@ -81,6 +63,17 @@ public class RobotContainer {
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new SetElevatorLength(m_elevator,
                 () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
+
+        JoystickButton farm10 = new JoystickButton(m_farm, 10);
+        farm10.onTrue(new TestShootSpeed(m_shooter,
+            () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+            
+        JoystickButton farm11 = new JoystickButton(m_farm, 11);
+        farm11.onTrue(new TestShoot(m_shooter,
+            ()->SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+            ()->SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
