@@ -15,6 +15,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import static edu.wpi.first.units.MutableMeasure.mutable;
@@ -59,9 +59,9 @@ public class Shooter extends SubsystemBase {
 
     // SysId data collection
     private SysIdRoutine m_sysIdRoutine = null;
-    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Units.Volts.of(0));
-    private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
-    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(edu.wpi.first.units.Units.Volts.of(0));
+    private final MutableMeasure<Angle> m_distance = mutable(edu.wpi.first.units.Units.Rotations.of(0));
+    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(edu.wpi.first.units.Units.RotationsPerSecond.of(0));
 
     // Used for is on target
     private double m_leftGoalRPM;
@@ -88,10 +88,11 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-        //TODO: Need to put in real values here
-        //Key is distance; ALL UNITS METRIC / RAD
-            Map.entry(0.3048, new ShooterValues(9.144, 9.144, 1.42284)), //Example values should work
-            Map.entry(4.8768, new ShooterValues(13.716, 13.716, 0.93382))));
+            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(35.0))), // a guess
+            Map.entry(Units.feetToMeters(8.5), new ShooterValues(3000.0, 2500.0, Math.toRadians(31.0))),
+            Map.entry(Units.feetToMeters(10.7), new ShooterValues(3000.0, 3500.0, Math.toRadians(25.0))),
+            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
+            ));
 
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
@@ -232,14 +233,14 @@ public class Shooter extends SubsystemBase {
     // Data collection for SysId
     private void setSysIdRoutine() {
         m_sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
-            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / Constants.MAX_VOLTAGE),
+            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(edu.wpi.first.units.Units.Volts) / Constants.MAX_VOLTAGE),
             log -> {
                 log.motor("left motor")
                     .voltage(
                         m_appliedVoltage.mut_replace(
-                            m_leftShooterMotor.get() * Constants.MAX_VOLTAGE, Units.Volts))
-                    .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), Units.Rotations))
-                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RPM));
+                            m_leftShooterMotor.get() * Constants.MAX_VOLTAGE, edu.wpi.first.units.Units.Volts))
+                    .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), edu.wpi.first.units.Units.Rotations))
+                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), edu.wpi.first.units.Units.RPM));
             }, this));
     }
 
