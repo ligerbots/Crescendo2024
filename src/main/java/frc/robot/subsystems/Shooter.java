@@ -90,6 +90,7 @@ public class Shooter extends SubsystemBase {
         //Key is distance; ALL UNITS METRIC / RAD
             Map.entry(0.3048, new ShooterValues(9.144, 9.144, 1.42284)), //Example values should work
             Map.entry(4.8768, new ShooterValues(13.716, 13.716, 0.93382))));
+
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
     public Shooter() {

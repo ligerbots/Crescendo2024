@@ -15,19 +15,18 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
-public class PrepareShooter extends ParallelCommandGroup {
-    /** Creates a new PrepareShooter. */
+public class PrepareSpeakerShot extends ParallelCommandGroup {
     private final DriveTrain m_driveTrain;
 
-    public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
+    /** Creates a new PrepareShooter. */
+    public PrepareSpeakerShot(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
             XboxController xboxController, 
             DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
         m_driveTrain = driveTrain;
 
         addCommands(
-                new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
+                new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
                 new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, joystickXSupplier, joystickYSupplier),
-                new ActiveSpeedUpShooter(shooter, this::getLeftRPM, this::getRightRPM),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
         );
     }
@@ -36,17 +35,9 @@ public class PrepareShooter extends ParallelCommandGroup {
         return m_driveTrain.getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
     }
 
-    private double getRightRPM() {
+    private Shooter.ShooterValues getShootValues() {
         // Will get distance update every time the function is called?
-        return Shooter.calculateShooterSpeeds(getDistance()).leftRPM; 
-    }
-
-    private double getLeftRPM() {
-        return Shooter.calculateShooterSpeeds(getDistance()).rightRPM;
-    }
-
-    private double getShooterPitch() {
-        return Shooter.calculateShooterSpeeds(getDistance()).shootAngle;
+        return Shooter.calculateShooterSpeeds(getDistance()); 
     }
 
     private Rotation2d getWantedHeading() {
