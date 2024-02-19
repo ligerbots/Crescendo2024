@@ -34,9 +34,9 @@ public class GetNoteX extends AutoCommandInterface {
             put(FieldConstants.NOTE_C_1, new String[] { "Start_2 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
             put(FieldConstants.NOTE_C_2, new String[] { "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
 
-            put(FieldConstants.NOTE_S_1, new String[] { "Start_2 to Note_S_1", "Note_S_2 to Note_S_1", null });
-            put(FieldConstants.NOTE_S_2, new String[] { "Start_2 to Note_S_2", "Note_S_1 to Note_S_2", "Note_S_3 to Note_S_2", null });
-            put(FieldConstants.NOTE_S_3, new String[] { "Start_2 to Note_S_3", "Note_S_2 to Note_S_3", null });
+            put(FieldConstants.BLUE_NOTE_S_1, new String[] { "Start_2 to Note_S_1", "Note_S_2 to Note_S_1", null });
+            put(FieldConstants.BLUE_NOTE_S_2, new String[] { "Start_2 to Note_S_2", "Note_S_1 to Note_S_2", "Note_S_3 to Note_S_2", null });
+            put(FieldConstants.BLUE_NOTE_S_3, new String[] { "Start_2 to Note_S_3", "Note_S_2 to Note_S_3", null });
 
             // put(FieldConstants.NOTE_C_3, "");
             // put(FieldConstants.NOTE_C_4, "";

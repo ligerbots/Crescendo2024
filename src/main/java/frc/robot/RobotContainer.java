@@ -103,9 +103,9 @@ public class RobotContainer {
         m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
         m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
         m_chosenAuto.addOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
@@ -113,22 +113,22 @@ public class RobotContainer {
         noteList = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
         m_chosenAuto.addOption("C2-C1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2};
         m_chosenAuto.addOption("S1-S2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_3, FieldConstants.NOTE_S_2};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2};
         m_chosenAuto.addOption("S3-S2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_3};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3};
         m_chosenAuto.addOption("S1-S2-S3", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_3, FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_1};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1};
         m_chosenAuto.addOption("S3-S2-S1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_1};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1};
         m_chosenAuto.addOption("S2-S1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_C_1};
+        noteList = new Translation2d[]{FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1};
         m_chosenAuto.addOption("S1-C1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));

@@ -195,13 +195,13 @@ public class NoteVision extends SubsystemBase {
                 FieldConstants.NOTE_C_4,
                 FieldConstants.NOTE_C_5,
                 // Blue Stage Notes
-                FieldConstants.NOTE_S_1,
-                FieldConstants.NOTE_S_2,
-                FieldConstants.NOTE_S_3,
+                FieldConstants.BLUE_NOTE_S_1,
+                FieldConstants.BLUE_NOTE_S_2,
+                FieldConstants.BLUE_NOTE_S_3,
                 // Red Stage Notes
-                FieldConstants.flipTranslation(FieldConstants.NOTE_S_1),
-                FieldConstants.flipTranslation(FieldConstants.NOTE_S_2),
-                FieldConstants.flipTranslation(FieldConstants.NOTE_S_3)
+                FieldConstants.RED_NOTE_S_1,
+                FieldConstants.RED_NOTE_S_2,
+                FieldConstants.RED_NOTE_S_3
                 )) {
             m_visionSim.addVisionTargets("note",
                     new VisionTargetSim(new Pose3d(notePose.getX(), notePose.getY(), 0, new Rotation3d()), noteModel));
