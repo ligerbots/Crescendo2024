@@ -47,7 +47,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants for various commands
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-    public static final double STOW_LENGTH = ELEVATOR_MIN_LENGTH_METERS;
+    public static final double STOW_LENGTH = Units.inchesToMeters(17.849);
+    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(38.211);
 
     // initializing Potentiometer
     private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value

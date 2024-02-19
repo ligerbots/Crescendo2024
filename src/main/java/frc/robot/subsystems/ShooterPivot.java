@@ -30,7 +30,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final int CURRENT_LIMIT = 10;
 
     // position constants for commands
-    public static final double STOW_ANGLE = MAX_ANGLE;
+    public static final double STOW_ANGLE_RADIANS = Math.toRadians(58.0);
+    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
     
     // All units are MKS with angles in Radians
       

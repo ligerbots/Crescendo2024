@@ -6,18 +6,18 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
-public class Stow extends ParallelCommandGroup {
-  /** Creates a new StowingNotes. */
-  public Stow(Shooter shooter, ShooterPivot shooterPivot, Elevator elevator) {
+
+public class PrepareAmpShot extends ParallelCommandGroup {
+  public PrepareAmpShot(Elevator elevator, ShooterPivot shooterPivot, Shooter shooter) {
+
     addCommands(
-        new InstantCommand(shooter::turnOffShooter),
-        new SetElevatorLength(elevator, Elevator.STOW_LENGTH),
-        new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE_RADIANS)
+      new SetElevatorLength(elevator, Elevator.AMP_SCORE_LENGTH),
+      new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS),
+      new InstantCommand(() -> shooter.setSpeakerShootMode(false))
     );
   }
 }
