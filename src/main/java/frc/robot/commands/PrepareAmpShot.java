@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.Elevator;
@@ -18,9 +17,7 @@ public class PrepareAmpShot extends ParallelCommandGroup {
     addCommands(
       new SetElevatorLength(elevator, Elevator.AMP_SCORE_LENGTH),
       new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS),
-      new InstantCommand(() -> {shooter.setSpeakerShootMode(false);})
-      
-
+      new InstantCommand(() -> shooter.setSpeakerShootMode(false))
     );
   }
 }
