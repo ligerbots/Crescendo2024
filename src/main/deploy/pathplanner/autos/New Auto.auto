@@ -1,16 +1,35 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 2,
-      "y": 2
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start_2 to NoteCheck_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Note_C_1 to Shoot_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Shoot_1 to NoteCheck_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Note_C_2 to shoot_1"
+          }
+        }
+      ]
     }
   },
   "folder": null,

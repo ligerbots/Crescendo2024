@@ -27,7 +27,7 @@ public class NoteAuto extends AutoCommandInterface {
         try {
             PathPlannerPath startPath = PathPlannerPath.fromPathFile("Note_C_1 to Shoot_1");
             m_initPose = startPath.getStartingDifferentialPose();
-            addCommands(m_driveTrain.makePathFollowingCommand(startPath));
+            addCommands(m_driveTrain.followPath(startPath));
 
         } catch (Exception e) {
             DriverStation.reportError("Unable to load PP path Test", true);

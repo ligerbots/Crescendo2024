@@ -4,18 +4,31 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 import frc.robot.commands.AutoCommandInterface;
 
 public class Robot extends TimedRobot {
     private AutoCommandInterface m_autonomousCommand = null;
     private AutoCommandInterface m_prevAutoCommand = null;
-    
+    private boolean m_prevIsRedAlliance = true;
+
     private RobotContainer m_robotContainer;
 
     @Override
     public void robotInit() {
+        // Disable the LiveWindow telemetry to lower the network load
+        LiveWindow.disableAllTelemetry();
+
+        // Enable local logging.
+        // ** CAREFUL: this probably should be disabled during competition.
+        DataLogManager.start();
+        DriverStation.startDataLog(DataLogManager.getLog());
+
         m_robotContainer = new RobotContainer();
     }
 
@@ -32,11 +45,13 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
+        boolean isRedAlliance = FieldConstants.isRedAlliance();
         AutoCommandInterface autoCommand = m_robotContainer.getAutonomousCommand();
-        if (autoCommand != null && autoCommand != m_prevAutoCommand) {
+        if (isRedAlliance != m_prevIsRedAlliance || (autoCommand != null && autoCommand != m_prevAutoCommand)) {
             m_robotContainer.getDriveTrain().setPose(autoCommand.getInitialPose());
             m_prevAutoCommand = autoCommand;
         }
+        m_prevIsRedAlliance = isRedAlliance;
     }
 
     @Override
@@ -73,6 +88,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+        
     }
 
     @Override
