@@ -8,13 +8,11 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import frc.robot.commands.AutoCommandInterface;
-
 public class Robot extends TimedRobot {
-    private AutoCommandInterface m_autonomousCommand = null;
-    private AutoCommandInterface m_prevAutoCommand = null;
+    private Command m_autonomousCommand = null;
     private boolean m_prevIsRedAlliance = true;
 
     private RobotContainer m_robotContainer;
@@ -46,10 +44,8 @@ public class Robot extends TimedRobot {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
 
         boolean isRedAlliance = FieldConstants.isRedAlliance();
-        AutoCommandInterface autoCommand = m_robotContainer.getAutonomousCommand();
-        if (isRedAlliance != m_prevIsRedAlliance || (autoCommand != null && autoCommand != m_prevAutoCommand)) {
-            m_robotContainer.getDriveTrain().setPose(autoCommand.getInitialPose());
-            m_prevAutoCommand = autoCommand;
+        if (isRedAlliance != m_prevIsRedAlliance || m_robotContainer.autoHasChanged()) {
+            m_robotContainer.getDriveTrain().setPose(m_robotContainer.getInitialPose());
         }
         m_prevIsRedAlliance = isRedAlliance;
     }

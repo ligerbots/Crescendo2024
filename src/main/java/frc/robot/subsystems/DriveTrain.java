@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
@@ -405,11 +404,12 @@ public class DriveTrain extends SubsystemBase {
                 () -> FieldConstants.isRedAlliance(), this);
     }
 
-    public Command followPath(Supplier<PathPlannerPath> path) {
+    // probably useless. This does not delay the choice of the path, since "path.get()" is called immediately
+    // public Command followPath(Supplier<PathPlannerPath> path) {
 
-        return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
-                PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
-    }
+    //     return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
+    //             PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
+    // }
 
     public static PathPlannerPath loadPath(String pathName) {
         try {

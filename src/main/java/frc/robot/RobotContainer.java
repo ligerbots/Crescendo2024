@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
@@ -32,7 +33,10 @@ public class RobotContainer {
     private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
     private final Elevator m_elevator = new Elevator();
 
-    private final SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
+    private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
+    private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
+    private Command m_prevAutoCommand = null;
+    private Pose2d m_prevInitialPose = new Pose2d();
 
     public RobotContainer() {
         configureBindings();
@@ -89,19 +93,25 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
+        // List of start locations
+        m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
+        m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
+        m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
+        SmartDashboard.putData("Start Location", m_startLocation);
+
         // Initialize the list of available Autonomous routines
         // m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain, m_noteVision, m_shooter, m_intake));
         // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
-        m_chosenAuto.addOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.setDefaultOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
         m_chosenAuto.addOption("C2-C1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
@@ -128,8 +138,21 @@ public class RobotContainer {
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 
-    public AutoCommandInterface getAutonomousCommand() {
+    public Pose2d getInitialPose() {
+        return FieldConstants.flipPose(m_startLocation.getSelected());
+    }
+
+    public Command getAutonomousCommand() {
         return m_chosenAuto.getSelected();
+    }
+
+    public boolean autoHasChanged() {
+        Command autoCommand = getAutonomousCommand();
+        Pose2d pose = getInitialPose();
+        boolean changed = pose != m_prevInitialPose || (autoCommand != null && autoCommand != m_prevAutoCommand);
+        m_prevAutoCommand = autoCommand;
+        m_prevInitialPose = pose;
+        return changed;
     }
 
     public Command getDriveCommand() {
