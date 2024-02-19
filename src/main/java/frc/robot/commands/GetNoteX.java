@@ -5,11 +5,11 @@
 package frc.robot.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -19,6 +19,7 @@ import com.pathplanner.lib.path.PathPoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
@@ -72,14 +73,14 @@ public class GetNoteX extends AutoCommandInterface {
         m_driveTrain = driveTrain;
         initPaths(s_pathLookup.get(targetNote));
 
-        addCommands(new PrintCommand("GetNoteX-- Starting Auto target note: "+ targetNote));
+        addCommands(new PrintCommand("**** GetNoteX-- Starting Auto target note: "+ targetNote));
 
         if (FieldConstants.isCenterNote(targetNote)) {
             // Use note "monitoring" for center notes only
-            addCommands(m_driveTrain.followPath(() -> getInitialPath())
+            addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                         .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)));
         } else {
-            addCommands(m_driveTrain.followPath(() -> getInitialPath()));
+            addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain)));
         }
 
         if (null != m_returnPath) {
@@ -97,7 +98,7 @@ public class GetNoteX extends AutoCommandInterface {
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
         Pose2d poseBlue = FieldConstants.flipPose(pose);
-
+        System.out.println("Starting getInitialPath " + poseBlue);
         // this part used when in center note area, if intended center note is not found
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
             Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
@@ -112,7 +113,8 @@ public class GetNoteX extends AutoCommandInterface {
             );
         }
 
-        Pose2d closestPathStart = pose.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
+        Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
+        System.out.println("getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
     }
 }

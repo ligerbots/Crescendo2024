@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import java.util.List;
+import java.util.Set;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -13,6 +14,7 @@ import com.pathplanner.lib.path.PathPoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.FieldConstants;
@@ -34,7 +36,7 @@ public class GetNoteC1 extends AutoCommandInterface {
         m_driveTrain = driveTrain;
 
         addCommands(
-                m_driveTrain.followPath(() -> getInitialPath())
+                new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                         .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), FieldConstants.NOTE_C_1, this)),
                 m_driveTrain.followPath(m_returnPath),
 
