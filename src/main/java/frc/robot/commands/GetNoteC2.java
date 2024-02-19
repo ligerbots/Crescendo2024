@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -15,7 +16,9 @@ import com.pathplanner.lib.path.PathPoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
@@ -23,8 +26,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-// Note that AutoCommandInterface is a SequentialCommandGroup
-public class GetNoteC2 extends AutoCommandInterface {
+public class GetNoteC2 extends SequentialCommandGroup {
     /** Creates a new GetNoteC2. */
 
     List<String> m_pathNames = new ArrayList<String>() {
@@ -52,7 +54,7 @@ public class GetNoteC2 extends AutoCommandInterface {
         m_driveTrain = driveTrain;
 
         addCommands(
-                m_driveTrain.followPath(() -> getInitialPath())
+                new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                         .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)),
                 m_driveTrain.followPath(m_returnPath),
 
@@ -61,10 +63,6 @@ public class GetNoteC2 extends AutoCommandInterface {
 
         );
     }
-
-    public Pose2d getInitialPose() {
-        return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
-    };
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
