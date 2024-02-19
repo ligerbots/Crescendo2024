@@ -61,7 +61,6 @@ public class RobotContainer {
                         () -> -modifyAxis(m_controller.getLeftX())));
         
         m_controller.rightTrigger(.5).onTrue(new TriggerShot(m_shooter));
-        // need buttons for PrepareSpeakerShot, TriggerShot and PrepareAmpShot
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
