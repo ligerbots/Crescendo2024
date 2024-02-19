@@ -47,7 +47,12 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Intake
-        m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
+        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
+        
+        // run the intake as long as the bumper is held. 
+        // When release, shut off the intake and back up the note a little bit
+        m_controller.leftBumper().whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
+                        .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
         m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));

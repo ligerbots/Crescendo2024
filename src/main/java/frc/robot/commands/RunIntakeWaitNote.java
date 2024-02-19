@@ -16,17 +16,14 @@ public class RunIntakeWaitNote extends Command {
 
     /** Creates a new RunIntakeWaitNote. */
     public RunIntakeWaitNote(Intake intake) {
-        // Use addRequirements() here to declare subsystem dependencies.
         m_intake = intake;
-
         addRequirements(m_intake);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_timer.reset();
-        m_timer.start();
+        m_timer.restart();
 
         m_intake.intake();
     }
