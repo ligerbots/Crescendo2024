@@ -226,10 +226,6 @@ public class Shooter extends SubsystemBase {
         m_speakerShootMode = mode;
     }
 
-    public void setSpeakerShootModeFalse(){
-        m_speakerShootMode = false;
-    }
-
     public boolean getSpeakerShootMode() {
         return m_speakerShootMode;
     }
