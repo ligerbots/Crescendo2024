@@ -7,8 +7,7 @@ package frc.robot.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.pathplanner.lib.path.PathPlannerPath;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,9 +19,10 @@ import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
 public class GetMultiNoteGeneric extends AutoCommandInterface {
-    private PathPlannerPath m_longPath = DriveTrain.loadPath("Start_2 to Note_C_1");
+    private Supplier<Pose2d> m_initialPoseSupplier;
 
-    public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetMultiNoteGeneric(Supplier<Pose2d> initialPose, Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+        m_initialPoseSupplier = initialPose;
         List<Command> commandList = new ArrayList<>();
         Arrays.asList(noteLocations).forEach((n) -> commandList.add(new GetNoteX(n, driveTrain, noteVision, shooter, intake)));
 
@@ -30,6 +30,6 @@ public class GetMultiNoteGeneric extends AutoCommandInterface {
     }
     
     public Pose2d getInitialPose() {
-        return FieldConstants.flipPose(m_longPath.getStartingDifferentialPose());
+        return FieldConstants.flipPose(m_initialPoseSupplier.get());
     };
 }

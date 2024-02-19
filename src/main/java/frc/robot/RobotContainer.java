@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
@@ -33,6 +34,9 @@ public class RobotContainer {
     private final Elevator m_elevator = new Elevator();
 
     private final SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
+    private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
+    private AutoCommandInterface m_prevAutoCommand = null;
+    private Pose2d m_prevInitialPose = new Pose2d();
 
     public RobotContainer() {
         configureBindings();
@@ -96,43 +100,57 @@ public class RobotContainer {
     }
 
     private void configureAutos() {
+        // List of start locations
+        m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
+        m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
+        m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
+        SmartDashboard.putData("Start Location", m_startLocation);
+
         // Initialize the list of available Autonomous routines
         // m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain, m_noteVision, m_shooter, m_intake));
         // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
-        m_chosenAuto.addOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.setDefaultOption("C1-C2", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1};
-        m_chosenAuto.addOption("C2-C1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("C2-C1", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2};
-        m_chosenAuto.addOption("S1-S2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S1-S2", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_3, FieldConstants.NOTE_S_2};
-        m_chosenAuto.addOption("S3-S2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S3-S2", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_3};
-        m_chosenAuto.addOption("S1-S2-S3", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S1-S2-S3", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_3, FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_1};
-        m_chosenAuto.addOption("S3-S2-S1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S3-S2-S1", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_2, FieldConstants.NOTE_S_1};
-        m_chosenAuto.addOption("S2-S1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S2-S1", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[]{FieldConstants.NOTE_S_1, FieldConstants.NOTE_C_1};
-        m_chosenAuto.addOption("S1-C1", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption("S1-C1", new GetMultiNoteGeneric(()->m_startLocation.getSelected(), noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
+    }
+
+    public boolean autoHasChanged() {
+        AutoCommandInterface autoCommand = m_chosenAuto.getSelected();
+        if ((autoCommand != null && autoCommand != m_prevAutoCommand))
+           return true;
+        
+        return m_startLocation.getSelected() != m_prevInitialPose;
     }
 
     public AutoCommandInterface getAutonomousCommand() {
