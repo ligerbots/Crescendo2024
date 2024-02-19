@@ -8,6 +8,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import frc.robot.FieldConstants;
@@ -15,20 +17,21 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
-public class PrepareShooter extends ParallelCommandGroup {
-    /** Creates a new PrepareShooter. */
+public class PrepareSpeakerShot extends ParallelCommandGroup {
     private final DriveTrain m_driveTrain;
 
-    public PrepareShooter(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain,
-            XboxController xboxController, 
-            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
+    /** Creates a new PrepareSpeakerShot. */
+    public PrepareSpeakerShot(DriveTrain driveTrain, Shooter shooter, ShooterPivot shooterPivot,
+            XboxController xboxController, DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
         m_driveTrain = driveTrain;
 
         addCommands(
-                new ActiveTiltShooter(shooterPivot, this::getShooterPitch),
+                // set shoot mode, so that TriggerShot can be a single command/button
+                new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+                new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
                 new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, joystickXSupplier, joystickYSupplier),
-                new ActiveSpeedUpShooter(shooter, this::getLeftRPM, this::getRightRPM),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
+                // NOTE do NOT turn off the shooter wheels
         );
     }
 
@@ -36,17 +39,10 @@ public class PrepareShooter extends ParallelCommandGroup {
         return m_driveTrain.getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
     }
 
-    private double getRightRPM() {
-        // Will get distance update every time the function is called?
-        return Shooter.calculateShooterSpeeds(getDistance()).leftRPM; 
-    }
-
-    private double getLeftRPM() {
-        return Shooter.calculateShooterSpeeds(getDistance()).rightRPM;
-    }
-
-    private double getShooterPitch() {
-        return Shooter.calculateShooterSpeeds(getDistance()).shootAngle;
+    private Shooter.ShooterValues getShootValues() {
+        double distance = getDistance();
+        SmartDashboard.putNumber("shooter/speakDistance", distance);
+        return Shooter.calculateShooterSpeeds(distance); 
     }
 
     private Rotation2d getWantedHeading() {
