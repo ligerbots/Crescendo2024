@@ -22,7 +22,6 @@ public class FieldConstants {
 
     private static final double NOTE_C_X = FIELD_LENGTH / 2.0;
     private static final double NOTE_S_X = 2.89;
-    private static final double NOTE_CHECK_X = 6.85;
 
     public static final Translation2d NOTE_C_1 = new Translation2d(NOTE_C_X, 0.78);
     public static final Translation2d NOTE_C_2 = new Translation2d(NOTE_C_X, 2.44);
@@ -64,13 +63,13 @@ public class FieldConstants {
         ROBOT_START_3 = new Pose2d(pos, SPEAKER.minus(pos).getAngle());
     }
 
+    public static boolean isCenterNote(Translation2d targetNote) {
+        return Math.abs(NOTE_C_X - targetNote.getX()) < 0.1;
+    }
+
     public static boolean isRedAlliance() {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         return alliance.isPresent() && alliance.get() == Alliance.Red;
-    }
-
-    public static boolean isCenterNote(Translation2d targetNote) {
-        return Math.abs(NOTE_C_X - targetNote.getX()) < 0.1;
     }
 
     public static Pose2d flipPose(Pose2d pose) {
