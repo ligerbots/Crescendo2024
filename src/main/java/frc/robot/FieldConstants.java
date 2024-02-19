@@ -50,14 +50,19 @@ public class FieldConstants {
     public static final Pose2d ROBOT_SHOOT_M_1 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_SHOOT_M_2 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
-    public static final Pose2d ROBOT_NOTE_CHECK_1 = new Pose2d(NOTE_CHECK_X, 0.78, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_NOTE_CHECK_2 = new Pose2d(NOTE_CHECK_X, 2.44, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_NOTE_CHECK_3 = new Pose2d(NOTE_CHECK_X, 5.77, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_NOTE_CHECK_4 = new Pose2d(NOTE_CHECK_X, 7.45, Rotation2d.fromDegrees(0));
+    public static final Pose2d ROBOT_START_1;
+    public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(180));
+    public static final Pose2d ROBOT_START_3;
 
-    public static final Pose2d ROBOT_START_1 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_START_3 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
+    // Java magic: use a static code block to set START_1 and _3 angle to point exactly 
+    //    at the SPEAKER.
+    static {
+        Translation2d pos = new Translation2d(1.25, 3.85);
+        ROBOT_START_1 = new Pose2d(pos, SPEAKER.minus(pos).getAngle());
+
+        pos = new Translation2d(1.25, 6.95);
+        ROBOT_START_3 = new Pose2d(pos, SPEAKER.minus(pos).getAngle());
+    }
 
     public static boolean isRedAlliance() {
         Optional<Alliance> alliance = DriverStation.getAlliance();
