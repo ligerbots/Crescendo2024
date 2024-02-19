@@ -5,19 +5,24 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
-public class Stow extends ParallelCommandGroup {
-  /** Creates a new StowingNotes. */
-  public Stow(Shooter shooter, ShooterPivot shooterPivot, Elevator elevator) {
+// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
+// information, see:
+// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
+public class Stow extends SequentialCommandGroup {
+  /** Creates a new Stow. */
+  public Stow(Elevator elevator, ShooterPivot shooterPivot, Shooter shooter) {
+    // Add your commands in the addCommands() call, e.g.
+    // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new InstantCommand(shooter::turnOffShooter),
-        new SetElevatorLength(elevator, Elevator.STOW_LENGTH),
-        new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE)
+        new SetElevatorLength(elevator, Elevator.STOW_HEIGHT)
+            .alongWith(new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE_RADIANS)
+                .alongWith(new InstantCommand(shooter::turnOffShooter)))
+
     );
   }
 }

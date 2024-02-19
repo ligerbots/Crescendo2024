@@ -22,9 +22,8 @@ public class SetElevatorLength extends Command {
         addRequirements(m_elevator);
     }
 
-    // convenience constructor, takes a constant
-    public SetElevatorLength(Elevator elevator, double length) {
-        this(elevator, ()->length);
+    public SetElevatorLength(Elevator elevator, double length){
+        this(elevator, () -> length);
     }
 
     // Called when the command is initially scheduled.
