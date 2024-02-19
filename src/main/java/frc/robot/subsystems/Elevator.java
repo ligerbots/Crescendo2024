@@ -47,18 +47,17 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants for various commands
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-    public static final double AMP_SHOT_HEIGHT = Units.inchesToMeters(38.211);
-    public static final double STOW_HEIGHT = Units.inchesToMeters(17.849);
-        // Define the motor and encoders
-    private final CANSparkMax m_motor;
-    private final RelativeEncoder m_encoder;
+    public static final double STOW_LENGTH = ELEVATOR_MIN_LENGTH_METERS;
 
     // initializing Potentiometer
     private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
     private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
     private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
 
-    
+    // Define the motor and encoders
+    private final CANSparkMax m_motor;
+    private final RelativeEncoder m_encoder;
+
     private final AnalogPotentiometer m_stringPotentiometer;
     private final SparkPIDController m_PIDController;
     private double m_goal = 0;

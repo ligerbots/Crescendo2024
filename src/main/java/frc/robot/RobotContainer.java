@@ -4,20 +4,15 @@
 
 package frc.robot;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
@@ -25,8 +20,7 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-    private final CommandXboxController m_mainController = new CommandXboxController(0);
-    private final CommandXboxController m_controller2 = new CommandXboxController(2);
+    private final CommandXboxController m_controller = new CommandXboxController(0);
     private final Joystick m_farm = new Joystick(1);
 
     private final NoteVision m_noteVision = new NoteVision();
@@ -37,8 +31,8 @@ public class RobotContainer {
     // Java problem: the encoder needs to be created outside the constructor
     private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
     private final Elevator m_elevator = new Elevator();
+
     private final SendableChooser<AutoCommandInterface> m_chosenAuto = new SendableChooser<>();
-    private boolean m_isShootingAmp = false;
 
     public RobotContainer() {
         configureBindings();
@@ -49,26 +43,14 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Intake
-        m_mainController.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-        m_mainController.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+        m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
+        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+            
+        m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_controller2.rightTrigger(.8).onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
-
-        m_mainController.rightTrigger(.8).onTrue(new ScoreAmpOrShoot(m_shooter, m_isShootingAmp));
-
-        m_mainController.back().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
-        m_mainController.start().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
-        m_mainController.a().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
-                m_driveTrain::togglePrecisionMode, m_driveTrain));
-        m_mainController.y()
-                .onTrue(new PrepAmpShot(m_elevator, m_shooter, m_shooterPivot).alongWith(setIsShootingAmp(true)));
-        m_mainController.x()
-                .onTrue(new PrepareShooter(m_shooterPivot, m_shooter, m_driveTrain, m_mainController.getHID(),
-                        () -> m_mainController.getLeftY(),
-                        () -> m_mainController.getLeftX()));
-        m_mainController.b().onTrue(new Stow(m_elevator, m_shooterPivot, m_shooter));
+        m_controller.b().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+        m_controller.a().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
+        m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode, m_driveTrain::togglePrecisionMode, m_driveTrain));
 
         // need buttons for PrepareSpeakerShot, TriggerShot and PrepareAmpShot
         
@@ -150,11 +132,6 @@ public class RobotContainer {
         return m_chosenAuto.getSelected();
     }
 
-    public Command setIsShootingAmp(boolean isShootingAmp) {
-        m_isShootingAmp = isShootingAmp;
-        return null;
-    }
-
     public Command getDriveCommand() {
         // The controls are for field-oriented driving:
         // Left stick Y axis -> forward and backwards movement
@@ -162,9 +139,9 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_mainController.getLeftY()),
-                () -> -modifyAxis(m_mainController.getLeftX()),
-                () -> -modifyAxis(m_mainController.getRightX()));
+                () -> -modifyAxis(m_controller.getLeftY()),
+                () -> -modifyAxis(m_controller.getLeftX()),
+                () -> -modifyAxis(m_controller.getRightX()));
     }
 
     private static double deadband(double value, double deadband) {

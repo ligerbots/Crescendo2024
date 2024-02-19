@@ -210,7 +210,6 @@ public class Shooter extends SubsystemBase {
         turnOffFeeder();
     }
 
-
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
     }
