@@ -21,14 +21,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
 
-// Note that AutoCommandInterface is a SequentialCommandGroup
-public class GetNoteX extends AutoCommandInterface {
+public class GetNoteX extends SequentialCommandGroup {
 
     public static final Map<Translation2d, String[]> s_pathLookup = new HashMap<>() {
         {
@@ -89,11 +90,6 @@ public class GetNoteX extends AutoCommandInterface {
 
        addCommands(new PrintCommand("GetNoteX-- Finished target note: "+ targetNote));
     }
-
-    public Pose2d getInitialPose() {
-        PathPlannerPath firstPath = m_candidateStartPaths.values().iterator().next();
-        return FieldConstants.flipPose(firstPath.getStartingDifferentialPose());
-    };
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
