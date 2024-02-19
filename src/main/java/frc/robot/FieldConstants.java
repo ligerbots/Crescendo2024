@@ -30,10 +30,17 @@ public class FieldConstants {
     public static final Translation2d NOTE_C_4 = new Translation2d(NOTE_C_X, 5.77);
     public static final Translation2d NOTE_C_5 = new Translation2d(NOTE_C_X, 7.45);
 
-    public static final Translation2d NOTE_S_1 = new Translation2d(NOTE_S_X, 4.26);
-    public static final Translation2d NOTE_S_2 = new Translation2d(NOTE_S_X, 5.52);
-    public static final Translation2d NOTE_S_3 = new Translation2d(NOTE_S_X, 7.00);   
+    public static final Translation2d BLUE_NOTE_S_1 = new Translation2d(NOTE_S_X, 4.26);
+    public static final Translation2d BLUE_NOTE_S_2 = new Translation2d(NOTE_S_X, 5.52);
+    public static final Translation2d BLUE_NOTE_S_3 = new Translation2d(NOTE_S_X, 7.00);   
    
+    // Needed for the Note simulation. 
+    // For Autos, always use BLUE and flipTranslation
+    public static final Translation2d RED_NOTE_S_1 = new Translation2d(FIELD_LENGTH - NOTE_S_X, 4.26);
+    public static final Translation2d RED_NOTE_S_2 = new Translation2d(FIELD_LENGTH - NOTE_S_X, 5.52);
+    public static final Translation2d RED_NOTE_S_3 = new Translation2d(FIELD_LENGTH - NOTE_S_X, 7.00);   
+   
+
     public static final Translation2d SPEAKER = new Translation2d(0, 5.54);
 
     public static final Pose2d ROBOT_NOTE_C_1 = new Pose2d(7.85, 0.78, Rotation2d.fromDegrees(0));
