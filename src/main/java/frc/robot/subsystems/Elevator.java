@@ -50,7 +50,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants 
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-
+    public static final double AMP_SHOT_HEIGHT = Units.inchesToMeters(38.211);
+    public static final double STOW_HEIGHT = Units.inchesToMeters(17.849);
         // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;

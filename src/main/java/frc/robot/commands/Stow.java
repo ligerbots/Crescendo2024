@@ -13,14 +13,15 @@ import frc.robot.subsystems.ShooterPivot;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ScoreAmp extends SequentialCommandGroup {
-  /** Creates a new ScoreAmp. */
-  public ScoreAmp(Shooter shooter, Elevator elevator, ShooterPivot shooterPivot) {
+public class Stow extends SequentialCommandGroup {
+  /** Creates a new Stow. */
+  public Stow(Elevator elevator, ShooterPivot shooterPivot, Shooter shooter) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-        new InstantCommand(shooter::ampShot),
-        new Stow(elevator, shooterPivot, shooter)
+        new SetElevatorLength(elevator, Elevator.STOW_HEIGHT)
+            .alongWith(new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE_RADIANS)
+                .alongWith(new InstantCommand(shooter::turnOffShooter)))
 
     );
   }

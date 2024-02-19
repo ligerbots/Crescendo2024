@@ -5,7 +5,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
@@ -13,15 +12,22 @@ import frc.robot.subsystems.ShooterPivot;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ScoreAmp extends SequentialCommandGroup {
-  /** Creates a new ScoreAmp. */
-  public ScoreAmp(Shooter shooter, Elevator elevator, ShooterPivot shooterPivot) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
-    addCommands(
-        new InstantCommand(shooter::ampShot),
-        new Stow(elevator, shooterPivot, shooter)
+public class ScoreAmpOrShoot extends InstantCommand {
+  private boolean m_isShootingAmp;
+  private Shooter m_shooter;
+  public ScoreAmpOrShoot(Shooter shooter, boolean isShootingAmp) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    m_isShootingAmp = isShootingAmp;
+    m_shooter = shooter;
+  }
 
-    );
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+    
+    if(m_isShootingAmp == true){
+      new InstantCommand(m_shooter::ampShot);
+    }
+    else new InstantCommand(m_shooter::turnOnFeeder);
   }
 }

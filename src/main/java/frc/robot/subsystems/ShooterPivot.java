@@ -34,6 +34,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
     private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
 
+    public static final double STOW_ANGLE_RADIANS = Units.degreesToRadians(48);
+    public static final double AMP_SHOT_ANGLE_RADIANS = Units.degreesToRadians(45);
     private static final double POSITION_OFFSET = 62.0/360.0; //TODO: set for 2024
     private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
 
