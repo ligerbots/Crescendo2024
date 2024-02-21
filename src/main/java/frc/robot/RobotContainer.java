@@ -21,8 +21,9 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-    private final CommandXboxController m_controller = new CommandXboxController(0);
-    private final Joystick m_farm = new Joystick(1);
+    private final CommandXboxController m_driverController = new CommandXboxController(0);
+    private final CommandXboxController m_operatorController = new CommandXboxController(1);
+    private final Joystick m_farm = new Joystick(2);
 
     private final NoteVision m_noteVision = new NoteVision();
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
@@ -47,31 +48,33 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Intake
-        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake,
-        // m_intake::stop, m_intake));
+        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
 
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and back up the note a little bit
-        m_controller.leftBumper().whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
+        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
-        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+        m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        m_driverController.rightTrigger(0.5).onTrue(new TriggerShot(m_shooter));
 
-        m_controller.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
-        m_controller.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
-        m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
+        m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+
+        m_driverController.a().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
                 m_driveTrain::togglePrecisionMode, m_driveTrain));
 
-        m_controller.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+        m_driverController.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
 
-        m_controller.a()
-                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_controller.getHID(),
-                        () -> -modifyAxis(m_controller.getLeftY()),
-                        () -> -modifyAxis(m_controller.getLeftX()), 
-                        () -> -modifyAxis(m_controller.getRightX())));
+        m_driverController.a()
+                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
+                        () -> -modifyAxis(m_driverController.getLeftY()),
+                        () -> -modifyAxis(m_driverController.getLeftX()), 
+                        () -> -modifyAxis(m_driverController.getRightX())));
 
-        m_controller.rightTrigger(.5).onTrue(new TriggerShot(m_shooter));
+        m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+        m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
+
+
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
@@ -197,9 +200,9 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_controller.getLeftY()),
-                () -> -modifyAxis(m_controller.getLeftX()),
-                () -> -modifyAxis(m_controller.getRightX()));
+                () -> -modifyAxis(m_driverController.getLeftY()),
+                () -> -modifyAxis(m_driverController.getLeftX()),
+                () -> -modifyAxis(m_driverController.getRightX()));
     }
 
     private static double deadband(double value, double deadband) {

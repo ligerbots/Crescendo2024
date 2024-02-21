@@ -54,7 +54,10 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Start to Note",
-  "previewStartingState": null,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 180.0,
+    "velocity": 0
+  },
   "useDefaultConstraints": false
 }
