@@ -24,6 +24,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
     private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
+    public static final double OVERRIDE_METERS = Units.inchesToMeters(2.0);
+
     // Tolerance for commands
     private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
     
@@ -139,6 +141,12 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_goal = limitElevatorLength(goal);
         super.setGoal(m_goal);
         SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
+    }
+
+    public void overrideLength(double override){
+       double fixedOveride = override/50;
+       double currLength = getLength();
+       setLength(fixedOveride + currLength);
     }
 
     public boolean lengthWithinTolerance() {

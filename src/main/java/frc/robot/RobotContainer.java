@@ -44,6 +44,8 @@ public class RobotContainer {
         configureAutos();
 
         m_driveTrain.setDefaultCommand(getDriveCommand());
+        m_elevator.setDefaultCommand(getElevatorOverrideCommand());
+        m_shooterPivot.setDefaultCommand(getShooterPivotOverrideCommand());
     }
 
     private void configureBindings() {
@@ -73,8 +75,6 @@ public class RobotContainer {
 
         m_controller.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_controller.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
-
-
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
@@ -203,6 +203,19 @@ public class RobotContainer {
                 () -> -modifyAxis(m_controller.getLeftY()),
                 () -> -modifyAxis(m_controller.getLeftX()),
                 () -> -modifyAxis(m_controller.getRightX()));
+    }
+
+    public Command getElevatorOverrideCommand() {
+        return new OverrideElevator(
+                m_elevator,
+                () -> -modifyAxis(m_controller2.getLeftY()));
+    }
+
+    public Command getShooterPivotOverrideCommand() {
+        return new OverrideShooterPivot(
+            m_shooterPivot, 
+            () -> -modifyAxis(m_controller2.getRightY())
+        );
     }
 
     private static double deadband(double value, double deadband) {
