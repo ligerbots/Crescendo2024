@@ -39,11 +39,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 161.94,
+    "rotation": 150.38045582363097,
     "rotateFast": true
   },
   "reversed": false,
-  "folder": "Note to Note ",
+  "folder": null,
   "previewStartingState": null,
   "useDefaultConstraints": false
 }
