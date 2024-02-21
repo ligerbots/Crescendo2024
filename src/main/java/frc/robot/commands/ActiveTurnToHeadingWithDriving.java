@@ -22,6 +22,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final Supplier<Rotation2d> m_wantedHeadingSupplier;
     private final DoubleSupplier m_joystickXSupplier;
     private final DoubleSupplier m_joystickYSupplier;
+    private final DoubleSupplier m_rightJoystickXSupplier;
 
     private final static double KP = 0.2; // TODO pick correct values
     private final static double KI = 0.0;
@@ -34,11 +35,12 @@ public class ActiveTurnToHeadingWithDriving extends Command {
      * Creates a new autoAim.
      */
     public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
-            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
+            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier, DoubleSupplier rightJoystickXSupplier) {
         m_driveTrain = driveTrain;
         m_wantedHeadingSupplier = wantedHeading;
         m_joystickXSupplier = joystickXSupplier;
         m_joystickYSupplier = joystickYSupplier;
+        m_rightJoystickXSupplier = rightJoystickXSupplier;
 
         m_turnHeadingPID = new PIDController(KP, KI, KD);
         addRequirements(m_driveTrain);
@@ -55,14 +57,22 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     public void execute() {
         // auto aiming using PID
         m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
-        double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
+        double speed;
+        if (m_rightJoystickXSupplier.getAsDouble() != 0) {
+            speed = m_rightJoystickXSupplier.getAsDouble();
+        } else {
+            speed = -(m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees));
 
-        m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), -speed);
+        }
+
+        m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), speed);
 
         // Record whether at the right heading, so that other commands can check
-        m_driveTrain.setOnGoalForActiveTurn(
-            Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
+        m_driveTrain.setOnGoalForActiveTurn(Math
+                .abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
     }
+
+
 
     // Called once the command ends or is interrupted.
     @Override
