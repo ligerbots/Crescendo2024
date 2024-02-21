@@ -47,12 +47,13 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Intake
-        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-        
-        // run the intake as long as the bumper is held. 
+        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake,
+        // m_intake::stop, m_intake));
+
+        // run the intake as long as the bumper is held.
         // When release, shut off the intake and back up the note a little bit
         m_controller.leftBumper().whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
-                        .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
+                .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
         m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
         m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
@@ -63,12 +64,13 @@ public class RobotContainer {
                 m_driveTrain::togglePrecisionMode, m_driveTrain));
 
         m_controller.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
-        
+
         m_controller.a()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_controller.getHID(),
                         () -> -modifyAxis(m_controller.getLeftY()),
-                        () -> -modifyAxis(m_controller.getLeftX())));
-        
+                        () -> -modifyAxis(m_controller.getLeftX()), 
+                        () -> -modifyAxis(m_controller.getRightX())));
+
         m_controller.rightTrigger(.5).onTrue(new TriggerShot(m_shooter));
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
@@ -117,15 +119,25 @@ public class RobotContainer {
         // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision,
         // m_shooter, m_intake));
 
-        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new
+        // GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter,
+        // m_intake));
+        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2,
+        // m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        // m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S1)", new
+        // GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter,
+        // m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S2)", new
+        // GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter,
+        // m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S3)", new
+        // GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter,
+        // m_intake));
 
-        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
-        m_chosenAuto.setDefaultOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        Translation2d[] noteList = new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 };
+        m_chosenAuto.setDefaultOption("C1-C2",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
         noteList = new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 };
         m_chosenAuto.addOption("C2-C1",
