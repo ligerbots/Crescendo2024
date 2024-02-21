@@ -4,33 +4,35 @@
 
 package frc.robot.commands;
 
-
-import java.util.function.DoubleSupplier;
-
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Shooter;
 
-public class SetElevatorLength extends Command {
-    Elevator m_elevator;
-    DoubleSupplier m_lengthSupplier;
+public class TriggerShot extends Command {
+    private static final double SHOOT_TIME = 1.0;  // seconds
+    
+    Shooter m_shooter;
+    Timer m_timer = new Timer();
 
-    /** Creates a new SetElevatorLength. */
-    public SetElevatorLength(Elevator elevator, DoubleSupplier length) {
-        m_elevator = elevator;
-        m_lengthSupplier = length;
+    /** Creates a new TriggerShot. */
+    public TriggerShot(Shooter shooter) {
+        m_shooter = shooter;
 
-        addRequirements(m_elevator);
-    }
-
-    // convenience constructor, takes a constant
-    public SetElevatorLength(Elevator elevator, double length) {
-        this(elevator, ()->length);
+        addRequirements(shooter);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_elevator.setLength(m_lengthSupplier.getAsDouble());
+        if (m_shooter.getSpeakerShootMode()) {
+            // speaker shot
+            m_shooter.turnOnFeeder();
+        } else {
+            // amp shot
+            m_shooter.ampShot();
+        }
+
+        m_timer.restart();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -41,11 +43,12 @@ public class SetElevatorLength extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        m_shooter.turnOffShooter();
     }
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return m_elevator.lengthWithinTolerance();
+        return m_timer.hasElapsed(SHOOT_TIME);
     }
 }

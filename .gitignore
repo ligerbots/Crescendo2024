@@ -107,7 +107,6 @@ Temporary Items
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -162,7 +161,9 @@ bin/
 
 # Simulation GUI and other tools window save file
 *-window.json
-ctre_sim
-simgui*.json
+ctre_sim/
+simgui-window.json
+simgui.json
+simgui-ds.json
 networktables.json
 settings.json

@@ -8,14 +8,15 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 public class SwerveModule {
     private final String m_moduleName;
-    private final NeoDriveController m_driveController;
-    private final NeoSteerController m_steerController;
+    private final DriveController m_driveController;
+    private final SteerController m_steerController;
 
-    public SwerveModule(String moduleName, NeoDriveController driveController, NeoSteerController steerController) {
+    public SwerveModule(String moduleName, DriveController driveController, SteerController steerController) {
         m_moduleName = moduleName;
         m_driveController = driveController;
         m_steerController = steerController;
     }
+    
 
     public double getDriveVelocity() {
         return m_driveController.getStateVelocity();
@@ -77,6 +78,7 @@ public class SwerveModule {
 
     public void updateSmartDashboard() {
         m_steerController.updateSmartDashboard(String.format("drivetrain/%s/steer", m_moduleName));
+        m_driveController.updateSmartDashboard(String.format("drivetrain/%s/drive", m_moduleName));
     }
 
     public void syncAngleEncoders(boolean dontCheckTimer) {

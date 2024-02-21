@@ -4,31 +4,38 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShooterPivot;
 
-public class SetShooterSpeedAndWait extends Command {
+public class ActiveSetShooter extends Command {
     private final Shooter m_shooter;
-    private final DoubleSupplier m_leftRpm, m_rightRpm;
+    private final ShooterPivot m_shooterPivot;
+    private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
 
-    public SetShooterSpeedAndWait(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
-        addRequirements(shooter);
+    /** Creates a new ActiveSpeedUpShooter. */
+    public ActiveSetShooter(Shooter shooter, ShooterPivot shootPivot, Supplier<Shooter.ShooterValues> valueSupplier) {
         m_shooter = shooter;
-        m_leftRpm = leftRpm;
-        m_rightRpm = rightRpm;
+        m_shooterPivot = shootPivot;
+        m_valueSupplier = valueSupplier;
+
+        addRequirements(shooter);
+        addRequirements(shootPivot);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_shooter.setShooterRpms(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble());
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        Shooter.ShooterValues shootValues = m_valueSupplier.get();
+        m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
+        m_shooterPivot.setAngle(shootValues.shootAngle);
     }
 
     // Called once the command ends or is interrupted.
@@ -39,7 +46,6 @@ public class SetShooterSpeedAndWait extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return Math.abs(m_shooter.getLeftRpm() - m_leftRpm.getAsDouble()) < Shooter.RPM_TOLERANCE
-                && Math.abs(m_shooter.getRightRpm() - m_rightRpm.getAsDouble()) < Shooter.RPM_TOLERANCE;
+        return false;
     }
 }

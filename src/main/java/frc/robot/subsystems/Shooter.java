@@ -15,6 +15,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -23,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import static edu.wpi.first.units.MutableMeasure.mutable;
@@ -36,7 +36,13 @@ public class Shooter extends SubsystemBase {
     
     static final double FEEDER_SPEED = 0.3;
 
-    public static final double RPM_TOLERANCE = 100; // TODO Tune this later
+    // AMP shot, backwards out input end
+    static final double AMP_SHOOT_SPEED = -0.5;
+    
+    // This is negative to push the note out slowly
+    public static final double BACKUP_FEED_SPEED = -0.1;
+
+    public static final double RPM_TOLERANCE = 200; // TODO Tune this later
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
@@ -53,32 +59,41 @@ public class Shooter extends SubsystemBase {
 
     // SysId data collection
     private SysIdRoutine m_sysIdRoutine = null;
-    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Units.Volts.of(0));
-    private final MutableMeasure<Angle> m_distance = mutable(Units.Rotations.of(0));
-    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(Units.RotationsPerSecond.of(0));
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(edu.wpi.first.units.Units.Volts.of(0));
+    private final MutableMeasure<Angle> m_distance = mutable(edu.wpi.first.units.Units.Rotations.of(0));
+    private final MutableMeasure<Velocity<Angle>> m_velocity = mutable(edu.wpi.first.units.Units.RotationsPerSecond.of(0));
+
+    // Used for is on target
+    private double m_leftGoalRPM;
+    private double m_rightGoalRPM;
+
+    private boolean m_speakerShootMode = true;
 
     // lookup table for upper hub speeds
-    public static class ShooterSpeeds {
-        public double top, bottom, chute;
+    public static class ShooterValues {
+        public double leftRPM, rightRPM, shootAngle;
         
-        public ShooterSpeeds(double top, double bottom, double chute) {
-            this.top = top;
-            this.bottom = bottom;
-            this.chute = chute;
+        public ShooterValues(double leftRPM, double rightRPM, double shootAngle) {
+            this.leftRPM = leftRPM;
+            this.rightRPM = rightRPM;
+            this.shootAngle = shootAngle;
         }
 
-        public ShooterSpeeds interpolate(ShooterSpeeds other, double ratio) {
-            return new ShooterSpeeds(
-                    top + (other.top - top) * ratio,
-                    bottom + (other.bottom - bottom) * ratio,
-                    chute + (other.chute - chute) * ratio);
+        public ShooterValues interpolate(ShooterValues other, double ratio) {
+            return new ShooterValues(
+                    leftRPM + (other.leftRPM - leftRPM) * ratio,
+                    rightRPM + (other.rightRPM - rightRPM) * ratio,
+                    shootAngle + (other.shootAngle - shootAngle) * ratio);
         }
     }
 
-    static final TreeMap<Double, ShooterSpeeds> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(0.0, new ShooterSpeeds(900.0, 900.0, FEEDER_SPEED)),      // actually lower hub, but safer to include
-            Map.entry(235.0, new ShooterSpeeds(2120.0, 2300.0, FEEDER_SPEED)))); // Revere
-            
+    static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
+            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(35.0))), // a guess
+            Map.entry(Units.feetToMeters(8.5), new ShooterValues(3000.0, 2500.0, Math.toRadians(31.0))),
+            Map.entry(Units.feetToMeters(10.7), new ShooterValues(3000.0, 3500.0, Math.toRadians(25.0))),
+            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
+            ));
+
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
     public Shooter() {
@@ -118,9 +133,9 @@ public class Shooter extends SubsystemBase {
         pidController.setOutputRange(-1.0, 1.0);
     }
 
-    public static ShooterSpeeds calculateShooterSpeeds(double distance, boolean upperHub) {
-        Map.Entry<Double, ShooterSpeeds> before = shooterSpeeds.floorEntry(distance);
-        Map.Entry<Double, ShooterSpeeds> after = shooterSpeeds.ceilingEntry(distance);
+    public static ShooterValues calculateShooterSpeeds(double distance) {
+        Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
+        Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
             if (after == null) {
                 return null; // this should never happen b/c shooterSpeeds should have at least 1 element
@@ -143,8 +158,12 @@ public class Shooter extends SubsystemBase {
     // periodically update the values of motors for shooter to SmartDashboard
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("shooter/left_rpm", getLeftRpm());
-        SmartDashboard.putNumber("shooter/right_rpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/leftRpm", getLeftRpm());
+        SmartDashboard.putNumber("shooter/rightRpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/leftCurrent", m_leftShooterMotor.getOutputCurrent());
+        SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
+        SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
+        SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
     }
 
     public double getLeftRpm() {
@@ -166,12 +185,24 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
         SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
 
+        //Used in isWithinTolerenceFunc
+        m_leftGoalRPM = leftRpm;
+        m_rightGoalRPM = rightRpm;
+
         m_leftPidController.setReference(leftRpm, CANSparkMax.ControlType.kVelocity);
         m_rightPidController.setReference(rightRpm, CANSparkMax.ControlType.kVelocity);
     }
 
+    public boolean rpmWithinTolerance() {
+        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
+    }
+
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void ampShot(){
+        setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
     public void turnOffShooter() {
@@ -191,17 +222,25 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(0);
     }
 
+    public void setSpeakerShootMode(boolean mode) {
+        m_speakerShootMode = mode;
+    }
+
+    public boolean getSpeakerShootMode() {
+        return m_speakerShootMode;
+    }
+
     // Data collection for SysId
     private void setSysIdRoutine() {
         m_sysIdRoutine = new SysIdRoutine(new Config(), new SysIdRoutine.Mechanism(
-            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(Units.Volts) / Constants.MAX_VOLTAGE),
+            (Measure<Voltage> voltage) -> m_leftShooterMotor.set(voltage.in(edu.wpi.first.units.Units.Volts) / Constants.MAX_VOLTAGE),
             log -> {
                 log.motor("left motor")
                     .voltage(
                         m_appliedVoltage.mut_replace(
-                            m_leftShooterMotor.get() * Constants.MAX_VOLTAGE, Units.Volts))
-                    .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), Units.Rotations))
-                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), Units.RPM));
+                            m_leftShooterMotor.get() * Constants.MAX_VOLTAGE, edu.wpi.first.units.Units.Volts))
+                    .angularPosition(m_distance.mut_replace(m_leftEncoder.getPosition(), edu.wpi.first.units.Units.Rotations))
+                    .angularVelocity(m_velocity.mut_replace(m_leftEncoder.getVelocity(), edu.wpi.first.units.Units.RPM));
             }, this));
     }
 

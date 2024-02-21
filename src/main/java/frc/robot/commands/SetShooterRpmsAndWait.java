@@ -4,33 +4,26 @@
 
 package frc.robot.commands;
 
-
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Shooter;
 
-public class SetElevatorLength extends Command {
-    Elevator m_elevator;
-    DoubleSupplier m_lengthSupplier;
+public class SetShooterRpmsAndWait extends Command {
+    private final Shooter m_shooter;
+    private final Supplier<Shooter.ShooterValues> m_valueSupplier;
 
-    /** Creates a new SetElevatorLength. */
-    public SetElevatorLength(Elevator elevator, DoubleSupplier length) {
-        m_elevator = elevator;
-        m_lengthSupplier = length;
-
-        addRequirements(m_elevator);
-    }
-
-    // convenience constructor, takes a constant
-    public SetElevatorLength(Elevator elevator, double length) {
-        this(elevator, ()->length);
+    public SetShooterRpmsAndWait(Shooter shooter, Supplier<Shooter.ShooterValues> valueSupplier) {
+        addRequirements(shooter);
+        m_shooter = shooter;
+        m_valueSupplier = valueSupplier;
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_elevator.setLength(m_lengthSupplier.getAsDouble());
+        Shooter.ShooterValues values = m_valueSupplier.get();
+        m_shooter.setShooterRpms(values.leftRPM, values.rightRPM);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -46,6 +39,6 @@ public class SetElevatorLength extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return m_elevator.lengthWithinTolerance();
+        return m_shooter.rpmWithinTolerance();
     }
 }

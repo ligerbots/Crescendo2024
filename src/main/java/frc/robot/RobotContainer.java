@@ -4,13 +4,17 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 
 import frc.robot.commands.*;
@@ -25,52 +29,67 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
-    // private final ShooterPivot m_shooterPivot = new ShooterPivot(null); //TODO:
-    // find encoder
+    // Java problem: the encoder needs to be created outside the constructor
+    private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
     private final Elevator m_elevator = new Elevator();
+
+    private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
+    private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
+    private Command m_prevAutoCommand = null;
+    private Pose2d m_prevInitialPose = new Pose2d();
 
     public RobotContainer() {
         configureBindings();
+        configureAutos();
+
         m_driveTrain.setDefaultCommand(getDriveCommand());
     }
 
     private void configureBindings() {
         // Intake
-        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-        m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
+        
+        // run the intake as long as the bumper is held. 
+        // When release, shut off the intake and back up the note a little bit
+        m_controller.leftBumper().whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
+                        .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
+        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.b().onTrue(new SetElevatorLength(m_elevator,
-                () -> SmartDashboard.getNumber("Elevator/testGoalLength", 0)));
+        m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_controller.y().onTrue(new TestShootSpeed(m_shooter,
+        m_controller.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+        m_controller.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
+        m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
+                m_driveTrain::togglePrecisionMode, m_driveTrain));
+
+        m_controller.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+        
+        m_controller.a()
+                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_controller.getHID(),
+                        () -> -modifyAxis(m_controller.getLeftY()),
+                        () -> -modifyAxis(m_controller.getLeftX())));
+        
+        m_controller.rightTrigger(.5).onTrue(new TriggerShot(m_shooter));
+
+        JoystickButton farm1 = new JoystickButton(m_farm, 1);
+        farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
+
+        JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        farm2.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_LOWER_ELEVATOR));
+
+        JoystickButton farm3 = new JoystickButton(m_farm, 3);
+        farm3.onTrue(new SetElevatorLength(m_elevator,
+                () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
+
+        JoystickButton farm10 = new JoystickButton(m_farm, 10);
+        farm10.onTrue(new TestShootSpeed(m_shooter,
                 () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
                 () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
 
-        m_controller.x().onTrue(new Shoot(m_shooter,
-                () -> {
-                    return SmartDashboard.getNumber("shooter/test_left_rpm", 0);
-                },
-                () -> {
-                    return SmartDashboard.getNumber("shooter/test_right_rpm", 0);
-                }));
-        // this is pseudo code
-        // m_controller.leftTrigger().onTrue(if(ampState = false){new Shoot(m_shooter,
-        // null, null)} else if(ampState = true){
-        // {new Shoot(m_shooter, null, null)}
-        // });
-        // m_controller.leftBumper().OnTrue(new set)
-        // m_controller.rightTrigger().whileTrue(new StartEndCommand(m_intake::intake,
-        // m_intake::stop, m_intake));
-        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake,
-        // m_intake::stop, m_intake));
-        // m_controller.a().whileTrue(new autoAimAndFire());
-        // m_controller.b().whileTrue(new setDefendedMode())
-
-        JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        farm1.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_RAISE_ELEVATOR));
-
-        JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new SetElevatorLength(m_elevator, () -> Elevator.ONSTAGE_LOWER_ELEVATOR));
+        JoystickButton farm11 = new JoystickButton(m_farm, 11);
+        farm11.onTrue(new TestShoot(m_shooter,
+                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
+                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -85,8 +104,78 @@ public class RobotContainer {
         // farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
+    private void configureAutos() {
+        // List of start locations
+        m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
+        m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
+        m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
+        SmartDashboard.putData("Start Location", m_startLocation);
+
+        // Initialize the list of available Autonomous routines
+        // m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain,
+        // m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision,
+        // m_shooter, m_intake));
+
+        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        // m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
+        m_chosenAuto.setDefaultOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 };
+        m_chosenAuto.addOption("C2-C1",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 };
+        m_chosenAuto.addOption("S1-S2",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 };
+        m_chosenAuto.addOption("S3-S2",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2,
+                FieldConstants.BLUE_NOTE_S_3 };
+        m_chosenAuto.addOption("S1-S2-S3",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2,
+                FieldConstants.BLUE_NOTE_S_1 };
+        m_chosenAuto.addOption("S3-S2-S1",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 };
+        m_chosenAuto.addOption("S2-S1",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1 };
+        m_chosenAuto.addOption("S1-C1",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
+        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
+    }
+
+    public Pose2d getInitialPose() {
+        return FieldConstants.flipPose(m_startLocation.getSelected());
+    }
+
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return m_chosenAuto.getSelected();
+    }
+
+    public boolean autoHasChanged() {
+        Command autoCommand = getAutonomousCommand();
+        Pose2d pose = getInitialPose();
+        boolean changed = pose != m_prevInitialPose || (autoCommand != null && autoCommand != m_prevAutoCommand);
+        m_prevAutoCommand = autoCommand;
+        m_prevInitialPose = pose;
+        return changed;
     }
 
     public Command getDriveCommand() {
