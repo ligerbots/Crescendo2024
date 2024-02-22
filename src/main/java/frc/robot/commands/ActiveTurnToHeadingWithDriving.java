@@ -23,25 +23,24 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final Supplier<Rotation2d> m_wantedHeadingSupplier;
     private final DoubleSupplier m_joystickXSupplier;
     private final DoubleSupplier m_joystickYSupplier;
-    private final DoubleSupplier m_rightJoystickXSupplier;
+    private final DoubleSupplier m_joystickTurnSupplier;
 
-    private final static double KP = 0.2; // TODO pick correct values
+    private final static double KP = 0.02; // TODO pick correct values
     private final static double KI = 0.0;
     private final static double KD = 0.0;
 
     private final PIDController m_turnHeadingPID;
-    private Double m_wantedDegrees;
 
     /**
      * Creates a new autoAim.
      */
     public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
-            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier, DoubleSupplier rightJoystickXSupplier) {
+            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier, DoubleSupplier joystickTurnSupplier) {
         m_driveTrain = driveTrain;
         m_wantedHeadingSupplier = wantedHeading;
         m_joystickXSupplier = joystickXSupplier;
         m_joystickYSupplier = joystickYSupplier;
-        m_rightJoystickXSupplier = rightJoystickXSupplier;
+        m_joystickTurnSupplier = joystickTurnSupplier;
 
         m_turnHeadingPID = new PIDController(KP, KI, KD);
         addRequirements(m_driveTrain);
@@ -57,20 +56,22 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     @Override
     public void execute() {
         // auto aiming using PID
-        m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
+        double wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
+        double headingDegrees = m_driveTrain.getHeading().getDegrees();
+
+        double turnJoyStick = m_joystickTurnSupplier.getAsDouble();
         double speed;
-        double joyStick = m_rightJoystickXSupplier.getAsDouble();
-        if (Math.abs(joyStick) > 0.01) {
-            speed = joyStick;
+        if (Math.abs(turnJoyStick) > 0.01) {
+            speed = turnJoyStick;
         } else {
-            speed = -MathUtil.clamp(m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees), -1.0, 1.0);
+            speed = -MathUtil.clamp(m_turnHeadingPID.calculate(headingDegrees, wantedDegrees), -1.0, 1.0);
         }
 
         m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), speed);
 
         // Record whether at the right heading, so that other commands can check
         m_driveTrain.setOnGoalForActiveTurn(
-            Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
+            Math.abs(headingDegrees - wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
     }
 
     // Called once the command ends or is interrupted.
