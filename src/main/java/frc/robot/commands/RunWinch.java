@@ -2,7 +2,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.DriveTrain;
 
 import java.util.function.DoubleSupplier;
 
@@ -14,12 +13,10 @@ public class RunWinch extends Command {
 
 
     public RunWinch(Climber climber,
-            DoubleSupplier leftSpeedSupplier,
-            DoubleSupplier rightSpeedSupplier
-            ) {
-        this.m_climber = climber;
-        this.m_leftSpeedSupplier = leftSpeedSupplier;
-        this.m_rightSpeedSupplier = rightSpeedSupplier;
+            DoubleSupplier leftSpeedSupplier,DoubleSupplier rightSpeedSupplier) {
+        m_climber = climber;
+        m_leftSpeedSupplier = leftSpeedSupplier;
+        m_rightSpeedSupplier = rightSpeedSupplier;
 
         addRequirements(m_climber);
     }

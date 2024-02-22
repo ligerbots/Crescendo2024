@@ -16,7 +16,7 @@ public class Climber extends SubsystemBase {
     private RelativeEncoder m_leftEncoder;
     private RelativeEncoder m_rightEncoder;
 
-    private static final double WINCH_GEAR_RATIO = 1.0;//TODO find correct numbers 
+    private static final double WINCH_GEAR_RATIO = 1.0;  // TODO find correct numbers
     private static final double MAX_WINCH_POSITION = 1.0;
 
     public Climber() {
@@ -29,8 +29,8 @@ public class Climber extends SubsystemBase {
         m_leftEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO);
         m_rightEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO);
 
-
         m_leftWinch.restoreFactoryDefaults();
+        // TODO only one will be inverted, not sure which
         m_leftWinch.setInverted(true);
         m_leftWinch.setIdleMode(IdleMode.kBrake);
 
@@ -41,27 +41,23 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Left Winch speed", m_leftEncoder.getVelocity());
-        SmartDashboard.putNumber("Right Winch speed", m_rightEncoder.getVelocity());
+        SmartDashboard.putNumber("climber/leftSpeed", m_leftEncoder.getVelocity());
+        SmartDashboard.putNumber("climber/rightSpeed", m_rightEncoder.getVelocity());
 
-        SmartDashboard.putNumber("Left Winch position", m_leftEncoder.getPosition());
-        SmartDashboard.putNumber("Right Winch position", m_rightEncoder.getPosition());
-
-
+        SmartDashboard.putNumber("climber/leftPosition", m_leftEncoder.getPosition());
+        SmartDashboard.putNumber("climber/rightPosition", m_rightEncoder.getPosition());
     }
 
-    public double limitWinch(RelativeEncoder encoder, double speed ){
-        if (encoder.getPosition() >= MAX_WINCH_POSITION){
+    private double limitWinch(RelativeEncoder encoder, double speed) {
+        if (encoder.getPosition() >= MAX_WINCH_POSITION) {
             return 0.0;
-        }
-        else return speed;
-
-
+        } else
+            return speed;
     }
-    public void run(double rightSpeed, double leftSpeed) {
+
+    public void run(double leftSpeed, double rightSpeed) {
         m_leftWinch.set(limitWinch(m_leftEncoder, leftSpeed));
-        m_rightWinch.set(limitWinch(m_leftEncoder, rightSpeed));
-        
+        m_rightWinch.set(limitWinch(m_leftEncoder, rightSpeed));    
     }
 
     public double getRightPosition(){
@@ -79,6 +75,4 @@ public class Climber extends SubsystemBase {
     public double getLeftVelocity(){
         return m_leftEncoder.getVelocity();
     }
-
-    
 }
