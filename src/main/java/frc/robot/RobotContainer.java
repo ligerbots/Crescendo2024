@@ -68,7 +68,8 @@ public class RobotContainer {
         m_driverController.a()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
                         () -> -modifyAxis(m_driverController.getLeftY()),
-                        () -> -modifyAxis(m_driverController.getLeftX())));
+                        () -> -modifyAxis(m_driverController.getLeftX()), 
+                        () -> -modifyAxis(m_driverController.getRightX())));
 
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
