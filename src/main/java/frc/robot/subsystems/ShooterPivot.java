@@ -27,7 +27,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // As of writing the above note we still may want to change the limits
     public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
 
-    public static final double OVERRIDE_RADIANS = Math.toRadians(5.0);
+    public static final double OVERRIDE_RADIANS = Math.toRadians(2.0);
     private static final int CURRENT_LIMIT = 10;
 
     // position constants for commands

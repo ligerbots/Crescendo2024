@@ -48,4 +48,12 @@ public class SetElevatorLength extends Command {
     public boolean isFinished() {
         return m_elevator.lengthWithinTolerance();
     }
+
+    // Not really sure what it's for but I didn't write this, I'm just doing requested changes
+    // Also this might not make sense here, but again, it was requested
+    public void overrideLength(double override) {
+        double fixedOveride = override/50; // '50' is a random value that I didn't choose and Paul doesn't know what it means either
+        double currLength = m_elevator.getLength();
+        m_elevator.setLength(fixedOveride + currLength);
+    }
 }
