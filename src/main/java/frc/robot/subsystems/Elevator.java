@@ -50,16 +50,18 @@ public class Elevator extends TrapezoidProfileSubsystem {
     public static final double STOW_LENGTH = Units.inchesToMeters(17.849);
     public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(38.211);
 
+    private static final double OFFSET_METER = 0.0;
+
     // initializing Potentiometer
-    private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
-    private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
-    private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
+    // private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
+    // private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
+    // private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
 
     // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;
 
-    private final AnalogPotentiometer m_stringPotentiometer;
+    // private final AnalogPotentiometer m_stringPotentiometer;
     private final SparkPIDController m_PIDController;
     private double m_goal = 0;
 
@@ -85,9 +87,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Set the position conversion factor.
         m_encoder.setPositionConversionFactor(METER_PER_REVOLUTION);
 
-        m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
-        // m_encoder.setPosition(ELEVATOR_OFFSET_METER);
-        updateMotorEncoderOffset();
+        // m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
+        m_encoder.setPosition(OFFSET_METER);
+        // updateMotorEncoderOffset();
 
         SmartDashboard.putBoolean("elevator/coastMode", false);
         setCoastMode();
@@ -99,11 +101,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(m_encoder.getPosition()));
-        SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
+        // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
         // useful for initial calibration; comment out later?
         SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
-        SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
+        // SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
 
         setCoastMode();
 
@@ -122,13 +124,13 @@ public class Elevator extends TrapezoidProfileSubsystem {
         return m_encoder.getPosition();
     }
 
-    public double getPotentiometerReadingMeters(){
-        return m_stringPotentiometer.get();
-    }
+    // public double getPotentiometerReadingMeters(){
+    //     return m_stringPotentiometer.get();
+    // }
 
-    public void updateMotorEncoderOffset() {
-        m_encoder.setPosition(getPotentiometerReadingMeters());
-    }
+    // public void updateMotorEncoderOffset() {
+    //     m_encoder.setPosition(getPotentiometerReadingMeters());
+    // }
 
     private static double limitElevatorLength(double length){
         return MathUtil.clamp(length, MIN_LENGTH_METERS, MAX_LENGTH_METERS);
