@@ -234,4 +234,9 @@ public class RobotContainer {
     public NoteVision getNoteVision() {
         return m_noteVision;
     }
+
+    public ShooterPivot getShooterPivot() {
+        return m_shooterPivot;
+    }
+
 }
