@@ -100,7 +100,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(m_encoder.getPosition()));
+        SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(getLength()));
         // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
         // useful for initial calibration; comment out later?
