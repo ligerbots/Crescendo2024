@@ -172,6 +172,14 @@ public class RobotContainer {
         m_chosenAuto.addOption("S1-C1",
                 new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
+        noteList = new Translation2d[] { FieldConstants.NOTE_C_4 };
+        m_chosenAuto.addOption("C4",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+                
+        noteList = new Translation2d[] { FieldConstants.NOTE_C_5 };
+        m_chosenAuto.addOption("C5",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }

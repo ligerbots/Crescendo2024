@@ -20,7 +20,7 @@ public class FieldConstants {
     // S = stage
     // M = Midline
 
-    private static final double NOTE_C_X = FIELD_LENGTH / 2.0;
+    public static final double NOTE_C_X = FIELD_LENGTH / 2.0;
     private static final double NOTE_S_X = 2.89;
 
     public static final Translation2d NOTE_C_1 = new Translation2d(NOTE_C_X, 0.78);
