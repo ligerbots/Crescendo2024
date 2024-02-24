@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkFlexExternalEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -35,14 +37,16 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     
     // All units are MKS with angles in Radians
       
+    private static final double TWO_PI = 2.0 * Math.PI;
+
     // Constants to limit the shooterPivot rotation speed
     private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
     private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
 
-    private static final double POSITION_OFFSET = 62.0/360.0; //TODO: set for 2024
-    private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
+    private static final double OFFSET_ROTATION = 62.0/360.0; //TODO: set for 2024
+    // private static final double OFFSET_RADIAN = OFFSET_ROTATION * 2 * Math.PI;
 
-    private static final double GEAR_RATIO = 1.0 / 22.5;  // TODO: set for 2024
+    // private static final double GEAR_RATIO = 1.0 / 22.5;  // TODO: set for 2024
 
     // Constants for the shooterPivot PID controller
     private static final double K_P = 0.01;  // TODO: set for 2024
@@ -51,41 +55,46 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double K_FF = 0.0;  // TODO: set for 2024
 
     // Used in conversion factor
-    private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
+    // private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
 
-    private final DutyCycleEncoder m_absoluteEncoder;  
+    private final RelativeEncoder m_absoluteEncoder;
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
-    private final RelativeEncoder m_encoder;
 
     // Used for checking if on goal
     private double m_goalRadians;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder absEncoder) {
-        super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ),
-                OFFSET_RADIAN - absEncoder.getDistance() * 2 * Math.PI);
+        super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ));
        
-        m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushless);
+        m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushed);
         m_motor.restoreFactoryDefaults();
        
         m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
     
+        // Rev through bore
+        m_absoluteEncoder = m_motor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
+        // offset
+        m_absoluteEncoder.setPosition(m_absoluteEncoder.getPosition() - OFFSET_ROTATION);
+
         m_pidController = m_motor.getPIDController();
+        m_pidController.setFeedbackDevice(m_absoluteEncoder);
+
         m_pidController.setP(K_P);
         m_pidController.setI(K_I);
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
-       
-        // Absolute encoder - set calibration to use radians
-        m_absoluteEncoder = absEncoder;
-        m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
-        m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
+        m_pidController.setOutputRange(-1.0, 1.0);
+        // // Absolute encoder - set calibration to use radians
+        // m_absoluteEncoder = absEncoder;
+        // m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
+        // m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
 
         // motor encoder - set calibration and offset to match absolute encoder
-        m_encoder = m_motor.getEncoder();
-        m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
-        updateMotorEncoderOffset();
+        // m_encoder = m_motor.getEncoder();
+        // m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
+        // updateMotorEncoderOffset();
 
         SmartDashboard.putBoolean("shooterPivot/coastMode", false);
         setCoastMode();
@@ -96,7 +105,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // Display current values on the SmartDashboard
         // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
-        SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
+        // SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
 
         setCoastMode();
@@ -109,24 +118,24 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     protected void useState(TrapezoidProfile.State setPoint) {
         // Remember that the encoder was already set to account for the gear ratios.
 
-        m_pidController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition);
+        m_pidController.setReference(setPoint.position / TWO_PI, CANSparkMax.ControlType.kPosition);
         SmartDashboard.putNumber("shooterPivot/setPoint", Math.toDegrees(setPoint.position));
     }
 
     // get the current pivot angle in radians
     public double getAngleRadians() {
-        return m_encoder.getPosition();
+        return TWO_PI * m_absoluteEncoder.getPosition();
     }
 
     // get the angle from the absolute encoder
-    public double getAbsEncoderAngleRadians() {
-        return -m_absoluteEncoder.getDistance();
-    }
+    // public double getAbsEncoderAngleRadians() {
+    //     return -m_absoluteEncoder.getDistance();
+    // }
 
-    // update the motor encoder offset to match the absolute encoder
-    public void updateMotorEncoderOffset() {
-        m_encoder.setPosition(getAbsEncoderAngleRadians());
-    }
+    // // update the motor encoder offset to match the absolute encoder
+    // public void updateMotorEncoderOffset() {
+    //     m_encoder.setPosition(getAbsEncoderAngleRadians());
+    // }
 
     // needs to be public so that commands can get the restricted angle
     public static double limitPivotAngle(double angle) {
