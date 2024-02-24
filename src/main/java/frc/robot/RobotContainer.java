@@ -175,7 +175,10 @@ public class RobotContainer {
         noteList = new Translation2d[] { FieldConstants.NOTE_C_4 };
         m_chosenAuto.addOption("C4",
                 new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-                
+        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 };
+        m_chosenAuto.addOption("S3-C4-C5",
+                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
         noteList = new Translation2d[] { FieldConstants.NOTE_C_5 };
         m_chosenAuto.addOption("C5",
                 new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
