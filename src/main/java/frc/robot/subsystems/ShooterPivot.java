@@ -20,29 +20,30 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class ShooterPivot extends TrapezoidProfileSubsystem {
-    public static final double MIN_ANGLE = Math.toRadians(-65.0); //TODO set for 2024
-    public static final double MAX_ANGLE = Math.toRadians(30.0); //TODO set for 2024
-    // NOTE: All constants were taken from the 2023 arm 
-    // Note: Current values for limits are refrenced with the shooter being flat
-    // facing fowards as zero.
-    // As of writing the above note we still may want to change the limits
-    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
+    // NOTE: the 0 angle should be with the shooter horizontal
+    // The offset for the absolute encoder should be taken care off
+    //   in the SparkMax settings (firmware).
+
+    private static final double TWO_PI = 2.0 * Math.PI;
+
+    private static final double MIN_ANGLE = Math.toRadians(0); //TODO set for 2024
+    private static final double MAX_ANGLE = Math.toRadians(60.0); //TODO set for 2024
+
+    private static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(2.0); //TODO: set for 2024
 
     private static final int CURRENT_LIMIT = 10;
 
     // position constants for commands
     public static final double STOW_ANGLE_RADIANS = Math.toRadians(58.0);
     public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
-    
-    // All units are MKS with angles in Radians
-      
-    private static final double TWO_PI = 2.0 * Math.PI;
 
+    // All units are MKS with angles in Radians
     // Constants to limit the shooterPivot rotation speed
     private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
     private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
 
-    private static final double OFFSET_ROTATION = 0.0/360.0; //TODO: set for 2024
+    // Angle Offset should be taken care off in the SparkMax
+    // private static final double OFFSET_ROTATION = 0.0/360.0; //TODO: set for 2024
 
     // Constants for the shooterPivot PID controller
     private static final double K_P = 0.01;  // TODO: set for 2024
@@ -61,15 +62,17 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     public ShooterPivot(DutyCycleEncoder absEncoder) {
         super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ));
        
+        // NOTE: currently using a mini CIM on the pivot. This is a BRUSHED motor.
         m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushed);
-        m_motor.restoreFactoryDefaults();
+        // don't reset to factory; might wipe important settings
+        // m_motor.restoreFactoryDefaults();
        
         m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
     
         // Rev through bore
         m_absoluteEncoder = m_motor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
         // offset
-        m_absoluteEncoder.setPosition(m_absoluteEncoder.getPosition() - OFFSET_ROTATION);
+        //m_absoluteEncoder.setPosition(m_absoluteEncoder.getPosition() - OFFSET_ROTATION);
 
         m_pidController = m_motor.getPIDController();
         m_pidController.setFeedbackDevice(m_absoluteEncoder);
@@ -123,7 +126,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     public boolean angleWithinTolerance() {
-        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+        return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 
     public void resetGoal() {
