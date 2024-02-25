@@ -46,10 +46,12 @@ public class Shooter extends SubsystemBase {
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
-    static final double K_P = 5.5e-4;//2.0766E-06;
+    static final double K_P_LEFT = 5.5e-4; // 2.0766E-06;
+    static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF = 0.0001575; //0.1111 / 60.0 / 12.0;
+    static final double K_FF_LEFT = 0.0001575; //0.1111 / 60.0 / 12.0;
+    static final double K_FF_RIGHT = K_FF_LEFT;
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
@@ -106,14 +108,15 @@ public class Shooter extends SubsystemBase {
         m_leftShooterMotor.restoreFactoryDefaults();
         m_leftShooterMotor.setInverted(true);
 
+        m_leftPidController = m_leftShooterMotor.getPIDController();
+        setPidController(m_leftPidController, K_P_LEFT, K_FF_LEFT);
+        m_leftEncoder = m_leftShooterMotor.getEncoder();
+
         m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_rightShooterMotor.restoreFactoryDefaults();
 
-        m_leftPidController = m_leftShooterMotor.getPIDController();
-        setPidController(m_leftPidController);
         m_rightPidController = m_rightShooterMotor.getPIDController();
-        setPidController(m_rightPidController);
-        m_leftEncoder = m_leftShooterMotor.getEncoder();
+        setPidController(m_rightPidController, K_P_RIGHT, K_FF_RIGHT);
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
         // RPMs for testing
@@ -123,13 +126,13 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/right_rpm_target", 0);
     }
 
-    private void setPidController(SparkPIDController pidController) {
+    private void setPidController(SparkPIDController pidController, double kP, double kFF) {
         // set PID coefficients
-        pidController.setP(K_P);
+        pidController.setP(kP);
         pidController.setI(K_I);
         pidController.setD(K_D);
         pidController.setIZone(0);
-        pidController.setFF(K_FF);
+        pidController.setFF(kFF);
         pidController.setOutputRange(-1.0, 1.0);
     }
 
