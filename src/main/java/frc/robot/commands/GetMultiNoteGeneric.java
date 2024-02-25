@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -64,12 +63,6 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
         }
         return noteCoordList;
     }
-
-    // public static GetMultiNoteGeneric buildCustomAuto(String noteSequence) {
-    //     GetMultiNoteGeneric retval = null;
-    //     List<String> items = Arrays.asList(noteSequence.split("\\s*-\\s*"));
-    //     return retval;
-    // }
 
     public static void main(String[] args) {
         System.out.println(Arrays.asList(buildNoteList("S2-S3-S1")));
