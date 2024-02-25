@@ -70,7 +70,7 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
     //     return retval;
     // }
 
-    public static void main(String[] args) {
-        System.out.println(Arrays.asList(buildNoteList("S2-S3-S1")));
-    }
+    // public static void main(String[] args) {
+    //     System.out.println(Arrays.asList(buildNoteList("S2-S3-S1")));
+    // }
 }
