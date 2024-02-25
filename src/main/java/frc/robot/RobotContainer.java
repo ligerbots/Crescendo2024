@@ -18,25 +18,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.BackupFeed;
-import frc.robot.commands.Drive;
-import frc.robot.commands.GetMultiNoteGeneric;
-import frc.robot.commands.NoteAuto;
-import frc.robot.commands.PrepareAmpShot;
-import frc.robot.commands.PrepareSpeakerShot;
-import frc.robot.commands.SetElevatorLength;
-import frc.robot.commands.StartIntake;
-import frc.robot.commands.Stow;
-import frc.robot.commands.TestShoot;
-import frc.robot.commands.TestShootSpeed;
-import frc.robot.commands.TriggerShot;
-import frc.robot.subsystems.AprilTagVision;
-import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.NoteVision;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterPivot;
+
+import frc.robot.commands.*;
+import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
