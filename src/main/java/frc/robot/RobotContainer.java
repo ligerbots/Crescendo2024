@@ -4,18 +4,20 @@
 
 package frc.robot;
 
+import java.util.Arrays;
+import java.util.List;
+
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -116,62 +118,18 @@ public class RobotContainer {
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
 
-        // Initialize the list of available Autonomous routines
-        // m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain,
-        // m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision,
-        // m_shooter, m_intake));
+        String autoName = "C1-C2";
+        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new
-        // GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter,
-        // m_intake));
-        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2,
-        // m_driveTrain, m_noteVision, m_shooter, m_intake));
+        autoName = "C2-C1";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        // m_chosenAuto.addOption("GetNoteX (S1)", new
-        // GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter,
-        // m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S2)", new
-        // GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter,
-        // m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S3)", new
-        // GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter,
-        // m_intake));
+        List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
 
-        Translation2d[] noteList = new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 };
-        m_chosenAuto.setDefaultOption("C1-C2",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 };
-        m_chosenAuto.addOption("C2-C1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 };
-        m_chosenAuto.addOption("S1-S2",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 };
-        m_chosenAuto.addOption("S3-S2",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2,
-                FieldConstants.BLUE_NOTE_S_3 };
-        m_chosenAuto.addOption("S1-S2-S3",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2,
-                FieldConstants.BLUE_NOTE_S_1 };
-        m_chosenAuto.addOption("S3-S2-S1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 };
-        m_chosenAuto.addOption("S2-S1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1 };
-        m_chosenAuto.addOption("S1-C1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
+        for (String autoNm : autonamesDropdown) {
+            m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        }
+        
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
