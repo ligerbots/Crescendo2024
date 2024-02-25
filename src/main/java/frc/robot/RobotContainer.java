@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -74,7 +75,7 @@ public class RobotContainer {
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 
-
+        // Test commands
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
@@ -84,7 +85,11 @@ public class RobotContainer {
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new SetElevatorLength(m_elevator,
-                () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))));
+
+        JoystickButton farm4 = new JoystickButton(m_farm, 4);
+        farm4.onTrue(new SetPivotAngle(m_shooterPivot,
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))));
 
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,

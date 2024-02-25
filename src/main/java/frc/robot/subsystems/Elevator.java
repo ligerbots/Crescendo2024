@@ -12,7 +12,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
+// import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
@@ -39,7 +39,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 0.1; //TODO: Need to tune
+    private static final double K_P = 0.01; //TODO: Need to tune
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -47,8 +47,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants for various commands
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-    public static final double STOW_LENGTH = Units.inchesToMeters(17.849);
-    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(38.211);
+
+    public static final double STOW_LENGTH = Units.inchesToMeters(0.5);
+    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(MAX_LENGTH_METERS - 1.0);
 
     private static final double OFFSET_METER = 0.0;
 
@@ -72,6 +73,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Create the motor, PID Controller and encoder.
         m_motor = new CANSparkMax(Constants.ELEVATOR_CAN_ID, CANSparkMax.MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
+        // m_motor.setInverted(true);
         
         //set currentLimit for reacher to 35 amps
         m_motor.setSmartCurrentLimit(35);
@@ -81,7 +83,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_PIDController.setI(K_I);
         m_PIDController.setD(K_D);
         m_PIDController.setFF(K_FF);
-        // m_motor.setInverted(true);
 
         m_encoder = m_motor.getEncoder();
         // Set the position conversion factor.
@@ -95,7 +96,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         setCoastMode();
 
         // Create SD values needed during testing. Here so that they are visible in NetworkTables
-        SmartDashboard.putNumber("elevator/testGoalLength", 0);
+        SmartDashboard.putNumber("elevator/testLength", 0);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
         // useful for initial calibration; comment out later?
-        SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
+        // SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
         // SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
 
         setCoastMode();
@@ -116,7 +117,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     protected void useState(TrapezoidProfile.State setPoint) {
         // Remember that the encoder was already set to account for the gear ratios.
 
-        m_PIDController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition); //(setPoint.position, ControlType.kPosition, 0); // , feedforward / 12.0);
+        // TODO include FF?
+        m_PIDController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition); 
         SmartDashboard.putNumber("elevator/setPoint", Units.metersToInches(setPoint.position));
     }
 

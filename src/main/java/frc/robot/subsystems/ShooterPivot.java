@@ -35,7 +35,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // position constants for commands
     public static final double STOW_ANGLE_RADIANS = Math.toRadians(58.0);
-    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
+    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(50);
 
     // All units are MKS with angles in Radians
     // Constants to limit the shooterPivot rotation speed
@@ -82,6 +82,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
         m_pidController.setOutputRange(-1.0, 1.0);
+
+        SmartDashboard.putNumber("shooterPivot/testAngle", 0);
 
         SmartDashboard.putBoolean("shooterPivot/coastMode", false);
         setCoastMode();
