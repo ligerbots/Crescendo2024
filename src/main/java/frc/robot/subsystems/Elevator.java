@@ -99,11 +99,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(m_encoder.getPosition()));
-        SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
+        // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters())); //Used if using string pot
 
         // useful for initial calibration; comment out later?
         SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
-        SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
+        // SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());//Used if using string pot
 
         setCoastMode();
 
@@ -127,7 +127,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     }
 
     public void updateMotorEncoderOffset() {
-        m_encoder.setPosition(getPotentiometerReadingMeters());
+        m_encoder.setPosition(0); //Assumes starts at min because of gravity
+        // m_encoder.setPosition(getPotentiometerReadingMeters());// For string pot
     }
 
     private static double limitElevatorLength(double length){
