@@ -112,7 +112,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // get the current pivot angle in radians
     public double getAngleRadians() {
-        return TWO_PI * m_absoluteEncoder.getPosition();
+        double angle = TWO_PI * m_absoluteEncoder.getPosition();
+        // we want the range to be -PI -> PI. Makes the control around 0 easier.
+        if (angle > Math.PI) angle -= TWO_PI;
+        return angle;
     }
 
     // needs to be public so that commands can get the restricted angle
