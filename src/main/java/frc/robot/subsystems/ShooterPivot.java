@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
@@ -20,73 +19,79 @@ import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class ShooterPivot extends TrapezoidProfileSubsystem {
-    // NOTE: the 0 angle should be with the shooter horizontal
-    // The offset for the absolute encoder should be taken care off
-    //   in the SparkMax settings (firmware).
+    public static final double MIN_ANGLE = Math.toRadians(0.0); //TODO set for 2024
+    public static final double MAX_ANGLE = Math.toRadians(60.0); //TODO set for 2024
+    // NOTE: All constants were taken from the 2023 arm 
+    // Note: Current values for limits are refrenced with the shooter being flat
+    // facing fowards as zero.
+    // As of writing the above note we still may want to change the limits
+    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
 
-    private static final double TWO_PI = 2.0 * Math.PI;
-
-    private static final double MIN_ANGLE = Math.toRadians(0); //TODO set for 2024
-    private static final double MAX_ANGLE = Math.toRadians(60.0); //TODO set for 2024
-
-    private static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(2.0); //TODO: set for 2024
-
-    private static final int CURRENT_LIMIT = 10;
+    private static final int CURRENT_LIMIT = 30;
 
     // position constants for commands
     public static final double STOW_ANGLE_RADIANS = Math.toRadians(58.0);
-    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(50);
-
+    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
+    
     // All units are MKS with angles in Radians
+      
     // Constants to limit the shooterPivot rotation speed
     private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
     private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
 
-    // Angle Offset should be taken care off in the SparkMax
-    // private static final double OFFSET_ROTATION = 0.0/360.0; //TODO: set for 2024
+    private static final double POSITION_OFFSET = 62.0/360.0; //TODO: set for 2024
+    private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
+
+    private static final double GEAR_RATIO = 1.0 / 22.5;  // TODO: set for 2024
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 0.01;  // TODO: set for 2024
+    private static final double K_P = 10.0;  // TODO: set for 2024
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;  // TODO: set for 2024
 
-    private final RelativeEncoder m_absoluteEncoder;
+    // Used in conversion factor
+    private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
+
+    private final DutyCycleEncoder m_absoluteEncoder;  
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
+    private final RelativeEncoder m_encoder;
 
     // Used for checking if on goal
     private double m_goalRadians;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder absEncoder) {
-        super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ));
+        super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ),
+                OFFSET_RADIAN - absEncoder.getDistance() * 2 * Math.PI);
        
-        // NOTE: currently using a mini CIM on the pivot. This is a BRUSHED motor.
-        m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushed);
-        // don't reset to factory; might wipe important settings
-        // m_motor.restoreFactoryDefaults();
-       
+        m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushless);
+        m_motor.restoreFactoryDefaults();
+        // m_motor.setInverted(true);
+
         m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
     
-        // Rev through bore
-        m_absoluteEncoder = m_motor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
-        // offset
-        //m_absoluteEncoder.setPosition(m_absoluteEncoder.getPosition() - OFFSET_ROTATION);
-
         m_pidController = m_motor.getPIDController();
-        m_pidController.setFeedbackDevice(m_absoluteEncoder);
-
         m_pidController.setP(K_P);
         m_pidController.setI(K_I);
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
-        m_pidController.setOutputRange(-1.0, 1.0);
+       
+        // Absolute encoder - set calibration to use radians
+        m_absoluteEncoder = absEncoder;
+        m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
+        m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
 
-        SmartDashboard.putNumber("shooterPivot/testAngle", 0);
+        // motor encoder - set calibration and offset to match absolute encoder
+        m_encoder = m_motor.getEncoder();
+        m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
+        updateMotorEncoderOffset();
 
         SmartDashboard.putBoolean("shooterPivot/coastMode", false);
         setCoastMode();
+
+        SmartDashboard.putNumber("shooterPivot/testAngle", 0);
     }
 
     @Override
@@ -94,6 +99,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // Display current values on the SmartDashboard
         // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
+        SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
 
         setCoastMode();
@@ -102,20 +108,28 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         super.periodic();
     }
 
+
     @Override
     protected void useState(TrapezoidProfile.State setPoint) {
-        // Remember - encoder is in rotations
+        // Remember that the encoder was already set to account for the gear ratios.
 
-        m_pidController.setReference(setPoint.position / TWO_PI, CANSparkMax.ControlType.kPosition);
+        m_pidController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition);
         SmartDashboard.putNumber("shooterPivot/setPoint", Math.toDegrees(setPoint.position));
     }
 
     // get the current pivot angle in radians
     public double getAngleRadians() {
-        double angle = TWO_PI * m_absoluteEncoder.getPosition();
-        // we want the range to be -PI -> PI. Makes the control around 0 easier.
-        if (angle > Math.PI) angle -= TWO_PI;
-        return angle;
+        return m_encoder.getPosition();
+    }
+
+    // get the angle from the absolute encoder
+    public double getAbsEncoderAngleRadians() {
+        return -m_absoluteEncoder.getDistance();
+    }
+
+    // update the motor encoder offset to match the absolute encoder
+    public void updateMotorEncoderOffset() {
+        m_encoder.setPosition(getAbsEncoderAngleRadians());
     }
 
     // needs to be public so that commands can get the restricted angle
@@ -123,7 +137,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         return MathUtil.clamp(angle, MIN_ANGLE, MAX_ANGLE);
     }
 
-    // set shooterPivot, angle in radians
+    // set shooterPivot angle in radians
     public void setAngle(double angle) {
         m_goalRadians = limitPivotAngle(angle);
         super.setGoal(m_goalRadians);
@@ -131,7 +145,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     public boolean angleWithinTolerance() {
-        return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 
     public void resetGoal() {
