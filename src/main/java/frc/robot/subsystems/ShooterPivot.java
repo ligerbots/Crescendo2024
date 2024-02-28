@@ -62,7 +62,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private final RelativeEncoder m_encoder;
 
     // Used for checking if on goal
-    private double m_goalRadians;
+    private double m_goalRadians = 0;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot(DutyCycleEncoder absEncoder) {
