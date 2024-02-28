@@ -19,9 +19,9 @@ import frc.robot.Constants;
 
 public class Elevator extends TrapezoidProfileSubsystem {
 
-    private static final double GEAR_REDUCTION = 1/4; //TODO: Check if changed on real robot
+    private static final double GEAR_REDUCTION = 14.0/60.0;
 
-    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
+    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(10.75);
     private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
 
     // Tolerance for commands
@@ -39,7 +39,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 0.01; //TODO: Need to tune
+    private static final double K_P = 1.0; //TODO: Need to tune
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -73,7 +73,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Create the motor, PID Controller and encoder.
         m_motor = new CANSparkMax(Constants.ELEVATOR_CAN_ID, CANSparkMax.MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
-        // m_motor.setInverted(true);
+        m_motor.setInverted(true);
         
         //set currentLimit for reacher to 35 amps
         m_motor.setSmartCurrentLimit(35);

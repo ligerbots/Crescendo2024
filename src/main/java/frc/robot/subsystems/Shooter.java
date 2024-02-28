@@ -50,8 +50,8 @@ public class Shooter extends SubsystemBase {
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF_LEFT = 0.0001575; //0.1111 / 60.0 / 12.0;
-    static final double K_FF_RIGHT = K_FF_LEFT;
+    static final double K_FF_LEFT = 0.00019;
+    static final double K_FF_RIGHT = 0.00032;
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
