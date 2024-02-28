@@ -79,7 +79,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         m_pidController.setI(K_I);
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
-       
+        m_pidController.setOutputRange(-1, 1);
+        
         // Absolute encoder - set calibration to use radians
         m_absoluteEncoder = absEncoder;
         // m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);

@@ -35,7 +35,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
 
-    private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION); //TODO: Double check robot if correct when built
+    private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
+    
+    private static final int CURRENT_LIMIT = 35;
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
@@ -75,8 +77,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_motor.restoreFactoryDefaults();
         m_motor.setInverted(true);
         
-        //set currentLimit for reacher to 35 amps
-        m_motor.setSmartCurrentLimit(35);
+        m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
 
         m_PIDController = m_motor.getPIDController();
         m_PIDController.setP(K_P);
