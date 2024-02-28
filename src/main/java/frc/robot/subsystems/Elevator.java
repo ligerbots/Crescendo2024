@@ -22,7 +22,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double GEAR_REDUCTION = 14.0/60.0;
 
     private static final double MAX_LENGTH_METERS = Units.inchesToMeters(10.75);
-    private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
+    private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.25);
 
     // Tolerance for commands
     private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
