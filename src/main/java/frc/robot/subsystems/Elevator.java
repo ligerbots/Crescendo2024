@@ -39,7 +39,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 1.0; //TODO: Need to tune
+    private static final double K_P = 50.0; //TODO: Need to tune
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -102,6 +102,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(getLength()));
+        SmartDashboard.putNumber("elevator/current", m_motor.getOutputCurrent());
         // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
         // useful for initial calibration; comment out later?
