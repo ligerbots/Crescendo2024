@@ -21,8 +21,8 @@ import frc.robot.Constants;
 public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double TWO_PI = 2.0 * Math.PI;
     
-    public static final double MIN_ANGLE = Math.toRadians(0.0); //TODO set for 2024
-    public static final double MAX_ANGLE = Math.toRadians(60.0); //TODO set for 2024
+    public static final double MIN_ANGLE = Math.toRadians(0.0);
+    public static final double MAX_ANGLE = Math.toRadians(60.0);
     // NOTE: All constants were taken from the 2023 arm 
     // Note: Current values for limits are refrenced with the shooter being flat
     // facing fowards as zero.
@@ -44,7 +44,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double POSITION_OFFSET = 59.5/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
 
-    private static final double GEAR_RATIO = 1.0 / 15.0 * 32/48;  // TODO: set for 2024
+    // 15:1 planetary plus 48:32 sprockets
+    private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
     private static final double K_P = 1.0;  // TODO: set for 2024
@@ -149,7 +150,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     public boolean angleWithinTolerance() {
-        return Math.abs(m_goalRadians-getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+        return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
     }
 
     public void resetGoal() {
