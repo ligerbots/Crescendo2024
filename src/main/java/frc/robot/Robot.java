@@ -42,7 +42,8 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
-
+        m_robotContainer.getShooterPivot().resetGoal();
+        
         boolean isRedAlliance = FieldConstants.isRedAlliance();
         if (isRedAlliance != m_prevIsRedAlliance || m_robotContainer.autoHasChanged()) {
             m_robotContainer.getDriveTrain().setPose(m_robotContainer.getInitialPose());
