@@ -5,11 +5,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -97,6 +99,11 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         setCoastMode();
 
         SmartDashboard.putNumber("shooterPivot/testAngle", 0);
+
+        if (Constants.SIMULATION_SUPPORT) {
+            // Simulation
+            REVPhysicsSim.getInstance().addSparkMax(m_motor, DCMotor.getNEO(1));
+        }
     }
 
     @Override
@@ -118,6 +125,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     @Override
     protected void useState(TrapezoidProfile.State setPoint) {
         // Remember that the encoder was already set to account for the gear ratios.
+        // System.out.println("Pivot setpoint = " + setPoint.position);
 
         m_pidController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition);
         SmartDashboard.putNumber("shooterPivot/setPoint", Math.toDegrees(TWO_PI * setPoint.position));
@@ -146,6 +154,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // set shooterPivot angle in radians
     public void setAngle(double angle) {
         m_goalRadians = limitPivotAngle(angle);
+
+        // System.out.println("Pivot set goal = " + Math.toDegrees(m_goalRadians));
         super.setGoal(m_goalRadians / TWO_PI);
         SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
     }
@@ -165,5 +175,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
             m_motor.stopMotor();
         } else
             m_motor.setIdleMode(IdleMode.kBrake);
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        REVPhysicsSim.getInstance().run();
     }
 }
