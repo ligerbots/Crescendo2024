@@ -34,7 +34,7 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     // Java problem: the encoder needs to be created outside the constructor
-    private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
+    private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
 
     private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
