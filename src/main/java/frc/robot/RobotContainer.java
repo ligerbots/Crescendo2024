@@ -65,8 +65,8 @@ public class RobotContainer {
 
         m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_driverController.a().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
-                m_driveTrain::togglePrecisionMode, m_driveTrain));
+        m_driverController.a().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
+                () -> m_driveTrain.setPrecisionMode(false)));
 
         m_driverController.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
 
