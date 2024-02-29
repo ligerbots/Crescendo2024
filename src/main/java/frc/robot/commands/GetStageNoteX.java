@@ -29,7 +29,7 @@ public class GetStageNoteX extends GetNoteX {
 
         addCommands(
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .alongWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
+                .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
             new AutoSpeakerShot(driveTrain, shooter, shooterPivot)
         );
     }
