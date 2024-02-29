@@ -11,8 +11,6 @@ import frc.robot.subsystems.Shooter;
 public class BackupFeed extends Command {
     Shooter m_shooter;
     Timer m_timer = new Timer();
-    double WAIT_TIME = 1.0
-    ;
 
     /** Creates a new BackupFeed. */
     public BackupFeed(Shooter shooter) {
@@ -41,6 +39,6 @@ public class BackupFeed extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return m_timer.hasElapsed(WAIT_TIME);
+        return m_timer.hasElapsed(Shooter.BACKUP_FEED_TIME);
     }
 }

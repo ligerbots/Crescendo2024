@@ -54,9 +54,11 @@ public class RobotContainer {
         // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
 
         // run the intake as long as the bumper is held.
-        // When release, shut off the intake and back up the note a little bit
+        // When release, shut off the intake and feeder
         m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
-                .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
+                .onFalse(new InstantCommand(m_intake::stop, m_intake)
+                        .alongWith(new InstantCommand(m_shooter::turnOffFeeder, m_shooter)));
+
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
         m_driverController.rightTrigger(0.5).onTrue(new TriggerShot(m_shooter));

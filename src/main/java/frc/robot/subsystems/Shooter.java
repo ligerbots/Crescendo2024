@@ -39,8 +39,9 @@ public class Shooter extends SubsystemBase {
     // AMP shot, backwards out input end
     static final double AMP_SHOOT_SPEED = -0.7;
     
-    // This is negative to push the note out slowly
+    // This is negative to push the note back slowly
     public static final double BACKUP_FEED_SPEED = -0.1;
+    public static final double BACKUP_FEED_TIME = 1.0;  // seconds
 
     public static final double RPM_TOLERANCE = 200; // TODO Tune this later
 
@@ -197,14 +198,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean rpmWithinTolerance() {
-        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
+        return Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
+                && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    public void ampShot(){
+    public void ampShot() {
         setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
