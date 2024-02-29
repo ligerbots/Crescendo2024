@@ -61,16 +61,16 @@ public class AprilTagVision {
     private AprilTagFieldLayout m_aprilTagFieldLayout;
 
     // Forward B&W camera for Apriltags
-    // relative position of the camera on the robot ot the robot center
-    // these are the offsets for the camera and need to be changed based off of our
-    // robot
+    // relative position of the camera on the robot to the robot center
+    // use measurements to center of Swerve, and include offset
+    // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToFrontAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(3.5), -0.136, Units.inchesToMeters(24.75)),
-            new Rotation3d(0.0, 0.0, 0.0));
+            new Translation3d(Units.inchesToMeters(0.5 + DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(18.5)),
+            new Rotation3d(0.0, -15.0, 0.0));
 
     private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-10.0), 0, Units.inchesToMeters(24.0)),
-            new Rotation3d(0.0, 0.0, Math.toRadians(180.0)));
+            new Translation3d(Units.inchesToMeters(-15.5 + DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(10.0)),
+            new Rotation3d(0.0, -15.0, Math.toRadians(180.0)));
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;

@@ -14,19 +14,14 @@ import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
 public class StartIntake extends SequentialCommandGroup {
-  /** Creates a new startIntake. */
-  public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
-    addCommands(
-      // turn off shooter completely, just in case
-      new InstantCommand(shooter::turnOffShooter, shooter),
-      // make sure the shooter is in the correct position
-      new SetElevatorLength(elevator, Elevator.STOW_LENGTH)
-          .alongWith(new SetPivotAngle(pivot, ShooterPivot.STOW_ANGLE_RADIANS)),
-      new InstantCommand(shooter::turnOnFeeder, shooter),
-      new InstantCommand(intake::intake, intake)
-      // new RunIntakeWaitNote(intake),
-      // new BackupFeed(shooter),
-      // new Rumble(xbox)
-    );
-  }
+    /** Creates a new startIntake. */
+    public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
+        addCommands(
+                new Stow(shooter, pivot, elevator),
+                new InstantCommand(shooter::turnOnFeeder, shooter),
+                new InstantCommand(intake::intake, intake)
+        // new RunIntakeWaitNote(intake),
+        // new Rumble(xbox)
+        );
+    }
 }
