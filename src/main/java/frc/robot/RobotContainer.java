@@ -105,6 +105,9 @@ public class RobotContainer {
                 () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
                 () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
 
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new BackupFeed(m_shooter));
+
         // -----------------------------------------------
         // commands to run the characterization for the shooter
         // JoystickButton farm1 = new JoystickButton(m_farm, 1);
