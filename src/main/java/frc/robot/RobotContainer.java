@@ -55,7 +55,7 @@ public class RobotContainer {
 
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
-        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
+        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
                         .alongWith(new InstantCommand(m_shooter::turnOffFeeder, m_shooter)));
 
