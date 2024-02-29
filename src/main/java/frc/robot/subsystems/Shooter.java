@@ -186,8 +186,8 @@ public class Shooter extends SubsystemBase {
 
     // set shooter RPMs, under PID control
     public void setShooterRpms(double leftRpm, double rightRpm) {
-        SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
-        SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
+        SmartDashboard.putNumber("shooter/leftRpmTarget", leftRpm);
+        SmartDashboard.putNumber("shooter/righRpmTarget", rightRpm);
 
         //Used in isWithinTolerenceFunc
         m_leftGoalRPM = leftRpm;
@@ -220,6 +220,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public void turnOffShooterWheels() {
+        SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
+        SmartDashboard.putNumber("shooter/righRpmTarget", 0);
+
         setShooterSpeeds(0, 0);
     }
 
