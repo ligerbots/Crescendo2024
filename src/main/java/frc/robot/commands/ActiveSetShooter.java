@@ -35,7 +35,7 @@ public class ActiveSetShooter extends Command {
     public void execute() {
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
         m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
-        m_shooterPivot.setAngle(shootValues.shootAngle);
+        // m_shooterPivot.setAngle(shootValues.shootAngle);
     }
 
     // Called once the command ends or is interrupted.

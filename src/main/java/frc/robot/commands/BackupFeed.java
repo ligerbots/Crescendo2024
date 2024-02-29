@@ -11,7 +11,8 @@ import frc.robot.subsystems.Shooter;
 public class BackupFeed extends Command {
     Shooter m_shooter;
     Timer m_timer = new Timer();
-    double WAIT_TIME = 0.1;
+    double WAIT_TIME = 1.0
+    ;
 
     /** Creates a new BackupFeed. */
     public BackupFeed(Shooter shooter) {
