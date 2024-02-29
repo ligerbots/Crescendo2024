@@ -65,6 +65,7 @@ public class RobotContainer {
 
         m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
+        // don't require the Drivetrain. Otherwise you cannot drive.
         m_driverController.a().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
                 () -> m_driveTrain.setPrecisionMode(false)));
 
