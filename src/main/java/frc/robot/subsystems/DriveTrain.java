@@ -83,9 +83,9 @@ public class DriveTrain extends SubsystemBase {
     private boolean m_onGoalForActiveTurn;
 
     // limit the acceleration from 0 to full power to take 1/3 second.
-    private SlewRateLimiter m_xLimiter = new SlewRateLimiter(3);
-    private SlewRateLimiter m_yLimiter = new SlewRateLimiter(3);
-    private SlewRateLimiter m_rotationLimiter = new SlewRateLimiter(3);
+    private SlewRateLimiter m_xLimiter = new SlewRateLimiter(10);
+    private SlewRateLimiter m_yLimiter = new SlewRateLimiter(10);
+    private SlewRateLimiter m_rotationLimiter = new SlewRateLimiter(10);
 
     private static final double MAX_VELOCITY_PRECISION_MODE = MAX_VELOCITY_METERS_PER_SECOND / 6.0;
 

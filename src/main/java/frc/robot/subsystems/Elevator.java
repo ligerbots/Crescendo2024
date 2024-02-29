@@ -51,7 +51,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
 
     public static final double STOW_LENGTH = Units.inchesToMeters(0.5);
-    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(MAX_LENGTH_METERS - 1.0);
+    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(13.0);
 
     private static final double OFFSET_METER = 0.0;
 

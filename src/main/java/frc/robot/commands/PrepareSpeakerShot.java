@@ -31,7 +31,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
                 // set shoot mode, so that TriggerShot can be a single command/button
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
-                new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
+                // new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );

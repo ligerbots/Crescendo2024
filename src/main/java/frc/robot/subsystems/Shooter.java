@@ -37,7 +37,7 @@ public class Shooter extends SubsystemBase {
     static final double FEEDER_SPEED = 0.3;
 
     // AMP shot, backwards out input end
-    static final double AMP_SHOOT_SPEED = -0.5;
+    static final double AMP_SHOOT_SPEED = -0.7;
     
     // This is negative to push the note out slowly
     public static final double BACKUP_FEED_SPEED = -0.1;

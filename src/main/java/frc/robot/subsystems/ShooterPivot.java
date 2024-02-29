@@ -33,7 +33,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // position constants for commands
     public static final double STOW_ANGLE_RADIANS = Math.toRadians(55.0);
-    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
+    public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45.0);
     
     // All units are MKS with angles in Radians
       
