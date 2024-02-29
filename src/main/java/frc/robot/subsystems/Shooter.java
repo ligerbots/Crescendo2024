@@ -121,10 +121,10 @@ public class Shooter extends SubsystemBase {
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
         // RPMs for testing
-        SmartDashboard.putNumber("shooter/test_left_rpm", 0);
-        SmartDashboard.putNumber("shooter/test_right_rpm", 0);
-        SmartDashboard.putNumber("shooter/left_rpm_target", 0);
-        SmartDashboard.putNumber("shooter/right_rpm_target", 0);
+        SmartDashboard.putNumber("shooter/testLeftRpm", 0);
+        SmartDashboard.putNumber("shooter/testRightRpm", 0);
+        SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
+        SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {

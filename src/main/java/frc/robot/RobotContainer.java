@@ -97,13 +97,13 @@ public class RobotContainer {
 
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new TestShoot(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
         farm12.onTrue(new BackupFeed(m_shooter));
