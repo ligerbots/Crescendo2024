@@ -398,6 +398,10 @@ public class DriveTrain extends SubsystemBase {
         return m_simChassisSpeeds;
     }
 
+    public double getSpeakerDistance() {
+        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+    }
+
     public Command followPath(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,
