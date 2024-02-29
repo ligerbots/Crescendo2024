@@ -19,21 +19,21 @@ import frc.robot.Constants;
 
 public class Elevator extends TrapezoidProfileSubsystem {
 
-    private static final double GEAR_REDUCTION = 14.0/60.0;
+    private static final double GEAR_REDUCTION = (1.0 / 4.0) * (14.0 / 60.0);
 
-    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(10.75);
+    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(13.5);
     private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.25);
 
     // Tolerance for commands
-    private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
+    private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(0.5);
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
-    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(100.0); //TODO: Find actual value
+    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(10.0);
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 
-    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
+    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(20.0);
 
     private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
     

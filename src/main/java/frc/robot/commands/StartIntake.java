@@ -20,8 +20,8 @@ public class StartIntake extends SequentialCommandGroup {
       // turn off shooter completely, just in case
       new InstantCommand(shooter::turnOffShooter, shooter),
       // make sure the shooter is in the correct position
-      new SetElevatorLength(elevator, Elevator.STOW_LENGTH)
-          .alongWith(new SetPivotAngle(pivot, ShooterPivot.STOW_ANGLE_RADIANS)),
+      // new SetElevatorLength(elevator, Elevator.STOW_LENGTH)
+      //     .alongWith(new SetPivotAngle(pivot, ShooterPivot.STOW_ANGLE_RADIANS)),
       new InstantCommand(shooter::turnOnFeeder, shooter),
       new InstantCommand(intake::intake, intake)
       // new RunIntakeWaitNote(intake),

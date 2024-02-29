@@ -27,19 +27,19 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // Note: Current values for limits are refrenced with the shooter being flat
     // facing fowards as zero.
     // As of writing the above note we still may want to change the limits
-    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(3.0); //TODO: set for 2024
+    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(1.5);
 
     private static final int CURRENT_LIMIT = 30;
 
     // position constants for commands
-    public static final double STOW_ANGLE_RADIANS = Math.toRadians(58.0);
+    public static final double STOW_ANGLE_RADIANS = Math.toRadians(55.0);
     public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45);
     
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
-    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40); //TODO: set for 2024
-    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40); //TODO: set for 2024
+    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40);
+    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40);
 
     private static final double POSITION_OFFSET = 59.5/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
@@ -48,10 +48,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 1.0;  // TODO: set for 2024
+    private static final double K_P = 10.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
-    private static final double K_FF = 0.0;  // TODO: set for 2024
+    private static final double K_FF = 0.0;
 
     // Used in conversion factor
     // private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
@@ -91,7 +91,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
         m_encoder.setPositionConversionFactor(GEAR_RATIO);
         updateMotorEncoderOffset();
-        // resetGoal();
+        resetGoal();
 
         SmartDashboard.putBoolean("shooterPivot/coastMode", false);
         setCoastMode();
@@ -152,6 +152,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     public boolean angleWithinTolerance() {
         return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
+
     }
 
     public void resetGoal() {
