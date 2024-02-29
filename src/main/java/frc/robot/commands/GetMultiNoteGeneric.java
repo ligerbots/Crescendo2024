@@ -9,21 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.NoteVision;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterPivot;
+import frc.robot.subsystems.*;
 
 public class GetMultiNoteGeneric extends SequentialCommandGroup {
-
-    DriveTrain m_driveTrain;
 
     private static final Map<String, Translation2d> s_noteNameMap = new HashMap<>() {
         {
@@ -44,25 +37,17 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
     private static final double WAIT_INTERVAL_SECONDS = 1.0;
 
     public GetMultiNoteGeneric(String noteSequence, DriveTrain driveTrain, NoteVision noteVision,
-            Shooter shooter, ShooterPivot shooterPivot, Intake intake) {
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
         // Convenience constructor to use an encoded note sequence string i.e.
         // "C1-C2-S3"
-        this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake);
+        this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
     }
 
     public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision,
-            Shooter shooter, ShooterPivot shooterPivot, Intake intake) {
-
-        m_driveTrain = driveTrain;
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
 
         // Shoot the preloaded NOTE. Do not worry about turning (add??)
-        addCommands(
-            new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
-            new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)
-                .until(()-> (shooterPivot.angleWithinTolerance() && shooter.rpmWithinTolerance()) ),
-            new TriggerShot(shooter),
-            new Stow(shooter, shooterPivot)
-        );
+        addCommands(new AutoSpeakerShot(driveTrain, shooter, shooterPivot));
 
         // add all the fetching+shooting NOTE blocks
         for (Translation2d note : noteLocations) {
@@ -73,7 +58,7 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
             } else if (FieldConstants.isCenterNote(note)) {
                 addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, intake));
             } else {
-                addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, intake));
+                addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             }
         }
     }
@@ -91,10 +76,6 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
             noteCoordList[i] = foundNote;
         }
         return noteCoordList;
-    }
-
-    private Shooter.ShooterValues getShootValues() {
-        return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance()); 
     }
 
     public static void main(String[] args) {

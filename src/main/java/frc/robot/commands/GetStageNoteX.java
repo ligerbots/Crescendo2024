@@ -8,25 +8,30 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.NoteVision;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.ShooterPivot;
 
+// Note this is a SequentialCommandGroup
 public class GetStageNoteX extends GetNoteX {
 
-    public GetStageNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetStageNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, 
+        Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
         super(targetNote, driveTrain, noteVision, shooter, intake);
 
         if (FieldConstants.isCenterNote(targetNote)) {
             throw new IllegalArgumentException("target note param must be a stage note: S1 S2 S3");
         }
 
-        addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain)));
-
-        addCommands(new PrintCommand("GetStageNoteX-- Finished target note: " + targetNote));
+        addCommands(
+            new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .alongWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
+            new AutoSpeakerShot(driveTrain, shooter, shooterPivot)
+        );
     }
 
     private PathPlannerPath getInitialPath() {

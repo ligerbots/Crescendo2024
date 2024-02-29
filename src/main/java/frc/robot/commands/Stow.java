@@ -13,18 +13,12 @@ import frc.robot.subsystems.ShooterPivot;
 
 public class Stow extends ParallelCommandGroup {
   /** Creates a new StowingNotes. */
-  public Stow(Shooter shooter, ShooterPivot shooterPivot) {
-    this(shooter, shooterPivot, null);
-  }
-
   public Stow(Shooter shooter, ShooterPivot shooterPivot, Elevator elevator) {
     addCommands(
         // Turn off shooter, just in case
         new InstantCommand(shooter::turnOffShooter),
+        new SetElevatorLength(elevator, Elevator.STOW_LENGTH),
         new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE_RADIANS)
     );
-
-    if (elevator != null)
-        addCommands(new SetElevatorLength(elevator, Elevator.STOW_LENGTH));
   }
 }

@@ -15,7 +15,7 @@ import frc.robot.subsystems.ShooterPivot;
 
 public class StartIntake extends SequentialCommandGroup {
   /** Creates a new startIntake. */
-  public StartIntake(Intake intake, Shooter shooter, Elevator elevator, ShooterPivot pivot) {
+  public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
     addCommands(
       // turn off shooter completely, just in case
       new InstantCommand(shooter::turnOffShooter, shooter),
