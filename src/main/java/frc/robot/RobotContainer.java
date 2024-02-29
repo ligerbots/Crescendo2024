@@ -65,8 +65,9 @@ public class RobotContainer {
 
         m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_driverController.a().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
-                m_driveTrain::togglePrecisionMode, m_driveTrain));
+        // don't require the Drivetrain. Otherwise you cannot drive.
+        m_driverController.a().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
+                () -> m_driveTrain.setPrecisionMode(false)));
 
         m_driverController.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
 
@@ -97,13 +98,13 @@ public class RobotContainer {
 
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new TestShoot(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
         farm12.onTrue(new BackupFeed(m_shooter));
