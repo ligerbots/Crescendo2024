@@ -129,19 +129,19 @@ public class RobotContainer {
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
 
-        String autoName = "C1-C2";
+        String autoName = "S1";
         m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C2-C1";
+        autoName = "S2";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        List<String> autonamesDropdown = Arrays.asList("S1-S2", "S1-W-S2", "S1-W-W-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
+        List<String> autonamesDropdown = Arrays.asList("S3", "S1-S2", "S1-W-S2", "S1-W-W-S2" );
 
         for (String autoNm : autonamesDropdown) {
             m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         }
         
-        m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
+        // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 
