@@ -1,24 +1,31 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.ShooterPivot;
-
 import java.util.function.DoubleSupplier;
 
-public class AdjustShooterPivot extends InstantCommand {
-    private final ShooterPivot m_ShooterPivot;
-    private final DoubleSupplier m_YSupplier;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.ShooterPivot;
 
-    public AdjustShooterPivot(ShooterPivot shooterPivot,
-            DoubleSupplier YSupplier) {
-        this.m_ShooterPivot = shooterPivot;
-        this.m_YSupplier = YSupplier;
+public class AdjustShooterPivot extends Command {
+    public static final double ADJUSTMENT_STEP = Math.toRadians(2.0);
+    
+    private final ShooterPivot m_shooterPivot;
+    private final DoubleSupplier m_joystickSupplier;
+
+    private SlewRateLimiter m_limiter = new SlewRateLimiter(3);
+
+    public AdjustShooterPivot(ShooterPivot shooterPivot, DoubleSupplier joystickSupplier) {
+        m_shooterPivot = shooterPivot;
+        m_joystickSupplier = joystickSupplier;
 
         addRequirements(shooterPivot);
     }
 
     @Override
     public void execute() {
-        m_ShooterPivot.overrideShooterPivot(Math.copySign(ShooterPivot.OVERRIDE_RADIANS, m_YSupplier.getAsDouble()));
+        double newX = m_limiter.calculate(m_joystickSupplier.getAsDouble());
+
+        double adjustment = ADJUSTMENT_STEP * newX;
+        m_shooterPivot.setAngle(m_shooterPivot.getAngleRadians() + adjustment);
     }
 }

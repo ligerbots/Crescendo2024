@@ -149,12 +149,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
         SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
     }
 
-    public void overrideLength(double override){
-       double fixedOveride = override/50;
-       double currLength = getLength();
-       setLength(fixedOveride + currLength);
-    }
-
     public boolean lengthWithinTolerance() {
         return Math.abs(getLength() - m_goal) < LENGTH_TOLERANCE_METERS;
     }

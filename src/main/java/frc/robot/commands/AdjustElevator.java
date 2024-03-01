@@ -1,24 +1,33 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.Elevator;
-
 import java.util.function.DoubleSupplier;
 
-public class AdjustElevator extends InstantCommand {
-    private final Elevator m_elevator;
-    private final DoubleSupplier m_YSupplier;
+import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
 
-    public AdjustElevator(Elevator elevator,
-            DoubleSupplier YSupplier) {
-        this.m_elevator = elevator;
-        this.m_YSupplier = YSupplier;
+import frc.robot.subsystems.Elevator;
+
+public class AdjustElevator extends Command {
+    public static final double ADJUSTMENT_STEP = Units.inchesToMeters(1.0);
+
+    private final Elevator m_elevator;
+    private final DoubleSupplier m_joystickSupplier;
+
+    private SlewRateLimiter m_limiter = new SlewRateLimiter(3);
+
+    public AdjustElevator(Elevator elevator, DoubleSupplier joystickSupplier) {
+        m_elevator = elevator;
+        m_joystickSupplier = joystickSupplier;
 
         addRequirements(elevator);
     }
 
     @Override
     public void execute() {
-        m_elevator.overrideLength(Math.copySign(Elevator.OVERRIDE_METERS, m_YSupplier.getAsDouble()));
+        double newX = m_limiter.calculate(m_joystickSupplier.getAsDouble());
+
+        double adjustment = ADJUSTMENT_STEP * newX;
+        m_elevator.setLength(m_elevator.getLength() + adjustment);
     }
 }
