@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
@@ -34,7 +35,7 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     // Java problem: the encoder needs to be created outside the constructor
-    private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
+    private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
 
     private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
@@ -54,21 +55,24 @@ public class RobotContainer {
         // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
 
         // run the intake as long as the bumper is held.
-        // When release, shut off the intake and back up the note a little bit
-        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
-                .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
+        // When release, shut off the intake and feeder
+        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
+                .onFalse(new InstantCommand(m_intake::stop, m_intake)
+                        .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
+
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_driverController.rightTrigger(0.5).onTrue(new TriggerShot(m_shooter));
+        m_driverController.rightTrigger().onTrue(new TriggerShot(m_shooter).andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)));
 
-        m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        m_driverController.a().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
-                m_driveTrain::togglePrecisionMode, m_driveTrain));
+        // don't require the Drivetrain. Otherwise you cannot drive.
+        m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
+                () -> m_driveTrain.setPrecisionMode(false)));
 
-        m_driverController.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+        m_driverController.a().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
 
-        m_driverController.y()
+        m_driverController.x()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()), 
@@ -95,13 +99,16 @@ public class RobotContainer {
 
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new TestShoot(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new BackupFeed(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -123,19 +130,28 @@ public class RobotContainer {
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
 
-        String autoName = "C1-C2";
-        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        String autoName = "S1";
+        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        autoName = "C2-C1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        autoName = "S2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        List<String> autonamesDropdown = Arrays.asList("S1-S2", "S1-W-S2", "S1-W-W-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
+        autoName = "S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        for (String autoNm : autonamesDropdown) {
-            m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        }
+        autoName = "S1-S2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        // autoName = "C2-C1";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+
+        // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
+
+        // for (String autoNm : autonamesDropdown) {
+        //     m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // }
         
-        m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
+        // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 

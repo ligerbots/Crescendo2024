@@ -25,11 +25,10 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
             XboxController xboxController, DoubleSupplier leftJoystickXSupplier, DoubleSupplier leftJoystickYSupplier, DoubleSupplier rightJoystickXSupplier) {
         m_driveTrain = driveTrain;
 
-        
-
         addCommands(
                 // set shoot mode, so that TriggerShot can be a single command/button
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+                // this backs up the NOTE before turning on the shooter motors
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
                 // new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)

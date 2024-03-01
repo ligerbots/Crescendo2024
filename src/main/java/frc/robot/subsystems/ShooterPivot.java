@@ -56,7 +56,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // Used in conversion factor
     // private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
 
-    private final DutyCycleEncoder m_absoluteEncoder;  
+    private final DutyCycleEncoder m_absoluteEncoder = new DutyCycleEncoder(0);  
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
     private final RelativeEncoder m_encoder;
@@ -65,7 +65,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private double m_goalRadians = 0;
 
     // Construct a new shooterPivot subsystem
-    public ShooterPivot(DutyCycleEncoder absEncoder) {
+    public ShooterPivot() {
         super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ));
        
         m_motor = new CANSparkMax(Constants.SHOOTER_PIVOT_CAN_ID, CANSparkMax.MotorType.kBrushless);
@@ -82,7 +82,6 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         m_pidController.setOutputRange(-1, 1);
 
         // Absolute encoder - work in rotations
-        m_absoluteEncoder = absEncoder;
         // m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
         m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
 

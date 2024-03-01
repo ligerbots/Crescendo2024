@@ -47,7 +47,8 @@ public class DriveTrain extends SubsystemBase {
     // Should be measured from center to center.
     private static final double WHEELBASE_METERS = Units.inchesToMeters(17.75);
 
-    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(-3), 0 );
+    public static final double ROBOT_SWERVE_OFFSET_X_INCHES = -3.0;
+    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0 );
 
     private static final double DRIVE_BASE_RADIUS_METERS = 
             Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
@@ -182,6 +183,8 @@ public class DriveTrain extends SubsystemBase {
         }
 
         SmartDashboard.putData("Field", m_field);
+        SmartDashboard.putNumber("driveTrain/redFlip", 0);
+
     }
 
     // sets the heading to zero with the existing pose
@@ -271,8 +274,8 @@ public class DriveTrain extends SubsystemBase {
         if (m_fieldCentric) {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-            double redFlip = (alliance.isPresent() && alliance.get() == Alliance.Red) ? -1.0 : 1.0;
+            double redFlip = FieldConstants.isRedAlliance() ? -1.0 : 1.0;
+            SmartDashboard.putNumber("driveTrain/redFlip", redFlip);
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                     redFlip * newInputX * m_maxVelocity,
