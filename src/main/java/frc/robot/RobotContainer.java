@@ -170,7 +170,8 @@ public class RobotContainer {
     public boolean autoHasChanged() {
         Command autoCommand = getAutonomousCommand();
         Pose2d pose = getInitialPose();
-        boolean changed = pose != m_prevInitialPose || (autoCommand != null && autoCommand != m_prevAutoCommand);
+        // warning do not compare poses with "==". That compares object IDs, not value.
+        boolean changed = !pose.equals(m_prevInitialPose) || (m_prevAutoCommand != null && autoCommand != m_prevAutoCommand);
         m_prevAutoCommand = autoCommand;
         m_prevInitialPose = pose;
         return changed;
