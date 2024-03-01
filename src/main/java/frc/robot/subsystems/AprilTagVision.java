@@ -53,8 +53,8 @@ public class AprilTagVision {
     static final double SHED_TAG_NODE_ZOFFSET = 0.31;
     static final double SHED_TAG_SUBSTATION_YOFFSET = 1.19;
 
-    private static final String CAMERA_NAME_FRONT = "ApriltagCameraFront";
-    private static final String CAMERA_NAME_BACK = "ApriltagCameraBack";
+    private static final String CAMERA_NAME_FRONT = "ArducamFront";
+    private static final String CAMERA_NAME_BACK = "ArducamBack";
     private final PhotonCamera m_aprilTagCameraFront = new PhotonCamera(CAMERA_NAME_FRONT);
     private final PhotonCamera m_aprilTagCameraBack = new PhotonCamera(CAMERA_NAME_BACK);
 
@@ -65,11 +65,11 @@ public class AprilTagVision {
     // use measurements to center of Swerve, and include offset
     // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToFrontAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(0.5 + DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(18.5)),
+            new Translation3d(Units.inchesToMeters(0.5 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(18.5)),
             new Rotation3d(0.0, -15.0, 0.0));
 
     private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-15.5 + DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(10.0)),
+            new Translation3d(Units.inchesToMeters(-15.5 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(10.0)),
             new Rotation3d(0.0, -15.0, Math.toRadians(180.0)));
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;

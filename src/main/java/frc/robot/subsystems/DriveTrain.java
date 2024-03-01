@@ -183,6 +183,8 @@ public class DriveTrain extends SubsystemBase {
         }
 
         SmartDashboard.putData("Field", m_field);
+        SmartDashboard.putNumber("driveTrain/redFlip", 0);
+
     }
 
     // sets the heading to zero with the existing pose
@@ -272,8 +274,8 @@ public class DriveTrain extends SubsystemBase {
         if (m_fieldCentric) {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
-            Optional<Alliance> alliance = DriverStation.getAlliance();
-            double redFlip = (alliance.isPresent() && alliance.get() == Alliance.Red) ? -1.0 : 1.0;
+            double redFlip = FieldConstants.isRedAlliance() ? 1.0 : -1.0;
+            SmartDashboard.putNumber("driveTrain/redFlip", redFlip);
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                     redFlip * newInputX * m_maxVelocity,

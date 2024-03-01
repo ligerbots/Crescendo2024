@@ -143,7 +143,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public static ShooterValues calculateShooterSpeeds(double distance) {
-        SmartDashboard.putNumber("shooter/shotDistance", distance);
+        SmartDashboard.putNumber("shooter/shotDistance", Units.metersToInches(distance));
 
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
@@ -163,7 +163,12 @@ public class Shooter extends SubsystemBase {
         }
 
         double ratio = (distance - before.getKey()) / denom;
-        return before.getValue().interpolate(after.getValue(), ratio);
+        ShooterValues res = before.getValue().interpolate(after.getValue(), ratio);
+        SmartDashboard.putNumber("shooter/shotLeftRPM", res.leftRPM);
+        SmartDashboard.putNumber("shooter/shotRightRPM", res.rightRPM);
+        SmartDashboard.putNumber("shooter/shotAngle", Math.toDegrees(res.shootAngle));
+        return res;
+
     }
 
     // periodically update the values of motors for shooter to SmartDashboard
