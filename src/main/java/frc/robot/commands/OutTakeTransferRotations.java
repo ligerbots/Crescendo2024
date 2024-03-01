@@ -20,8 +20,8 @@ public class OutTakeTransferRotations extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_shooter.setFeederSpeed(Shooter.BACKUP_SHOOTER_SPEED);
     m_initalRotations = m_shooter.getFeederRotations();
+    m_shooter.setFeederSpeed(Shooter.BACKUP_SHOOTER_SPEED);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
