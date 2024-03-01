@@ -187,13 +187,13 @@ public class RobotContainer {
     }
 
     public Command getElevatorOverrideCommand() {
-        return new OverrideElevator(
+        return new AdjustElevator(
                 m_elevator,
                 () -> -modifyAxis(m_operatorController.getLeftY()));
     }
 
     public Command getShooterPivotOverrideCommand() {
-        return new OverrideShooterPivot(
+        return new AdjustShooterPivot(
             m_shooterPivot, 
             () -> -modifyAxis(m_operatorController.getRightY())
         );

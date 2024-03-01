@@ -5,11 +5,11 @@ import frc.robot.subsystems.ShooterPivot;
 
 import java.util.function.DoubleSupplier;
 
-public class OverrideShooterPivot extends InstantCommand {
+public class AdjustShooterPivot extends InstantCommand {
     private final ShooterPivot m_ShooterPivot;
     private final DoubleSupplier m_YSupplier;
 
-    public OverrideShooterPivot(ShooterPivot shooterPivot,
+    public AdjustShooterPivot(ShooterPivot shooterPivot,
             DoubleSupplier YSupplier) {
         this.m_ShooterPivot = shooterPivot;
         this.m_YSupplier = YSupplier;

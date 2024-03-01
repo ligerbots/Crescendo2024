@@ -5,11 +5,11 @@ import frc.robot.subsystems.Elevator;
 
 import java.util.function.DoubleSupplier;
 
-public class OverrideElevator extends InstantCommand {
+public class AdjustElevator extends InstantCommand {
     private final Elevator m_elevator;
     private final DoubleSupplier m_YSupplier;
 
-    public OverrideElevator(Elevator elevator,
+    public AdjustElevator(Elevator elevator,
             DoubleSupplier YSupplier) {
         this.m_elevator = elevator;
         this.m_YSupplier = YSupplier;
