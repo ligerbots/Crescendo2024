@@ -63,15 +63,15 @@ public class RobotContainer {
 
         m_driverController.rightTrigger().onTrue(new TriggerShot(m_shooter).andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)));
 
-        m_driverController.x().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
         // don't require the Drivetrain. Otherwise you cannot drive.
-        m_driverController.a().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
+        m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
                 () -> m_driveTrain.setPrecisionMode(false)));
 
-        m_driverController.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+        m_driverController.a().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
 
-        m_driverController.y()
+        m_driverController.x()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()), 
@@ -129,17 +129,17 @@ public class RobotContainer {
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
 
-        String autoName = "C1-C2";
-        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // String autoName = "S2";
+        // m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        autoName = "C2-C1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // autoName = "C2-C1";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
 
-        List<String> autonamesDropdown = Arrays.asList("S1-S2", "S1-W-S2", "S1-W-W-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
+        // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
 
-        for (String autoNm : autonamesDropdown) {
-            m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        }
+        // for (String autoNm : autonamesDropdown) {
+        //     m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // }
         
         m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);

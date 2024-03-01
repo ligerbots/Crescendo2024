@@ -24,8 +24,8 @@ public class Robot extends TimedRobot {
 
         // Enable local logging.
         // ** CAREFUL: this probably should be disabled during competition.
-        DataLogManager.start();
-        DriverStation.startDataLog(DataLogManager.getLog());
+        // DataLogManager.start();
+        // DriverStation.startDataLog(DataLogManager.getLog());
 
         m_robotContainer = new RobotContainer();
     }

@@ -33,6 +33,7 @@ public class ActiveSetShooter extends Command {
     public void initialize() {
         // start the feeder motor and timer to back the NOTE a bit
         m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
+        m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
         m_backupTimer.restart();
     }
 
