@@ -12,8 +12,8 @@ public class Intake extends SubsystemBase {
     
     final static double INTAKE_SPEED = 0.5;
     final static double INTAKE_CENTERING_SPEED = 0.5;
-    final static double OUTTAKE_SPEED = -0.1;
-    final static double OUTTAKE_CENTERING_SPEED = -0.1;
+    final static double OUTTAKE_SPEED = -0.3;
+    final static double OUTTAKE_CENTERING_SPEED = -0.3;
 
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;

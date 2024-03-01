@@ -34,16 +34,16 @@ import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     
-    static final double FEEDER_SPEED = 0.3;
+    static final double FEEDER_SPEED = 0.5;
 
     // AMP shot, backwards out input end
     static final double AMP_SHOOT_SPEED = -0.7;
     
     // This is negative to push the note back slowly
-    public static final double BACKUP_FEED_SPEED = -0.3;
-    public static final double BACKUP_SHOOTER_SPEED = -0.2;
+    public static final double BACKUP_FEED_SPEED = -0.25;
+    public static final double BACKUP_SHOOTER_SPEED = -0.1;
 
-    public static final double BACKUP_FEED_TIME = 1.0;  // seconds
+    public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
     public static final double RPM_TOLERANCE = 200; // TODO Tune this later
 
@@ -106,7 +106,8 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.restoreFactoryDefaults();
         m_feederMotor.setInverted(true);
         m_feederMotor.setIdleMode(IdleMode.kBrake);
-        
+        m_feederMotor.setSmartCurrentLimit(30);
+
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_leftShooterMotor.restoreFactoryDefaults();
         m_leftShooterMotor.setInverted(true);
@@ -127,6 +128,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
         SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
         SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
+
+        SmartDashboard.putNumber("shooter/shotDistance", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {
@@ -140,6 +143,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public static ShooterValues calculateShooterSpeeds(double distance) {
+        SmartDashboard.putNumber("shooter/shotDistance", distance);
+
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
@@ -179,6 +184,7 @@ public class Shooter extends SubsystemBase {
     public double getRightRpm() {
         return m_rightEncoder.getVelocity();
     }
+
 
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {

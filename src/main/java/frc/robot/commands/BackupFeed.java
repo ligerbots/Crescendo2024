@@ -22,6 +22,7 @@ public class BackupFeed extends Command {
     @Override
     public void initialize() {
         m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
+        m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
         m_timer.restart();
     }
 
@@ -33,7 +34,7 @@ public class BackupFeed extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        m_shooter.turnOffFeeder();
+        m_shooter.turnOffShooter();
     }
 
     // Returns true when the command should end.
