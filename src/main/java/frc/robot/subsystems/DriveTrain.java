@@ -274,7 +274,7 @@ public class DriveTrain extends SubsystemBase {
         if (m_fieldCentric) {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
-            double redFlip = FieldConstants.isRedAlliance() ? 1.0 : -1.0;
+            double redFlip = FieldConstants.isRedAlliance() ? -1.0 : 1.0;
             SmartDashboard.putNumber("driveTrain/redFlip", redFlip);
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
