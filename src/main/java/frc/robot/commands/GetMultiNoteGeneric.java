@@ -12,11 +12,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.NoteVision;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.*;
 
 public class GetMultiNoteGeneric extends SequentialCommandGroup {
 
@@ -39,14 +37,18 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
     private static final double WAIT_INTERVAL_SECONDS = 1.0;
 
     public GetMultiNoteGeneric(String noteSequence, DriveTrain driveTrain, NoteVision noteVision,
-            Shooter shooter, Intake intake) {
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
         // Convenience constructor to use an encoded note sequence string i.e.
         // "C1-C2-S3"
-        this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, intake);
+        this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
     }
 
     public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision,
-            Shooter shooter, Intake intake) {
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
+
+        // Shoot the preloaded NOTE. Do not worry about turning (add??)
+        addCommands(new AutoSpeakerShot(driveTrain, shooter, shooterPivot));
+
         // add all the fetching+shooting NOTE blocks
         for (Translation2d note : noteLocations) {
             if (FieldConstants.DUMMY_NOTE_WAIT_FLAG == note) {
@@ -56,7 +58,7 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
             } else if (FieldConstants.isCenterNote(note)) {
                 addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, intake));
             } else {
-                addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, intake));
+                addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             }
         }
     }
