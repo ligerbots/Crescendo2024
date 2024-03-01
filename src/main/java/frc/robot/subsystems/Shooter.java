@@ -57,6 +57,9 @@ public class Shooter extends SubsystemBase {
     static final double K_FF_RIGHT = 0.00032;
 
     CANSparkMax m_feederMotor;
+    private static final double FEEDER_GEAR_RATIO = 1/2;
+    RelativeEncoder m_feederMotorEncoder;
+
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
     SparkPIDController m_leftPidController, m_rightPidController;
     private RelativeEncoder m_leftEncoder;
@@ -106,7 +109,10 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.restoreFactoryDefaults();
         m_feederMotor.setInverted(true);
         m_feederMotor.setIdleMode(IdleMode.kBrake);
-        
+        m_feederMotorEncoder = m_feederMotor.getEncoder();
+        m_feederMotorEncoder.setPositionConversionFactor(FEEDER_GEAR_RATIO);
+
+
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_leftShooterMotor.restoreFactoryDefaults();
         m_leftShooterMotor.setInverted(true);
@@ -233,8 +239,8 @@ public class Shooter extends SubsystemBase {
         setFeederSpeed(0);
     }
 
-    public double getFeederPosition() {
-        return m_feederMotor.getEncoder().getPosition();//TODO: Declare higher up and check if encoder already exists
+    public double getFeederRotations() {
+        return m_feederMotorEncoder.getPosition();//TODO: Declare higher up and check if encoder already exists
     }
 
     public void setSpeakerShootMode(boolean mode) {

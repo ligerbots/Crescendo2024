@@ -9,6 +9,8 @@ import frc.robot.subsystems.Shooter;
 
 public class OutTakeTransferRotations extends Command {
   private Shooter m_shooter;
+  private double m_initalRotations;
+  private final double NUMBER_OF_ROTATIONS = 2; //Number of times to outtake
   /** Creates a new OutTakeTransferRotations. */
   public OutTakeTransferRotations(Shooter shooter) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -19,6 +21,8 @@ public class OutTakeTransferRotations extends Command {
   @Override
   public void initialize() {
     m_shooter.setFeederSpeed(Shooter.BACKUP_SHOOTER_SPEED);
+    m_shooter.turnOnFeeder();//Does this work?
+    m_initalRotations = m_shooter.getFeederRotations();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -27,11 +31,13 @@ public class OutTakeTransferRotations extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    m_shooter.turnOffFeeder();
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_shooter.get;
+    return Math.abs(m_shooter.getFeederRotations() - m_initalRotations) >= NUMBER_OF_ROTATIONS;
   }
 }
