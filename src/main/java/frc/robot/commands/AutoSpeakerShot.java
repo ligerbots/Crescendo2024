@@ -22,7 +22,8 @@ public class AutoSpeakerShot extends SequentialCommandGroup {
         addCommands(
             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
             new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)
-                        .until(() -> (shooterPivot.angleWithinTolerance() && shooter.rpmWithinTolerance())),
+                        .until(() -> (shooterPivot.angleWithinTolerance() && shooter.rpmWithinTolerance()))
+                        .withTimeout(2.0),
             new TriggerShot(shooter)
         );
     }
