@@ -43,7 +43,10 @@
     "rotateFast": true
   },
   "reversed": false,
-  "folder": "Note to Note ",
-  "previewStartingState": null,
+  "folder": null,
+  "previewStartingState": {
+    "rotation": 149.0,
+    "velocity": 0
+  },
   "useDefaultConstraints": false
 }

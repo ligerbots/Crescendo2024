@@ -34,22 +34,27 @@ import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
     
-    static final double FEEDER_SPEED = 0.3;
+    static final double FEEDER_SPEED = 0.5;
 
     // AMP shot, backwards out input end
-    static final double AMP_SHOOT_SPEED = -0.5;
+    static final double AMP_SHOOT_SPEED = -0.7;
     
-    // This is negative to push the note out slowly
-    public static final double BACKUP_FEED_SPEED = -0.1;
+    // This is negative to push the note back slowly
+    public static final double BACKUP_FEED_SPEED = -0.25;
+    public static final double BACKUP_SHOOTER_SPEED = -0.1;
+
+    public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
     public static final double RPM_TOLERANCE = 200; // TODO Tune this later
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
-    static final double K_P = 5.5e-4;//2.0766E-06;
+    static final double K_P_LEFT = 5.5e-4; // 2.0766E-06;
+    static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF = 0.0001575; //0.1111 / 60.0 / 12.0;
+    static final double K_FF_LEFT = 0.00019;
+    static final double K_FF_RIGHT = 0.00032;
 
     CANSparkMax m_feederMotor;
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
@@ -101,39 +106,45 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.restoreFactoryDefaults();
         m_feederMotor.setInverted(true);
         m_feederMotor.setIdleMode(IdleMode.kBrake);
-        
+        m_feederMotor.setSmartCurrentLimit(30);
+
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_leftShooterMotor.restoreFactoryDefaults();
         m_leftShooterMotor.setInverted(true);
 
+        m_leftPidController = m_leftShooterMotor.getPIDController();
+        setPidController(m_leftPidController, K_P_LEFT, K_FF_LEFT);
+        m_leftEncoder = m_leftShooterMotor.getEncoder();
+
         m_rightShooterMotor = new CANSparkMax(Constants.RIGHT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_rightShooterMotor.restoreFactoryDefaults();
 
-        m_leftPidController = m_leftShooterMotor.getPIDController();
-        setPidController(m_leftPidController);
         m_rightPidController = m_rightShooterMotor.getPIDController();
-        setPidController(m_rightPidController);
-        m_leftEncoder = m_leftShooterMotor.getEncoder();
+        setPidController(m_rightPidController, K_P_RIGHT, K_FF_RIGHT);
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
         // RPMs for testing
-        SmartDashboard.putNumber("shooter/test_left_rpm", 0);
-        SmartDashboard.putNumber("shooter/test_right_rpm", 0);
-        SmartDashboard.putNumber("shooter/left_rpm_target", 0);
-        SmartDashboard.putNumber("shooter/right_rpm_target", 0);
+        SmartDashboard.putNumber("shooter/testLeftRpm", 0);
+        SmartDashboard.putNumber("shooter/testRightRpm", 0);
+        SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
+        SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
+
+        SmartDashboard.putNumber("shooter/shotDistance", 0);
     }
 
-    private void setPidController(SparkPIDController pidController) {
+    private void setPidController(SparkPIDController pidController, double kP, double kFF) {
         // set PID coefficients
-        pidController.setP(K_P);
+        pidController.setP(kP);
         pidController.setI(K_I);
         pidController.setD(K_D);
         pidController.setIZone(0);
-        pidController.setFF(K_FF);
+        pidController.setFF(kFF);
         pidController.setOutputRange(-1.0, 1.0);
     }
 
     public static ShooterValues calculateShooterSpeeds(double distance) {
+        SmartDashboard.putNumber("shooter/shotDistance", Units.metersToInches(distance));
+
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
@@ -152,7 +163,12 @@ public class Shooter extends SubsystemBase {
         }
 
         double ratio = (distance - before.getKey()) / denom;
-        return before.getValue().interpolate(after.getValue(), ratio);
+        ShooterValues res = before.getValue().interpolate(after.getValue(), ratio);
+        SmartDashboard.putNumber("shooter/shotLeftRPM", res.leftRPM);
+        SmartDashboard.putNumber("shooter/shotRightRPM", res.rightRPM);
+        SmartDashboard.putNumber("shooter/shotAngle", Math.toDegrees(res.shootAngle));
+        return res;
+
     }
 
     // periodically update the values of motors for shooter to SmartDashboard
@@ -174,6 +190,7 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
+
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {
         m_leftShooterMotor.set(leftSpeed);
@@ -182,8 +199,8 @@ public class Shooter extends SubsystemBase {
 
     // set shooter RPMs, under PID control
     public void setShooterRpms(double leftRpm, double rightRpm) {
-        SmartDashboard.putNumber("shooter/left_rpm_target", leftRpm);
-        SmartDashboard.putNumber("shooter/right_rpm_target", rightRpm);
+        SmartDashboard.putNumber("shooter/leftRpmTarget", leftRpm);
+        SmartDashboard.putNumber("shooter/righRpmTarget", rightRpm);
 
         //Used in isWithinTolerenceFunc
         m_leftGoalRPM = leftRpm;
@@ -194,14 +211,15 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean rpmWithinTolerance() {
-        return Math.abs(m_leftGoalRPM-getLeftRpm()) < RPM_TOLERANCE && Math.abs(m_rightGoalRPM-getRightRpm()) < RPM_TOLERANCE;
+        return Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
+                && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
     public void turnOnFeeder() {
         setFeederSpeed(FEEDER_SPEED);
     }
 
-    public void ampShot(){
+    public void ampShot() {
         setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
@@ -215,6 +233,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public void turnOffShooterWheels() {
+        SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
+        SmartDashboard.putNumber("shooter/righRpmTarget", 0);
+
         setShooterSpeeds(0, 0);
     }
 

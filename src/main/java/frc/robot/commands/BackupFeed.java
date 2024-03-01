@@ -11,7 +11,6 @@ import frc.robot.subsystems.Shooter;
 public class BackupFeed extends Command {
     Shooter m_shooter;
     Timer m_timer = new Timer();
-    double WAIT_TIME = 0.1;
 
     /** Creates a new BackupFeed. */
     public BackupFeed(Shooter shooter) {
@@ -23,6 +22,7 @@ public class BackupFeed extends Command {
     @Override
     public void initialize() {
         m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
+        m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
         m_timer.restart();
     }
 
@@ -34,12 +34,12 @@ public class BackupFeed extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        m_shooter.turnOffFeeder();
+        m_shooter.turnOffShooter();
     }
 
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return m_timer.hasElapsed(WAIT_TIME);
+        return m_timer.hasElapsed(Shooter.BACKUP_FEED_TIME);
     }
 }

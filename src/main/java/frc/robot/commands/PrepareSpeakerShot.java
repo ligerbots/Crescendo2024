@@ -22,17 +22,19 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
 
     /** Creates a new PrepareSpeakerShot. */
     public PrepareSpeakerShot(DriveTrain driveTrain, Shooter shooter, ShooterPivot shooterPivot,
-            XboxController xboxController, DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier) {
+            XboxController xboxController, DoubleSupplier leftJoystickXSupplier, DoubleSupplier leftJoystickYSupplier, DoubleSupplier rightJoystickXSupplier) {
         m_driveTrain = driveTrain;
 
         addCommands(
                 // set shoot mode, so that TriggerShot can be a single command/button
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+                // this backs up the NOTE before turning on the shooter motors
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
-                new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, joystickXSupplier, joystickYSupplier),
+                // new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );
+        
     }
 
     private double getDistance() {
@@ -49,4 +51,6 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
                 .getAngle();
     }
+
+
 }
