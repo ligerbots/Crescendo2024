@@ -48,8 +48,8 @@ public class RobotContainer {
         configureAutos();
 
         m_driveTrain.setDefaultCommand(getDriveCommand());
-        m_elevator.setDefaultCommand(getElevatorOverrideCommand());
-        m_shooterPivot.setDefaultCommand(getShooterPivotOverrideCommand());
+        m_elevator.setDefaultCommand(getElevatorAdjustCommand());
+        m_shooterPivot.setDefaultCommand(getShooterPivotAdjustCommand());
     }
 
     private void configureBindings() {
@@ -186,17 +186,16 @@ public class RobotContainer {
                 () -> -modifyAxis(m_driverController.getRightX()));
     }
 
-    public Command getElevatorOverrideCommand() {
+    public Command getElevatorAdjustCommand() {
         return new AdjustElevator(
                 m_elevator,
                 () -> -modifyAxis(m_operatorController.getLeftY()));
     }
 
-    public Command getShooterPivotOverrideCommand() {
+    public Command getShooterPivotAdjustCommand() {
         return new AdjustShooterPivot(
-            m_shooterPivot, 
-            () -> -modifyAxis(m_operatorController.getRightY())
-        );
+                m_shooterPivot,
+                () -> -modifyAxis(m_operatorController.getRightY()));
     }
 
     private static double deadband(double value, double deadband) {

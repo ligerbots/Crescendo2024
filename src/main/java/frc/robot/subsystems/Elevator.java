@@ -24,8 +24,6 @@ public class Elevator extends TrapezoidProfileSubsystem {
     private static final double MAX_LENGTH_METERS = Units.inchesToMeters(13.5);
     private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.25);
 
-    public static final double OVERRIDE_METERS = Units.inchesToMeters(2.0);
-
     // Tolerance for commands
     private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(0.5);
     
