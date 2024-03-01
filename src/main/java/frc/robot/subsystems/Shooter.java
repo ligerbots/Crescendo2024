@@ -93,7 +93,7 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(35.0))), // a guess
+            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(50.0))), // a guess
             Map.entry(Units.feetToMeters(8.5), new ShooterValues(3000.0, 2500.0, Math.toRadians(31.0))),
             Map.entry(Units.feetToMeters(10.7), new ShooterValues(3000.0, 3500.0, Math.toRadians(25.0))),
             Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
@@ -128,8 +128,6 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
         SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
         SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
-
-        SmartDashboard.putNumber("shooter/shotDistance", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {
@@ -143,8 +141,6 @@ public class Shooter extends SubsystemBase {
     }
 
     public static ShooterValues calculateShooterSpeeds(double distance) {
-        SmartDashboard.putNumber("shooter/shotDistance", Units.metersToInches(distance));
-
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
@@ -164,11 +160,14 @@ public class Shooter extends SubsystemBase {
 
         double ratio = (distance - before.getKey()) / denom;
         ShooterValues res = before.getValue().interpolate(after.getValue(), ratio);
+
+        // for tuning. Leave in for diagnostics??
+        SmartDashboard.putNumber("shooter/shotDistance", Units.metersToInches(distance));
         SmartDashboard.putNumber("shooter/shotLeftRPM", res.leftRPM);
         SmartDashboard.putNumber("shooter/shotRightRPM", res.rightRPM);
         SmartDashboard.putNumber("shooter/shotAngle", Math.toDegrees(res.shootAngle));
-        return res;
 
+        return res;
     }
 
     // periodically update the values of motors for shooter to SmartDashboard
