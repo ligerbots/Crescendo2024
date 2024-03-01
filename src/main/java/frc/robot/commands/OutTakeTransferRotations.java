@@ -21,7 +21,6 @@ public class OutTakeTransferRotations extends Command {
   @Override
   public void initialize() {
     m_shooter.setFeederSpeed(Shooter.BACKUP_SHOOTER_SPEED);
-    m_shooter.turnOnFeeder();//Does this work?
     m_initalRotations = m_shooter.getFeederRotations();
   }
 
