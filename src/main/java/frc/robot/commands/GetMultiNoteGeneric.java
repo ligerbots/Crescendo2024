@@ -36,12 +36,12 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
 
     private static final double WAIT_INTERVAL_SECONDS = 1.0;
 
-    public GetMultiNoteGeneric(String noteSequence, DriveTrain driveTrain, NoteVision noteVision,
-            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
-        // Convenience constructor to use an encoded note sequence string i.e.
-        // "C1-C2-S3"
-        this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
-    }
+    // public GetMultiNoteGeneric(String noteSequence, DriveTrain driveTrain, NoteVision noteVision,
+    //         Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
+    //     // Convenience constructor to use an encoded note sequence string i.e.
+    //     // "C1-C2-S3"
+    //     this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
+    // }
 
     public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision,
             Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
@@ -51,12 +51,11 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
 
         // add all the fetching+shooting NOTE blocks
         for (Translation2d note : noteLocations) {
-            if (FieldConstants.DUMMY_NOTE_WAIT_FLAG == note) {
-                addCommands(new PrintCommand("starting wait " + WAIT_INTERVAL_SECONDS + " seconds"),
-                            new WaitCommand(WAIT_INTERVAL_SECONDS),
-                            new PrintCommand("finished wait " + WAIT_INTERVAL_SECONDS + " seconds"));
+            if (FieldConstants.DUMMY_NOTE_WAIT_FLAG.equals(note)) {
+                addCommands(new PrintCommand("Auto Wait"),  // TODO remove print when ready
+                            new WaitCommand(WAIT_INTERVAL_SECONDS));
             } else if (FieldConstants.isCenterNote(note)) {
-                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, intake));
+                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             } else {
                 addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             }
