@@ -219,6 +219,7 @@ public class Shooter extends SubsystemBase {
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
+        
     }
 
     public void turnOffShooterWheels() {
@@ -230,6 +231,10 @@ public class Shooter extends SubsystemBase {
 
     public void turnOffFeeder() {
         setFeederSpeed(0);
+    }
+
+    public double getFeederPosition() {
+        return m_feederMotor.getEncoder().getPosition();//TODO: Declare higher up and check if encoder already exists
     }
 
     public void setSpeakerShootMode(boolean mode) {
