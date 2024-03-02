@@ -11,7 +11,8 @@ public class OutTakeTransferRotations extends Command {
   private Shooter m_shooter;
   private double m_initalRotations;
 
-  private final double NUMBER_OF_ROTATIONS = 2; //Number of times to outtake
+  // Number of motor rotations
+  private final double NUMBER_OF_ROTATIONS = 1;
 
   /** Creates a new OutTakeTransferRotations. */
   public OutTakeTransferRotations(Shooter shooter) {
