@@ -8,6 +8,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Elevator;
@@ -30,6 +32,8 @@ public class GetStageNoteX extends GetNoteX {
         addCommands(
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
+            new InstantCommand(shooter::turnOffShooter),
+            new WaitCommand(2.0),
             new AutoSpeakerShot(driveTrain, shooter, shooterPivot)
         );
     }

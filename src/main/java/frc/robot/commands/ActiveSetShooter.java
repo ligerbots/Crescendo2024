@@ -16,11 +16,15 @@ public class ActiveSetShooter extends Command {
     private final ShooterPivot m_shooterPivot;
     private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
 
-    private static final double PIVOT_WAIT_TIME = 0.1;
+    // Number of motor rotations
+    private final double NUMBER_OF_ROTATIONS = 1;
+
+    private static final double PIVOT_WAIT_TIME = 0.2;
 
     enum State {START, WAIT_FOR_PIVOT, BACKUP_NOTE, SPEED_UP_SHOOTER};
     private State m_state;
     Timer m_timer = new Timer();
+    double m_initialRotations;
 
     /** Creates a new ActiveSpeedUpShooter. */
     public ActiveSetShooter(Shooter shooter, ShooterPivot shootPivot, Supplier<Shooter.ShooterValues> valueSupplier) {
@@ -36,6 +40,7 @@ public class ActiveSetShooter extends Command {
     @Override
     public void initialize() {
         m_state = State.START;
+        m_initialRotations = m_shooter.getFeederRotations();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -58,8 +63,7 @@ public class ActiveSetShooter extends Command {
         }
 
         if (m_state == State.BACKUP_NOTE) {
-            // TODO change this end condition
-            if (m_timer.hasElapsed(Shooter.BACKUP_FEED_TIME)) {
+            if (Math.abs(m_shooter.getFeederRotations() - m_initialRotations) >= NUMBER_OF_ROTATIONS) {
                 // NOTE should be out of the shooter wheels. Start the spin up.
                 Shooter.ShooterValues shootValues = m_valueSupplier.get();
                 m_shooter.turnOffFeeder();
