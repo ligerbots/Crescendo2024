@@ -57,8 +57,8 @@ public class DriveTrain extends SubsystemBase {
     private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
 
     // TODO get correct values
-    public static final double PATH_PLANNER_MAX_VELOCITY = 5.0;
-    public static final double PATH_PLANNER_MAX_ACCELERATION = 5.0;
+    public static final double PATH_PLANNER_MAX_VELOCITY = 2.0; //5.0;
+    public static final double PATH_PLANNER_MAX_ACCELERATION = 2.0; //5.0;
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
@@ -275,7 +275,6 @@ public class DriveTrain extends SubsystemBase {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
             double redFlip = FieldConstants.isRedAlliance() ? -1.0 : 1.0;
-            SmartDashboard.putNumber("driveTrain/redFlip", redFlip);
 
             chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                     redFlip * newInputX * m_maxVelocity,

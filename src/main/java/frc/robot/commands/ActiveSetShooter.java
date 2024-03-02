@@ -77,6 +77,7 @@ public class ActiveSetShooter extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        System.out.println("ActiveSetShooter end interrupt = " + interrupted);
         m_timer.stop();
     }
 

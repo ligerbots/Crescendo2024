@@ -15,7 +15,7 @@ public class FalconDriveController implements DriveController {
     public static final double MAX_VELOCITY_METERS_PER_SECOND = 
             6380.0 / 60.0 * DRIVE_REDUCTION * WHEEL_DIAMETER * Math.PI;
     
-    private static final double FALCON_DISTANCE_PER_UNIT = Math.PI * WHEEL_DIAMETER * DRIVE_REDUCTION / 2048.0 ;
+    private static final double FALCON_DISTANCE_PER_UNIT = Math.PI * WHEEL_DIAMETER * DRIVE_REDUCTION;
     
     private static final double CURRENT_LIMIT = 35.0;  // Amps
     private static final double CURRENT_LIMIT_TIME = 0.25;  // seconds
@@ -55,5 +55,6 @@ public class FalconDriveController implements DriveController {
     @Override
     public void updateSmartDashboard(String sdPrefix) {
         SmartDashboard.putNumber(sdPrefix + "/speed", getStateVelocity());
+        SmartDashboard.putNumber(sdPrefix + "/position", getWheelDistance());
     }
 }

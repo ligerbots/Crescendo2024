@@ -41,7 +41,7 @@ public class Shooter extends SubsystemBase {
     
     // This is negative to push the note back slowly
     public static final double BACKUP_FEED_SPEED = -0.25;
-    public static final double BACKUP_SHOOTER_SPEED = -0.1;
+    public static final double BACKUP_SHOOTER_SPEED = -0.2;
 
     public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
@@ -97,9 +97,9 @@ public class Shooter extends SubsystemBase {
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
             Map.entry(1.4, new ShooterValues(2000.0, 2000.0, Math.toRadians(50.0))),
-            Map.entry(2.65, new ShooterValues(2500.0, 2500.0, Math.toRadians(33.0))),
-            Map.entry(4.06, new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
-            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
+            Map.entry(2.65, new ShooterValues(2500.0, 2500.0, Math.toRadians(36.0))),
+            Map.entry(4.06, new ShooterValues(3500.0, 3500.0, Math.toRadians(27.0))),
+            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(24.0)))
             ));
 
     // Shooter class constructor, initialize arrays for motors controllers,
