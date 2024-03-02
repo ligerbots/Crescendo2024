@@ -39,20 +39,18 @@ public class ActiveSetShooter extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_state = State.START;
         m_initialRotations = m_shooter.getFeederRotations();
+
+        m_timer.restart();
+        m_state = State.WAIT_FOR_PIVOT;
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (m_state == State.START) {
-            // Start the Pivot turning
-            Shooter.ShooterValues shootValues = m_valueSupplier.get();
-            m_shooterPivot.setAngle(shootValues.shootAngle);
-            m_timer.restart();
-            m_state = State.WAIT_FOR_PIVOT;
-        }
+        // always adjust the pivot
+        Shooter.ShooterValues shootValues = m_valueSupplier.get();
+        m_shooterPivot.setAngle(shootValues.shootAngle);
 
         if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
             // start the feeder motor and timer to back the NOTE a bit
@@ -62,15 +60,16 @@ public class ActiveSetShooter extends Command {
             m_state = State.BACKUP_NOTE;
         }
 
-        if (m_state == State.BACKUP_NOTE) {
-            if (Math.abs(m_shooter.getFeederRotations() - m_initialRotations) >= NUMBER_OF_ROTATIONS) {
-                // NOTE should be out of the shooter wheels. Start the spin up.
-                Shooter.ShooterValues shootValues = m_valueSupplier.get();
-                m_shooter.turnOffFeeder();
-                m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
-                // does not actually do anything
-                m_state = State.SPEED_UP_SHOOTER;
-            }
+        if (m_state == State.BACKUP_NOTE
+                && Math.abs(m_shooter.getFeederRotations() - m_initialRotations) >= NUMBER_OF_ROTATIONS) {
+            // NOTE should be out of the shooter wheels. Start the spin up.
+            m_shooter.turnOffFeeder();
+            m_state = State.SPEED_UP_SHOOTER;
+        }
+
+        if (m_state == State.SPEED_UP_SHOOTER) {
+            // Keep updating angle and speed
+            m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
         }
     }
 
