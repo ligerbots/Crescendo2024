@@ -30,6 +30,7 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
+    private final Climber m_climber = new Climber();
     // Java problem: the encoder needs to be created outside the constructor
     private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
@@ -106,6 +107,8 @@ public class RobotContainer {
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
         farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new ResetClimber(m_climber, () -> SmartDashboard.getNumber("climber/resetRotationsLeft", 0), () -> SmartDashboard.getNumber("climber/resetRotationsRight", 0)));
         // -----------------------------------------------
         // commands to run the characterization for the shooter
         // JoystickButton farm1 = new JoystickButton(m_farm, 1);
