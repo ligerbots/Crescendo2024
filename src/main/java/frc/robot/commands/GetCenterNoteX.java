@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
 
@@ -45,6 +45,7 @@ public class GetCenterNoteX extends GetNoteX {
         // Use note "monitoring" for center notes only
         addCommands(
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .andThen(new WaitCommand(1))
                 .deadlineWith(
                     new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)
                         .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
