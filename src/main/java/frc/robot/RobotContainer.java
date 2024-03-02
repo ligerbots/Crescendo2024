@@ -99,7 +99,7 @@ public class RobotContainer {
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
-        farm11.onTrue(new TestShoot(m_shooter,
+        farm11.onTrue(new TestShoot(m_driveTrain, m_shooter,
                 () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 

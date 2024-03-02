@@ -49,12 +49,12 @@ public class Shooter extends SubsystemBase {
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
-    static final double K_P_LEFT = 5.5e-4; // 2.0766E-06;
+    static final double K_P_LEFT = 1e-4; // 2.0766E-06;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF_LEFT = 0.000198;
-    static final double K_FF_RIGHT = 0.000276;
+    static final double K_FF_LEFT = 0.000234;
+    static final double K_FF_RIGHT = 0.000215;
 
     CANSparkMax m_feederMotor;
     // private static final double FEEDER_GEAR_RATIO = 1/2;
@@ -96,9 +96,9 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(50.0))), // a guess
-            Map.entry(Units.feetToMeters(8.5), new ShooterValues(3000.0, 2500.0, Math.toRadians(31.0))),
-            Map.entry(Units.feetToMeters(10.7), new ShooterValues(3000.0, 3500.0, Math.toRadians(25.0))),
+            Map.entry(1.4, new ShooterValues(2000.0, 2000.0, Math.toRadians(50.0))),
+            Map.entry(2.65, new ShooterValues(2500.0, 2500.0, Math.toRadians(33.0))),
+            Map.entry(4.06, new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
             Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
             ));
 
