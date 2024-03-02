@@ -10,46 +10,29 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterPivot;
 
 public class SetPivotAngle extends Command {
-  /** Creates a new SetShooterPivot. */
-  ShooterPivot m_shooterPivot;
-  DoubleSupplier m_angleRadians;
-  double m_wantedAngleRadians;
+    ShooterPivot m_shooterPivot;
+    DoubleSupplier m_angleProvider;
 
-  public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    m_shooterPivot = shooterPivot;
-    m_angleRadians = angleRadians;
-    addRequirements(m_shooterPivot);
-  }
+    public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians) {
+        m_shooterPivot = shooterPivot;
+        m_angleProvider = angleRadians;
 
-  public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    this(shooterPivot, () -> angleRadians);
-  }
+        addRequirements(m_shooterPivot);
+    }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    m_wantedAngleRadians = m_angleRadians.getAsDouble();
-    m_shooterPivot.setAngle(m_wantedAngleRadians);
-  }
+    public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians) {
+        this(shooterPivot, () -> angleRadians);
+    }
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+        m_shooterPivot.setAngle(m_angleProvider.getAsDouble());
+    }
 
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    double currAngle = m_shooterPivot.getAngleRadians();
-    return Math.abs(currAngle - m_wantedAngleRadians) < ShooterPivot.ANGLE_TOLERANCE_RADIAN;
-    
-  }
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        return m_shooterPivot.angleWithinTolerance();
+    }
 }

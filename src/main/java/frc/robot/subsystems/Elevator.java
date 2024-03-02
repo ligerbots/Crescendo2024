@@ -12,34 +12,36 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
+// import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 import frc.robot.Constants;
 
 public class Elevator extends TrapezoidProfileSubsystem {
 
-    private static final double GEAR_REDUCTION = 1/4; //TODO: Check if changed on real robot
+    private static final double GEAR_REDUCTION = (1.0 / 4.0) * (14.0 / 60.0);
 
-    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(22.0);
-    private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.0);
+    private static final double MAX_LENGTH_METERS = Units.inchesToMeters(13.5);
+    private static final double MIN_LENGTH_METERS = Units.inchesToMeters(0.25);
 
     // Tolerance for commands
-    private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(1.0); //TODO: Decide on tolerence
+    private static final double LENGTH_TOLERANCE_METERS = Units.inchesToMeters(0.5);
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
-    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(100.0); //TODO: Find actual value
+    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(20.0);
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 
-    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(100.0); //TODO: Find actual value
+    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(30.0);
 
-    private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION); //TODO: Double check robot if correct when built
+    private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
+    
+    private static final int CURRENT_LIMIT = 35;
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 0.1; //TODO: Need to tune
+    private static final double K_P = 50.0; //TODO: Need to tune
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -47,19 +49,22 @@ public class Elevator extends TrapezoidProfileSubsystem {
     // constants for various commands
     public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
     public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-    public static final double STOW_LENGTH = Units.inchesToMeters(17.849);
-    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(38.211);
+
+    public static final double STOW_LENGTH = Units.inchesToMeters(0.5);
+    public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(13.0);
+
+    private static final double OFFSET_METER = 0.0;
 
     // initializing Potentiometer
-    private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
-    private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
-    private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
+    // private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
+    // private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
+    // private final double POTENTIOMETER_OFFSET = 2.51; //TODO: Find inital value and update
 
     // Define the motor and encoders
     private final CANSparkMax m_motor;
     private final RelativeEncoder m_encoder;
 
-    private final AnalogPotentiometer m_stringPotentiometer;
+    // private final AnalogPotentiometer m_stringPotentiometer;
     private final SparkPIDController m_PIDController;
     private double m_goal = 0;
 
@@ -70,40 +75,40 @@ public class Elevator extends TrapezoidProfileSubsystem {
         // Create the motor, PID Controller and encoder.
         m_motor = new CANSparkMax(Constants.ELEVATOR_CAN_ID, CANSparkMax.MotorType.kBrushless);
         m_motor.restoreFactoryDefaults();
+        m_motor.setInverted(true);
         
-        //set currentLimit for reacher to 35 amps
-        m_motor.setSmartCurrentLimit(35);
+        m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
 
         m_PIDController = m_motor.getPIDController();
         m_PIDController.setP(K_P);
         m_PIDController.setI(K_I);
         m_PIDController.setD(K_D);
         m_PIDController.setFF(K_FF);
-        // m_motor.setInverted(true);
 
         m_encoder = m_motor.getEncoder();
         // Set the position conversion factor.
         m_encoder.setPositionConversionFactor(METER_PER_REVOLUTION);
 
-        m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
-        // m_encoder.setPosition(ELEVATOR_OFFSET_METER);
-        updateMotorEncoderOffset();
+        // m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
+        m_encoder.setPosition(OFFSET_METER);
+        // updateMotorEncoderOffset();
 
         SmartDashboard.putBoolean("elevator/coastMode", false);
         setCoastMode();
 
         // Create SD values needed during testing. Here so that they are visible in NetworkTables
-        SmartDashboard.putNumber("elevator/testGoalLength", 0);
+        SmartDashboard.putNumber("elevator/testLength", 0);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(m_encoder.getPosition()));
-        SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
+        SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(getLength()));
+        SmartDashboard.putNumber("elevator/current", m_motor.getOutputCurrent());
+        // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 
         // useful for initial calibration; comment out later?
-        SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
-        SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
+        // SmartDashboard.putNumber("elevator/encoderMeter", m_encoder.getPosition());
+        // SmartDashboard.putNumber("elevator/stringPotMeter", getPotentiometerReadingMeters());
 
         setCoastMode();
 
@@ -114,7 +119,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
     protected void useState(TrapezoidProfile.State setPoint) {
         // Remember that the encoder was already set to account for the gear ratios.
 
-        m_PIDController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition); //(setPoint.position, ControlType.kPosition, 0); // , feedforward / 12.0);
+        // TODO include FF?
+        m_PIDController.setReference(setPoint.position, CANSparkMax.ControlType.kPosition); 
         SmartDashboard.putNumber("elevator/setPoint", Units.metersToInches(setPoint.position));
     }
 
@@ -122,13 +128,13 @@ public class Elevator extends TrapezoidProfileSubsystem {
         return m_encoder.getPosition();
     }
 
-    public double getPotentiometerReadingMeters(){
-        return m_stringPotentiometer.get();
-    }
+    // public double getPotentiometerReadingMeters(){
+    //     return m_stringPotentiometer.get();
+    // }
 
-    public void updateMotorEncoderOffset() {
-        m_encoder.setPosition(getPotentiometerReadingMeters());
-    }
+    // public void updateMotorEncoderOffset() {
+    //     m_encoder.setPosition(getPotentiometerReadingMeters());
+    // }
 
     private static double limitElevatorLength(double length){
         return MathUtil.clamp(length, MIN_LENGTH_METERS, MAX_LENGTH_METERS);

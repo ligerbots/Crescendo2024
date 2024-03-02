@@ -6,23 +6,24 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-    private final CommandXboxController m_controller = new CommandXboxController(0);
-    private final Joystick m_farm = new Joystick(1);
+    private final CommandXboxController m_driverController = new CommandXboxController(0);
+    private final CommandXboxController m_operatorController = new CommandXboxController(1);
+    private final Joystick m_farm = new Joystick(2);
 
     private final NoteVision m_noteVision = new NoteVision();
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
@@ -30,7 +31,7 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
     // Java problem: the encoder needs to be created outside the constructor
-    private final ShooterPivot m_shooterPivot = new ShooterPivot(new DutyCycleEncoder(0));
+    private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
 
     private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
@@ -48,28 +49,35 @@ public class RobotContainer {
     private void configureBindings() {
         // Intake
         // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-        
-        // run the intake as long as the bumper is held. 
-        // When release, shut off the intake and back up the note a little bit
-        m_controller.leftBumper().whileTrue(new StartIntake(m_intake, m_shooter, m_elevator, m_shooterPivot))
-                        .onFalse(new InstantCommand(m_intake::stop, m_intake).andThen(new BackupFeed(m_shooter)));
-        m_controller.rightBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.leftTrigger(0.5).onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        // run the intake as long as the bumper is held.
+        // When release, shut off the intake and feeder
+        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
+                .onFalse(new InstantCommand(m_intake::stop, m_intake)
+                        .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
 
-        m_controller.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
-        m_controller.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
-        m_controller.x().whileTrue(new StartEndCommand(m_driveTrain::togglePrecisionMode,
-                m_driveTrain::togglePrecisionMode, m_driveTrain));
+        m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_controller.b().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
-        
-        m_controller.a()
-                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_controller.getHID(),
-                        () -> -modifyAxis(m_controller.getLeftY()),
-                        () -> -modifyAxis(m_controller.getLeftX())));
-        
-        m_controller.rightTrigger(.5).onTrue(new TriggerShot(m_shooter));
+        m_driverController.rightTrigger().onTrue(new TriggerShot(m_shooter).andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)));
+
+        m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+
+        // don't require the Drivetrain. Otherwise you cannot drive.
+        m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
+                () -> m_driveTrain.setPrecisionMode(false)));
+
+        m_driverController.a().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+
+        m_driverController.x()
+                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
+                        () -> -modifyAxis(m_driverController.getLeftY()),
+                        () -> -modifyAxis(m_driverController.getLeftX()), 
+                        () -> -modifyAxis(m_driverController.getRightX())));
+                        
+        m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
+        m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
+
+        // Test commands
 
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
         farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
@@ -79,17 +87,24 @@ public class RobotContainer {
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new SetElevatorLength(m_elevator,
-                () -> SmartDashboard.getNumber("elevator/testGoalLength", 0)));
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+
+        JoystickButton farm4 = new JoystickButton(m_farm, 4);
+        farm4.onTrue(new SetPivotAngle(m_shooterPivot,
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new TestShoot(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/test_left_rpm", 0),
-                () -> SmartDashboard.getNumber("shooter/test_right_rpm", 0)));
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -111,53 +126,34 @@ public class RobotContainer {
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
 
-        // Initialize the list of available Autonomous routines
-        // m_chosenAuto.setDefaultOption("GetNoteC1", new GetNoteC1(m_driveTrain,
-        // m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteC2", new GetNoteC2(m_driveTrain, m_noteVision,
-        // m_shooter, m_intake));
+        String autoName = "S1";
+        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        // m_chosenAuto.setDefaultOption("GetNoteX (C1)", new GetNoteX(FieldConstants.NOTE_C_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (C2)", new GetNoteX(FieldConstants.NOTE_C_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // autoName = "S2";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2 }, 
+        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        // m_chosenAuto.addOption("GetNoteX (S1)", new GetNoteX(FieldConstants.BLUE_NOTE_S_1, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S2)", new GetNoteX(FieldConstants.BLUE_NOTE_S_2, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // m_chosenAuto.addOption("GetNoteX (S3)", new GetNoteX(FieldConstants.BLUE_NOTE_S_3, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // autoName = "S3";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, 
+        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        Translation2d[] noteList = new Translation2d[]{FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2};
-        m_chosenAuto.setDefaultOption("C1-C2", new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // autoName = "S1-S2";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 }, 
+        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        noteList = new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 };
-        m_chosenAuto.addOption("C2-C1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // autoName = "C2-C1";
+        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+        //         new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
+        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 };
-        m_chosenAuto.addOption("S1-S2",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
 
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 };
-        m_chosenAuto.addOption("S3-S2",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2,
-                FieldConstants.BLUE_NOTE_S_3 };
-        m_chosenAuto.addOption("S1-S2-S3",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2,
-                FieldConstants.BLUE_NOTE_S_1 };
-        m_chosenAuto.addOption("S3-S2-S1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 };
-        m_chosenAuto.addOption("S2-S1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        noteList = new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1 };
-        m_chosenAuto.addOption("S1-C1",
-                new GetMultiNoteGeneric(noteList, m_driveTrain, m_noteVision, m_shooter, m_intake));
-
-        m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
+        // for (String autoNm : autonamesDropdown) {
+        //     m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        // }
+        
+        // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
     }
 
@@ -172,7 +168,8 @@ public class RobotContainer {
     public boolean autoHasChanged() {
         Command autoCommand = getAutonomousCommand();
         Pose2d pose = getInitialPose();
-        boolean changed = pose != m_prevInitialPose || (autoCommand != null && autoCommand != m_prevAutoCommand);
+        // warning do not compare poses with "==". That compares object IDs, not value.
+        boolean changed = !pose.equals(m_prevInitialPose) || (m_prevAutoCommand != null && autoCommand != m_prevAutoCommand);
         m_prevAutoCommand = autoCommand;
         m_prevInitialPose = pose;
         return changed;
@@ -185,9 +182,9 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         return new Drive(
                 m_driveTrain,
-                () -> -modifyAxis(m_controller.getLeftY()),
-                () -> -modifyAxis(m_controller.getLeftX()),
-                () -> -modifyAxis(m_controller.getRightX()));
+                () -> -modifyAxis(m_driverController.getLeftY()),
+                () -> -modifyAxis(m_driverController.getLeftX()),
+                () -> -modifyAxis(m_driverController.getRightX()));
     }
 
     private static double deadband(double value, double deadband) {
@@ -219,4 +216,9 @@ public class RobotContainer {
     public NoteVision getNoteVision() {
         return m_noteVision;
     }
+
+    public ShooterPivot getShooterPivot() {
+        return m_shooterPivot;
+    }
+
 }
