@@ -45,7 +45,7 @@ public class GetCenterNoteX extends GetNoteX {
         // Use note "monitoring" for center notes only
         addCommands(
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .andThen(new WaitCommand(1))
+                .andThen(new WaitCommand(2))
                 .deadlineWith(
                     new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)
                         .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
