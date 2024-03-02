@@ -31,6 +31,7 @@ public class GetStageNoteX extends GetNoteX {
 
         addCommands(
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .andThen(new WaitCommand(2))
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
             new InstantCommand(shooter::turnOffShooter),
             new WaitCommand(2.0),
