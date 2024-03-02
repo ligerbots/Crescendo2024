@@ -57,8 +57,8 @@ public class Shooter extends SubsystemBase {
     static final double K_FF_RIGHT = 0.000215;
 
     CANSparkMax m_feederMotor;
-    // private static final double FEEDER_GEAR_RATIO = 1/2;
     RelativeEncoder m_feederMotorEncoder;
+    SparkPIDController m_feederPidController;
 
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
     SparkPIDController m_leftPidController, m_rightPidController;
@@ -111,8 +111,9 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.setIdleMode(IdleMode.kBrake);
         m_feederMotor.setSmartCurrentLimit(30);
         m_feederMotorEncoder = m_feederMotor.getEncoder();
-        // m_feederMotorEncoder.setPositionConversionFactor(FEEDER_GEAR_RATIO);
 
+        m_feederPidController = m_feederMotor.getPIDController();
+        setPidController(m_feederPidController, 1e-4, 0);
 
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_leftShooterMotor.restoreFactoryDefaults();
@@ -246,7 +247,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public void turnOffFeeder() {
-        setFeederSpeed(0);
+        m_feederPidController.setReference(0, CANSparkMax.ControlType.kVelocity);
+        // setFeederSpeed(0);
     }
 
     public double getFeederRotations() {

@@ -50,6 +50,8 @@ public class GetCenterNoteX extends GetNoteX {
                     new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)
                         .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
                 ),
+            new InstantCommand(shooter::turnOffShooter),
+            new WaitCommand(1.0),
             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
             m_driveTrain.followPath(m_returnPath)
                 .deadlineWith(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
