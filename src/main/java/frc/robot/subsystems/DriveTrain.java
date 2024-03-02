@@ -254,14 +254,16 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void joystickDrive(double inputX, double inputY, double inputRotation) {
-        // SmartDashboard.putNumber("drivetrain/joystickX", inputX);
-        // SmartDashboard.putNumber("drivetrain/joystickY", inputY);
+        SmartDashboard.putNumber("drivetrain/joystickX", inputX);
+        SmartDashboard.putNumber("drivetrain/joystickY", inputY);
         SmartDashboard.putNumber("drivetrain/joystickR", inputRotation);
 
         // apply SlewLimiters to the joystick values to control acceleration
         double newInputX = m_xLimiter.calculate(inputX);
         double newInputY = m_yLimiter.calculate(inputY);
         double newInputRotation = m_rotationLimiter.calculate(inputRotation);
+        SmartDashboard.putNumber("drivetrain/xConditioned", newInputX);
+        SmartDashboard.putNumber("drivetrain/Conditioned", newInputY);
 
         // prevents a drive call with parameters of 0 0 0
         if (Math.abs(newInputX) < 0.01 && Math.abs(newInputY) < 0.01 && Math.abs(newInputRotation) < 0.01) {
@@ -445,6 +447,7 @@ public class DriveTrain extends SubsystemBase {
         // SmartDashboard.putNumber("drivetrain/yaw", getYaw().getDegrees());
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
+        SmartDashboard.putNumber("drivetrain/maxVelocity", m_maxVelocity);
 
         for (SwerveModule mod : m_swerveModules) {
             mod.updateSmartDashboard();

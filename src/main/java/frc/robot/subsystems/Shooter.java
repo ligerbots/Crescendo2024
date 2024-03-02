@@ -111,7 +111,7 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.setIdleMode(IdleMode.kBrake);
         m_feederMotor.setSmartCurrentLimit(30);
         m_feederMotorEncoder = m_feederMotor.getEncoder();
-
+        
         m_feederPidController = m_feederMotor.getPIDController();
         setPidController(m_feederPidController, 1e-4, 0);
 
@@ -182,6 +182,8 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("shooter/leftRpm", getLeftRpm());
         SmartDashboard.putNumber("shooter/rightRpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/feederRpm", getFeederRpm());
+
         SmartDashboard.putNumber("shooter/leftCurrent", m_leftShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
@@ -196,6 +198,9 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
+    public double getFeederRpm() {
+        return m_feederMotorEncoder.getVelocity();
+    }
 
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {

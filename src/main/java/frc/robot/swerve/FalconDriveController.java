@@ -56,5 +56,6 @@ public class FalconDriveController implements DriveController {
     public void updateSmartDashboard(String sdPrefix) {
         SmartDashboard.putNumber(sdPrefix + "/speed", getStateVelocity());
         SmartDashboard.putNumber(sdPrefix + "/position", getWheelDistance());
+        SmartDashboard.putNumber(sdPrefix + "/current", m_motor.getSupplyCurrent().getValueAsDouble());
     }
 }
