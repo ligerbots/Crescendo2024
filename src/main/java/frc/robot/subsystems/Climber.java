@@ -16,12 +16,12 @@ public class Climber extends SubsystemBase {
     private RelativeEncoder m_leftEncoder;
     private RelativeEncoder m_rightEncoder;
 
-    private static final double WINCH_GEAR_RATIO = 1.0;  // TODO find correct numbers
+    private static final double WINCH_GEAR_RATIO = 1.0/15.0;
     private static final double MAX_WINCH_POSITION = 1.0;
 
     public Climber() {
-        m_rightWinch = new CANSparkMax(Constants.CLIMBER_RIGHT_CAN_ID, MotorType.kBrushless);
-        m_leftWinch = new CANSparkMax(Constants.CLIMBER_LEFT_CAN_ID, MotorType.kBrushless);
+        m_rightWinch = new CANSparkMax(Constants.RIGHT_CLIMBER_CAN_ID, MotorType.kBrushless);
+        m_leftWinch = new CANSparkMax(Constants.LEFT_CLIMBER_CAN_ID, MotorType.kBrushless);
 
         m_leftEncoder = m_leftWinch.getEncoder();
         m_rightEncoder = m_rightWinch.getEncoder();
@@ -35,7 +35,7 @@ public class Climber extends SubsystemBase {
         m_leftWinch.setIdleMode(IdleMode.kBrake);
 
         m_rightWinch.restoreFactoryDefaults();
-        m_rightWinch.setInverted(true);
+        m_rightWinch.setInverted(false);
         m_rightWinch.setIdleMode(IdleMode.kBrake);
     }
 
