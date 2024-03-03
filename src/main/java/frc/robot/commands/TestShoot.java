@@ -27,7 +27,7 @@ public class TestShoot extends SequentialCommandGroup {
 
         addCommands(
                 new SetShooterRpmsAndWait(shooter, this::getShootValues),
-                new InstantCommand(shooter::turnOnFeeder),
+                new InstantCommand(shooter::speakerShot),
                 new WaitCommand(2),
                 new InstantCommand(shooter::turnOffShooter));
 

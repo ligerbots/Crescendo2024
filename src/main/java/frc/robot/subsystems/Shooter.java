@@ -16,6 +16,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -45,12 +46,11 @@ public class Shooter extends SubsystemBase {
 
     public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
-    public static final double RPM_TOLERANCE = 200; // TODO Tune this later
+    public static final double RPM_TOLERANCE = 200;
     public static final double FEEDER_RPM_TOLERANCE = 100; 
 
-    // constants for side shooter, from SysId
-    // Not right. There is a units problem!
-    static final double K_P_LEFT = 1e-4; // 2.0766E-06;
+    // manually tuned kFF and guessed kP
+    static final double K_P_LEFT = 1e-4;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
@@ -78,6 +78,13 @@ public class Shooter extends SubsystemBase {
 
     private boolean m_speakerShootMode = true;
 
+    // Variables and constants to detect a NOTE 
+    private static final double INTAKE_BASE_MAX_CURRENT = 1;
+    private static final double INTAKE_NOTE_MIN_CURRENT = 1;
+    private enum IntakeState {IDLE, MOTOR_START, WAITING, HAS_NOTE};
+    private IntakeState m_noteIntakeState = IntakeState.IDLE;
+    private Timer m_intakeTimer;
+    
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
@@ -191,6 +198,23 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
         SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
+
+        // look for the Note by checking the Feeder current
+        if (m_noteIntakeState == IntakeState.MOTOR_START) {
+            // feeder current spikes when the motors start
+            if (m_feederMotor.getOutputCurrent() < INTAKE_BASE_MAX_CURRENT) {
+                m_noteIntakeState = IntakeState.WAITING;
+                m_intakeTimer.restart();
+            }
+        } else if (m_noteIntakeState == IntakeState.WAITING) {
+            if (m_feederMotor.getOutputCurrent() > INTAKE_NOTE_MIN_CURRENT) {
+                if (m_intakeTimer.hasElapsed(0.2)) {
+                    m_noteIntakeState = IntakeState.HAS_NOTE;
+                }
+            } else {
+                m_intakeTimer.restart();
+            }
+        }
     }
 
     public double getLeftRpm() {
@@ -234,11 +258,19 @@ public class Shooter extends SubsystemBase {
                 && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
-    public void turnOnFeeder() {
+    public void startIntake() {
+        m_noteIntakeState = IntakeState.MOTOR_START;
+        setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
+        setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void speakerShot() {
+        m_noteIntakeState = IntakeState.IDLE;
         setFeederSpeed(FEEDER_SPEED);
     }
 
     public void ampShot() {
+        m_noteIntakeState = IntakeState.IDLE;
         setFeederSpeed(AMP_SHOOT_SPEED);
     }
 
@@ -262,6 +294,10 @@ public class Shooter extends SubsystemBase {
         // try using PID to get the feeder stopped as quickly as possible
         m_feederPidController.setReference(0, CANSparkMax.ControlType.kVelocity);
         // setFeederSpeed(0);
+    }
+
+    public boolean hasNote() {
+        return m_noteIntakeState == IntakeState.HAS_NOTE;
     }
 
     public void setSpeakerShootMode(boolean mode) {

@@ -18,8 +18,7 @@ public class StartIntake extends SequentialCommandGroup {
     public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
         addCommands(
                 new Stow(shooter, pivot, elevator),
-                new InstantCommand(() -> shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED)),
-                new InstantCommand(shooter::turnOnFeeder, shooter),
+                new InstantCommand(shooter::startIntake, shooter),
                 new InstantCommand(intake::intake, intake)
         // new RunIntakeWaitNote(intake),
         // new Rumble(xbox)
