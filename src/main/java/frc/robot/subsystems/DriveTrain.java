@@ -212,6 +212,11 @@ public class DriveTrain extends SubsystemBase {
         m_odometry.resetPosition(getGyroscopeRotation(), getModulePositions(), pose);
     }
 
+    public boolean isInCenterZone() {
+        Pose2d poseBlue = FieldConstants.flipPose(getPose());
+        return poseBlue.getX() >= FieldConstants.BLUE_WING_LINE_X_METERS;
+    }
+
     public Rotation2d getHeading() {
         if (Robot.isSimulation()) {
             return m_simPose.getRotation();

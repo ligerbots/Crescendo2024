@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Elevator;
@@ -30,11 +31,16 @@ public class GetStageNoteX extends GetNoteX {
         }
 
         addCommands(
+            // drive back to the Note, and run Intake during the drive
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .andThen(new WaitCommand(1))
+                .andThen(new WaitCommand(1))   // run Intake 1 sec longer after finishing path
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
+
+            // turn off Shooter, and wait for Feeder to be stopped
             new InstantCommand(shooter::turnOffShooter),
-            new WaitCommand(1.0),
+            new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0),
+
+            // Spin up and shoot
             new AutoSpeakerShot(driveTrain, shooter, shooterPivot)
         );
     }

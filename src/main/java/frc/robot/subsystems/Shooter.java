@@ -46,6 +46,7 @@ public class Shooter extends SubsystemBase {
     public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
     public static final double RPM_TOLERANCE = 200; // TODO Tune this later
+    public static final double FEEDER_RPM_TOLERANCE = 100; 
 
     // constants for side shooter, from SysId
     // Not right. There is a units problem!
