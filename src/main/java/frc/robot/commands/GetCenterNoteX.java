@@ -14,8 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
 
@@ -49,19 +49,23 @@ public class GetCenterNoteX extends GetNoteX {
             // Monitor for the Note and start Intake when we are close
             ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
-                .andThen(new WaitCommand(1))  // run Intake 1 sec longer after finishing path
             ).deadlineWith(
                 new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
             ),
 
-            // turn off Shooter and wait for Feeder to stop
-            new InstantCommand(shooter::turnOffShooter),
-            new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0),
+            // wait up to 1 second to suck the Note in all the way
+            new WaitUntilCommand(intake::hasNote).withTimeout(1),
 
-            // drive to shoot position, and spin up Shooter while going
+            // turn off Shooter and intake
+            new InstantCommand(shooter::turnOffShooter),
+            new InstantCommand(intake::stop),
             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+
+            // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
-                .deadlineWith(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
+                .deadlineWith(
+                    new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
+                        .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues))),
             
             // Shoot
             new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
