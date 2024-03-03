@@ -228,7 +228,8 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean rpmWithinTolerance() {
-        return Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
+        return m_leftGoalRPM > 1000.0
+                && Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
                 && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
