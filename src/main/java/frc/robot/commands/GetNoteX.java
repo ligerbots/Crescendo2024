@@ -12,8 +12,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Intake;
@@ -27,7 +27,7 @@ public abstract class GetNoteX extends SequentialCommandGroup {
         {
             put(FieldConstants.NOTE_C_1, new String[] { "Start_1 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
             put(FieldConstants.NOTE_C_2, new String[] { "Start_1 to Note_C_2", "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
-            // put(FieldConstants.NOTE_C_3, "");
+            put(FieldConstants.NOTE_C_3, new String[] { "Start_2 to Note_C_3", "Note_C_3 to Shoot_3" });
             put(FieldConstants.NOTE_C_4, new String[] { "Start_3 to Note_C_4", "Note_C_4 to Shoot_2" });
             put(FieldConstants.NOTE_C_5, new String[] { "Start_3 to Note_C_5", "Note_C_5 to Shoot_2" });
 
@@ -49,7 +49,6 @@ public abstract class GetNoteX extends SequentialCommandGroup {
                 m_candidateStartPaths.put(startPose, path);
             }
         }
-
     }
 
     public GetNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
@@ -57,8 +56,6 @@ public abstract class GetNoteX extends SequentialCommandGroup {
         m_driveTrain = driveTrain;
         initPaths(s_pathLookup.get(targetNote));
 
-        addCommands(new PrintCommand("**** GetNoteX-- Starting Auto target note: "+ targetNote));
-
+        // addCommands(new PrintCommand("**** GetNoteX-- Starting Auto target note: "+ targetNote));
     }
-
 }

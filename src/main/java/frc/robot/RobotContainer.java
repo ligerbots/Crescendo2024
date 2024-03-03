@@ -4,13 +4,9 @@
 
 package frc.robot;
 
-import java.util.Arrays;
-import java.util.List;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -103,12 +99,12 @@ public class RobotContainer {
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
-        farm11.onTrue(new TestShoot(m_shooter,
+        farm11.onTrue(new TestShoot(m_driveTrain, m_shooter,
                 () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new BackupFeed(m_shooter));
+        farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -131,19 +127,43 @@ public class RobotContainer {
         SmartDashboard.putData("Start Location", m_startLocation);
 
         String autoName = "S1";
-        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "S2";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "S3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "S1-S2";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2 }, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2}, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
+        autoName = "S2-S3-C5";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
+        autoName = "S3-S2-S1";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        // autoName = "C2-C1";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(autoName, m_driveTrain, m_noteVision, m_shooter, m_intake));
+        autoName = "C4-C5";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "C2-C1";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
+        autoName = "C3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
 
@@ -166,7 +186,8 @@ public class RobotContainer {
     public boolean autoHasChanged() {
         Command autoCommand = getAutonomousCommand();
         Pose2d pose = getInitialPose();
-        boolean changed = pose != m_prevInitialPose || (autoCommand != null && autoCommand != m_prevAutoCommand);
+        // warning do not compare poses with "==". That compares object IDs, not value.
+        boolean changed = !pose.equals(m_prevInitialPose) || (m_prevAutoCommand != null && autoCommand != m_prevAutoCommand);
         m_prevAutoCommand = autoCommand;
         m_prevInitialPose = pose;
         return changed;

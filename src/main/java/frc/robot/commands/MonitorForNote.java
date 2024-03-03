@@ -15,7 +15,7 @@ import frc.robot.subsystems.NoteVision;
 
 public class MonitorForNote extends Command {
     // distance to NOTE where we just go for it
-    private static final double MIN_DISTANCE_END_CHECKS = 1.0; // meters
+    private static final double MIN_DISTANCE_END_CHECKS = 1.5; // meters
 
     private static final int NUM_SUCCESSIVE_FAILURES = 10;
 

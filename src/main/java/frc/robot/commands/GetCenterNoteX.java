@@ -13,12 +13,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
-import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.NoteVision;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.*;
 
 public class GetCenterNoteX extends GetNoteX {
 
@@ -32,7 +30,8 @@ public class GetCenterNoteX extends GetNoteX {
         }
     }
 
-    public GetCenterNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, Shooter shooter, Intake intake) {
+    public GetCenterNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, 
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
 
         super(targetNote, driveTrain, noteVision, shooter, intake);
 
@@ -44,12 +43,20 @@ public class GetCenterNoteX extends GetNoteX {
         setReturnPath(targetNote);
 
         // Use note "monitoring" for center notes only
-        addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .alongWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)));
-
-        addCommands(m_driveTrain.followPath(m_returnPath));
-
-        addCommands(new PrintCommand("GetCenterNoteX-- Finished target note: " + targetNote));
+        addCommands(
+            new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .andThen(new WaitCommand(2))
+                .deadlineWith(
+                    new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)
+                        .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+                ),
+            new InstantCommand(shooter::turnOffShooter),
+            new WaitCommand(1.0),
+            new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+            m_driveTrain.followPath(m_returnPath)
+                .deadlineWith(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
+            new TriggerShot(shooter)
+            );
     }
 
     private PathPlannerPath getInitialPath() {
@@ -74,5 +81,9 @@ public class GetCenterNoteX extends GetNoteX {
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         System.out.println("getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
+    }
+
+    private Shooter.ShooterValues getShootValues() {
+        return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance());
     }
 }

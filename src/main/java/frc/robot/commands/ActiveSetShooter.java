@@ -16,7 +16,15 @@ public class ActiveSetShooter extends Command {
     private final ShooterPivot m_shooterPivot;
     private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
 
-    Timer m_backupTimer = new Timer();
+    // Number of motor rotations
+    private final double NUMBER_OF_ROTATIONS = 1;
+
+    private static final double PIVOT_WAIT_TIME = 0.2;
+
+    enum State {START, WAIT_FOR_PIVOT, BACKUP_NOTE, SPEED_UP_SHOOTER};
+    private State m_state;
+    Timer m_timer = new Timer();
+    double m_initialRotations;
 
     /** Creates a new ActiveSpeedUpShooter. */
     public ActiveSetShooter(Shooter shooter, ShooterPivot shootPivot, Supplier<Shooter.ShooterValues> valueSupplier) {
@@ -31,22 +39,36 @@ public class ActiveSetShooter extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        // start the feeder motor and timer to back the NOTE a bit
-        m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
-        m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
-        m_backupTimer.restart();
+        m_initialRotations = m_shooter.getFeederRotations();
+
+        m_timer.restart();
+        m_state = State.WAIT_FOR_PIVOT;
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        // always adjust the pivot
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
         m_shooterPivot.setAngle(shootValues.shootAngle);
 
-        if (m_backupTimer.hasElapsed(Shooter.BACKUP_FEED_TIME))
-        {
+        if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
+            // start the feeder motor and timer to back the NOTE a bit
+            m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
+            m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
+            m_timer.restart();
+            m_state = State.BACKUP_NOTE;
+        }
+
+        if (m_state == State.BACKUP_NOTE
+                && Math.abs(m_shooter.getFeederRotations() - m_initialRotations) >= NUMBER_OF_ROTATIONS) {
             // NOTE should be out of the shooter wheels. Start the spin up.
             m_shooter.turnOffFeeder();
+            m_state = State.SPEED_UP_SHOOTER;
+        }
+
+        if (m_state == State.SPEED_UP_SHOOTER) {
+            // Keep updating angle and speed
             m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
         }
     }
@@ -54,6 +76,8 @@ public class ActiveSetShooter extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        System.out.println("ActiveSetShooter end interrupt = " + interrupted);
+        m_timer.stop();
     }
 
     // Returns true when the command should end.

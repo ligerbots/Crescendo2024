@@ -33,7 +33,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 
-    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(20.0);
+    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(10.0);
 
     private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
     

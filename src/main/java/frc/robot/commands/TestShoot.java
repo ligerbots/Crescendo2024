@@ -6,20 +6,24 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 
 // For testing. Needs to get separate left and right RPMs
 public class TestShoot extends SequentialCommandGroup {
     private final DoubleSupplier m_leftRpm;
     private final DoubleSupplier m_rightRpm;
+    private final DriveTrain m_driveTrain;
 
     /** Creates a new TestShoot. */
-    public TestShoot(Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
+    public TestShoot(DriveTrain drivetrain, Shooter shooter, DoubleSupplier leftRpm, DoubleSupplier rightRpm) {
         m_leftRpm = leftRpm;
         m_rightRpm = rightRpm;
+        m_driveTrain = drivetrain;
 
         addCommands(
                 new SetShooterRpmsAndWait(shooter, this::getShootValues),
@@ -31,6 +35,7 @@ public class TestShoot extends SequentialCommandGroup {
     }
 
     private Shooter.ShooterValues getShootValues() {
+        SmartDashboard.putNumber("shooter/shotDistance", m_driveTrain.getSpeakerDistance());
         return new Shooter.ShooterValues(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble(), 0);
     }
 }

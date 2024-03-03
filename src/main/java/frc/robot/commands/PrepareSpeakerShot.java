@@ -37,12 +37,8 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         
     }
 
-    private double getDistance() {
-        return m_driveTrain.getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
-    }
-
     private Shooter.ShooterValues getShootValues() {
-        double distance = getDistance();
+        double distance = m_driveTrain.getSpeakerDistance();
         SmartDashboard.putNumber("shooter/speakDistance", distance);
         return Shooter.calculateShooterSpeeds(distance); 
     }
@@ -51,6 +47,4 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
                 .getAngle();
     }
-
-
 }
