@@ -27,7 +27,7 @@ public class AutoSpeakerShot extends SequentialCommandGroup {
             new TriggerShot(shooter)
         );
     }
-
+    
     private Shooter.ShooterValues getShootValues() {
         return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance());
     }

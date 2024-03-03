@@ -41,24 +41,24 @@ public class Shooter extends SubsystemBase {
     
     // This is negative to push the note back slowly
     public static final double BACKUP_FEED_SPEED = -0.25;
-    public static final double BACKUP_SHOOTER_SPEED = -0.1;
+    public static final double BACKUP_SHOOTER_SPEED = -0.2;
 
     public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
-    public static final double RPM_TOLERANCE = 200; // TODO Tune this later
+    public static final double RPM_TOLERANCE = 200;
+    public static final double FEEDER_RPM_TOLERANCE = 100; 
 
-    // constants for side shooter, from SysId
-    // Not right. There is a units problem!
-    static final double K_P_LEFT = 5.5e-4; // 2.0766E-06;
+    // manually tuned kFF and guessed kP
+    static final double K_P_LEFT = 1e-4;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF_LEFT = 0.000198;
-    static final double K_FF_RIGHT = 0.000276;
+    static final double K_FF_LEFT = 0.000234;
+    static final double K_FF_RIGHT = 0.000215;
 
     CANSparkMax m_feederMotor;
-    // private static final double FEEDER_GEAR_RATIO = 1/2;
     RelativeEncoder m_feederMotorEncoder;
+    SparkPIDController m_feederPidController;
 
     CANSparkMax m_leftShooterMotor, m_rightShooterMotor;
     SparkPIDController m_leftPidController, m_rightPidController;
@@ -76,7 +76,7 @@ public class Shooter extends SubsystemBase {
     private double m_rightGoalRPM;
 
     private boolean m_speakerShootMode = true;
-
+    
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
@@ -96,10 +96,10 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(Units.feetToMeters(3), new ShooterValues(2500.0, 2500.0, Math.toRadians(50.0))), // a guess
-            Map.entry(Units.feetToMeters(8.5), new ShooterValues(3000.0, 2500.0, Math.toRadians(31.0))),
-            Map.entry(Units.feetToMeters(10.7), new ShooterValues(3000.0, 3500.0, Math.toRadians(25.0))),
-            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(19.0)))
+            Map.entry(1.4, new ShooterValues(2000.0, 2000.0, Math.toRadians(50.0))),
+            Map.entry(2.65, new ShooterValues(2500.0, 2500.0, Math.toRadians(33.0))),
+            Map.entry(4.06, new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
+            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(21.0)))
             ));
 
     // Shooter class constructor, initialize arrays for motors controllers,
@@ -111,8 +111,9 @@ public class Shooter extends SubsystemBase {
         m_feederMotor.setIdleMode(IdleMode.kBrake);
         m_feederMotor.setSmartCurrentLimit(30);
         m_feederMotorEncoder = m_feederMotor.getEncoder();
-        // m_feederMotorEncoder.setPositionConversionFactor(FEEDER_GEAR_RATIO);
-
+        
+        m_feederPidController = m_feederMotor.getPIDController();
+        setPidController(m_feederPidController, 1e-4, 0);
 
         m_leftShooterMotor = new CANSparkMax(Constants.LEFT_SHOOTER_CAN_ID, MotorType.kBrushless);
         m_leftShooterMotor.restoreFactoryDefaults();
@@ -134,6 +135,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
         SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
         SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
+
+        SmartDashboard.putNumber("shooter/shotDistance", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {
@@ -181,6 +184,8 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("shooter/leftRpm", getLeftRpm());
         SmartDashboard.putNumber("shooter/rightRpm", getRightRpm());
+        SmartDashboard.putNumber("shooter/feederRpm", getFeederRpm());
+
         SmartDashboard.putNumber("shooter/leftCurrent", m_leftShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
@@ -195,6 +200,13 @@ public class Shooter extends SubsystemBase {
         return m_rightEncoder.getVelocity();
     }
 
+    public double getFeederRpm() {
+        return m_feederMotorEncoder.getVelocity();
+    }
+
+    public double getFeederRotations() {
+        return m_feederMotorEncoder.getPosition();
+    }
 
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {
@@ -216,11 +228,17 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean rpmWithinTolerance() {
-        return Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
+        return m_leftGoalRPM > 1000.0
+                && Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
                 && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
-    public void turnOnFeeder() {
+    public void startIntake() {
+        setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
+        setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void speakerShot() {
         setFeederSpeed(FEEDER_SPEED);
     }
 
@@ -235,7 +253,6 @@ public class Shooter extends SubsystemBase {
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
-        
     }
 
     public void turnOffShooterWheels() {
@@ -246,11 +263,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public void turnOffFeeder() {
-        setFeederSpeed(0);
-    }
-
-    public double getFeederRotations() {
-        return m_feederMotorEncoder.getPosition();//TODO: Declare higher up and check if encoder already exists
+        // try using PID to get the feeder stopped as quickly as possible
+        m_feederPidController.setReference(0, CANSparkMax.ControlType.kVelocity);
+        // setFeederSpeed(0);
     }
 
     public void setSpeakerShootMode(boolean mode) {

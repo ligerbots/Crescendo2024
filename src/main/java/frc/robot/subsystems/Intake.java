@@ -15,6 +15,13 @@ public class Intake extends SubsystemBase {
     final static double OUTTAKE_SPEED = -0.3;
     final static double OUTTAKE_CENTERING_SPEED = -0.3;
 
+    // Variables and constants to detect a NOTE 
+    private static final double INTAKE_BASE_MAX_CURRENT = 18.0;
+    private static final double INTAKE_NOTE_MIN_CURRENT = 23.0;
+    private static final double INTAKE_NOTE_OUT_MAX_CURRENT = 10.0;
+    private enum IntakeState {IDLE, MOTOR_START, WAITING, NOTE_ENTERING, HAS_NOTE};
+    private IntakeState m_noteIntakeState = IntakeState.IDLE;
+
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;
 
@@ -31,6 +38,30 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("intake/centeringSpeed", m_centeringMotor.get());
         SmartDashboard.putNumber("intake/intakeCurrent", m_intakeMotor.getOutputCurrent());
         SmartDashboard.putNumber("intake/centeringCurrent", m_centeringMotor.getOutputCurrent());
+
+        // look for the Note by checking the Intake current
+        if (m_noteIntakeState == IntakeState.MOTOR_START) {
+            // feeder current spikes when the motors start
+            if (m_intakeMotor.getOutputCurrent() < INTAKE_BASE_MAX_CURRENT) {
+                m_noteIntakeState = IntakeState.WAITING;
+            }
+        } else if (m_noteIntakeState == IntakeState.WAITING) {
+            if (m_intakeMotor.getOutputCurrent() > INTAKE_NOTE_MIN_CURRENT) {
+                m_noteIntakeState = IntakeState.NOTE_ENTERING;
+            }
+        } else if (m_noteIntakeState == IntakeState.NOTE_ENTERING) {
+            if (m_intakeMotor.getOutputCurrent() < INTAKE_NOTE_OUT_MAX_CURRENT) {
+                m_noteIntakeState = IntakeState.HAS_NOTE;
+            }
+        }
+    }
+
+    public boolean hasNote() {
+        return m_noteIntakeState == IntakeState.HAS_NOTE;
+    }
+
+    public void clearHasNote() {
+        m_noteIntakeState = IntakeState.IDLE;
     }
 
     public void run(double rollerSpeed, double centeringWheelSpeed) {
@@ -39,6 +70,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void intake() {
+        m_noteIntakeState = IntakeState.MOTOR_START;
         run(INTAKE_SPEED, INTAKE_CENTERING_SPEED);
     }
 

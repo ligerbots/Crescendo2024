@@ -23,10 +23,12 @@ public class TriggerShot extends Command {
 
     // Called when the command is initially scheduled.
     @Override
-    public void initialize() {
+    public void initialize() {     
+        // System.out.println("TriggerShot initialized");
+
         if (m_shooter.getSpeakerShootMode()) {
             // speaker shot
-            m_shooter.turnOnFeeder();
+            m_shooter.speakerShot();
         } else {
             // amp shot
             m_shooter.ampShot();
@@ -43,6 +45,7 @@ public class TriggerShot extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        // System.out.println("TriggerShot ended interrupted = " + interrupted);
         m_shooter.turnOffShooter();
     }
 
