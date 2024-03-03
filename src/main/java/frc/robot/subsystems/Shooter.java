@@ -135,6 +135,8 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
         SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
         SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
+
+        SmartDashboard.putNumber("shooter/shotDistance", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {
@@ -202,6 +204,10 @@ public class Shooter extends SubsystemBase {
         return m_feederMotorEncoder.getVelocity();
     }
 
+    public double getFeederRotations() {
+        return m_feederMotorEncoder.getPosition();
+    }
+
     // set speeds -1 -> 1
     public void setShooterSpeeds(double leftSpeed, double rightSpeed) {
         m_leftShooterMotor.set(leftSpeed);
@@ -241,7 +247,6 @@ public class Shooter extends SubsystemBase {
 
     public void setFeederSpeed(double chute) {
         m_feederMotor.set(-chute);
-        
     }
 
     public void turnOffShooterWheels() {
@@ -252,12 +257,9 @@ public class Shooter extends SubsystemBase {
     }
 
     public void turnOffFeeder() {
+        // try using PID to get the feeder stopped as quickly as possible
         m_feederPidController.setReference(0, CANSparkMax.ControlType.kVelocity);
         // setFeederSpeed(0);
-    }
-
-    public double getFeederRotations() {
-        return m_feederMotorEncoder.getPosition();//TODO: Declare higher up and check if encoder already exists
     }
 
     public void setSpeakerShootMode(boolean mode) {

@@ -47,6 +47,4 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
                 .getAngle();
     }
-
-
 }
