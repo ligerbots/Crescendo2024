@@ -58,7 +58,10 @@ public class RobotContainer {
 
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_driverController.rightTrigger().onTrue(new TriggerShot(m_shooter).andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)));
+        m_driverController.rightTrigger().onTrue(
+            new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
+            .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
+        );
 
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 

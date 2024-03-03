@@ -41,7 +41,7 @@ public class GetStageNoteX extends GetNoteX {
             new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0),
 
             // Spin up and shoot
-            new AutoSpeakerShot(driveTrain, shooter, shooterPivot)
+            new AutoSpeakerShot(driveTrain, shooter, shooterPivot).alongWith(new InstantCommand(intake::clearHasNote))
         );
     }
 

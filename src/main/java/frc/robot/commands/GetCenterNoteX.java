@@ -64,7 +64,7 @@ public class GetCenterNoteX extends GetNoteX {
                 .deadlineWith(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
             
             // Shoot
-            new TriggerShot(shooter)
+            new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
         );
     }
 
