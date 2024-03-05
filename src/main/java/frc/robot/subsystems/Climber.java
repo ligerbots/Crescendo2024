@@ -43,6 +43,8 @@ public class Climber extends SubsystemBase {
     private static final double WINCH_CLIMB_ADJUST_VOLTAGE = 0.2;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
     
+    private static final double MAX_ROPE_LENGTH = Units.feetToMeters(3);
+
     private enum ClimberState {IDLE, EXTENDING_HOOKS, WAITING, RETRACTING_HOOKS, CLIMBING, HOLDING};
     private ClimberState m_climberState = ClimberState.IDLE;
 
@@ -173,17 +175,17 @@ public class Climber extends SubsystemBase {
         }
     }
 
-    // private double limitWinch(RelativeEncoder encoder, double speed) {
-    //     if (encoder.getPosition() >= MAX_HEIGHT_WINCH_POSITION) {
-    //         return 0.0;
-    //     } else
-    //         return speed;
-    // }
+    private double limitWinch(RelativeEncoder encoder, double speed) {
+        if (encoder.getPosition() >= MAX_ROPE_LENGTH) {
+            return 0.0;
+        } else
+            return speed;
+    }
 
-    // public void run(double leftSpeed, double rightSpeed) {
-    //     m_leftWinch.set(limitWinch(m_leftEncoder, leftSpeed));
-    //     m_rightWinch.set(limitWinch(m_leftEncoder, rightSpeed));    
-    // }
+    public void run(double leftSpeed, double rightSpeed) {
+        m_leftWinch.set(limitWinch(m_leftEncoder, leftSpeed));
+        m_rightWinch.set(limitWinch(m_rightEncoder, rightSpeed));    
+    }
 
     public double getRightPosition(){
         return m_leftEncoder.getPosition();

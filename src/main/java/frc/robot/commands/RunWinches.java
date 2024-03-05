@@ -5,15 +5,14 @@ import frc.robot.subsystems.Climber;
 
 import java.util.function.DoubleSupplier;
 
-public class RunWinch extends Command {
+public class RunWinches extends Command {
     private final Climber m_climber;
 
     private final DoubleSupplier m_leftSpeedSupplier;
     private final DoubleSupplier m_rightSpeedSupplier;
 
 
-    public RunWinch(Climber climber,
-            DoubleSupplier leftSpeedSupplier,DoubleSupplier rightSpeedSupplier) {
+    public RunWinches(Climber climber, DoubleSupplier leftSpeedSupplier,DoubleSupplier rightSpeedSupplier) {
         m_climber = climber;
         m_leftSpeedSupplier = leftSpeedSupplier;
         m_rightSpeedSupplier = rightSpeedSupplier;

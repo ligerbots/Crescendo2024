@@ -46,6 +46,7 @@ public class RobotContainer {
         configureAutos();
 
         m_driveTrain.setDefaultCommand(getDriveCommand());
+        m_climber.setDefaultCommand(getWinchCommand());
     }
 
     private void configureBindings() {
@@ -208,6 +209,16 @@ public class RobotContainer {
                 () -> -modifyAxis(m_driverController.getLeftY()),
                 () -> -modifyAxis(m_driverController.getLeftX()),
                 () -> -modifyAxis(m_driverController.getRightX()));
+    }
+
+    public Command getWinchCommand() {
+        // The controls are for field-oriented driving:
+        // Left stick Y axis -> forward and backwards movement
+        // Left stick X axis -> left and right movement
+        // Right stick X axis -> rotation
+        return new RunWinches( m_climber,
+                () -> m_operatorController.getLeftTriggerAxis(),
+                () -> m_operatorController.getRightTriggerAxis());
     }
 
     private static double deadband(double value, double deadband) {
