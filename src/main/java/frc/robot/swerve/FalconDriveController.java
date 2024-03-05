@@ -24,6 +24,7 @@ public class FalconDriveController implements DriveController {
     
     private static final boolean MOTOR_INVERTED = true;
 
+
     private final TalonFX m_motor;
 
     public FalconDriveController(int id) {
@@ -36,6 +37,7 @@ public class FalconDriveController implements DriveController {
         motorCurrentConfigs.withSupplyTimeThreshold(CURRENT_LIMIT_TIME);// if the peak current is held for this long it drops to the current limit 
         motorCurrentConfigs.withSupplyCurrentLimit(CURRENT_LIMIT);// regular current limit 
         motorCurrentConfigs.withSupplyCurrentLimitEnable(true);
+        motorCurrentConfigs.withStatorCurrentLimitEnable(false);
         m_motor.getConfigurator().apply(motorCurrentConfigs);
         
         m_motor.setNeutralMode(NeutralModeValue.Brake);
