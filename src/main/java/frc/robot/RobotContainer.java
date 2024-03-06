@@ -22,8 +22,8 @@ import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
-    private final CommandXboxController m_operatorController = new CommandXboxController(1);
-    private final Joystick m_farm = new Joystick(2);
+    // private final CommandXboxController m_operatorController = new CommandXboxController(1);
+    private final Joystick m_farm = new Joystick(1);
 
     private final NoteVision m_noteVision = new NoteVision();
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
@@ -46,7 +46,6 @@ public class RobotContainer {
         configureAutos();
 
         m_driveTrain.setDefaultCommand(getDriveCommand());
-        m_climber.setDefaultCommand(getWinchCommand());
     }
 
     private void configureBindings() {
@@ -83,34 +82,60 @@ public class RobotContainer {
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 
-        // Test commands
-
+        // Climber Commands
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
+        farm1.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
 
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_LOWER_ELEVATOR));
+        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
-        farm3.onTrue(new SetElevatorLength(m_elevator,
-                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+        farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
 
+        // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
-        farm4.onTrue(new SetPivotAngle(m_shooterPivot,
-                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
+        farm4.onTrue(new InstantCommand(() -> m_elevator.adjustLength(true)));
+        JoystickButton farm9 = new JoystickButton(m_farm, 9);
+        farm9.onTrue(new InstantCommand(() -> m_elevator.adjustLength(false)));
 
+        // Pivot adjust up/down
+        JoystickButton farm5 = new JoystickButton(m_farm, 5);
+        farm5.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(true)));
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
-        farm10.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
-        JoystickButton farm11 = new JoystickButton(m_farm, 11);
-        farm11.onTrue(new TestShoot(m_driveTrain, m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // Test commands
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new OutTakeTransferRotations(m_shooter));
+        farm12.onTrue(new SetElevatorLength(m_elevator,
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+
+        JoystickButton farm14 = new JoystickButton(m_farm, 14);
+        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
+
+        // Climber Commands
+        JoystickButton farm6 = new JoystickButton(m_farm, 6);
+        farm6.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
+
+        JoystickButton farm7 = new JoystickButton(m_farm, 7);
+        farm7.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
+
+        JoystickButton farm8 = new JoystickButton(m_farm, 8);
+        farm8.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
+
+        JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        farm15.onTrue(new TestShootSpeed(m_shooter,
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+
+        // JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -130,6 +155,7 @@ public class RobotContainer {
         m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
         m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
+        m_startLocation.addOption("TEST ONLY source", FieldConstants.TEST_START_SOURCE);
         SmartDashboard.putData("Start Location", m_startLocation);
 
         String autoName = "S1";
@@ -144,16 +170,20 @@ public class RobotContainer {
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "S1-S2";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2}, 
+        autoName = "TEST ONLY crossfield from Source to S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.TEST_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "S3-S2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "S3-S2-S1";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
         autoName = "S2-S3-C5";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        autoName = "S3-S2-S1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "C4-C5";
@@ -164,6 +194,11 @@ public class RobotContainer {
         autoName = "C2-C1";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
+        autoName = "C1-C2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
         autoName = "C3";
@@ -209,16 +244,6 @@ public class RobotContainer {
                 () -> -modifyAxis(m_driverController.getLeftY()),
                 () -> -modifyAxis(m_driverController.getLeftX()),
                 () -> -modifyAxis(m_driverController.getRightX()));
-    }
-
-    public Command getWinchCommand() {
-        // The controls are for field-oriented driving:
-        // Left stick Y axis -> forward and backwards movement
-        // Left stick X axis -> left and right movement
-        // Right stick X axis -> rotation
-        return new RunWinches( m_climber,
-                () -> m_operatorController.getLeftTriggerAxis(),
-                () -> m_operatorController.getRightTriggerAxis());
     }
 
     private static double deadband(double value, double deadband) {

@@ -11,7 +11,6 @@ public class RunWinches extends Command {
     private final DoubleSupplier m_leftSpeedSupplier;
     private final DoubleSupplier m_rightSpeedSupplier;
 
-
     public RunWinches(Climber climber, DoubleSupplier leftSpeedSupplier,DoubleSupplier rightSpeedSupplier) {
         m_climber = climber;
         m_leftSpeedSupplier = leftSpeedSupplier;

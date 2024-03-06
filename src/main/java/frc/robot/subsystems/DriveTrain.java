@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Optional;
-
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -14,7 +12,6 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -446,7 +443,7 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
 
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
-        // SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
+        SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
         // SmartDashboard.putNumber("drivetrain/yaw", getYaw().getDegrees());
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
