@@ -22,8 +22,8 @@ import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private final CommandXboxController m_driverController = new CommandXboxController(0);
-    private final CommandXboxController m_operatorController = new CommandXboxController(1);
-    private final Joystick m_farm = new Joystick(2);
+    // private final CommandXboxController m_operatorController = new CommandXboxController(1);
+    private final Joystick m_farm = new Joystick(1);
 
     private final NoteVision m_noteVision = new NoteVision();
     private final AprilTagVision m_aprilTagVision = new AprilTagVision();
@@ -80,34 +80,42 @@ public class RobotContainer {
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 
+        // Climber will be 1-3
+
+        // Elevator adjust up/down
+        JoystickButton farm4 = new JoystickButton(m_farm, 4);
+        farm4.onTrue(new InstantCommand(() -> m_elevator.adjustLength(true)));
+        JoystickButton farm9 = new JoystickButton(m_farm, 9);
+        farm9.onTrue(new InstantCommand(() -> m_elevator.adjustLength(false)));
+
+        // Pivot adjust up/down
+        JoystickButton farm5 = new JoystickButton(m_farm, 5);
+        farm5.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(true)));
+        JoystickButton farm10 = new JoystickButton(m_farm, 10);
+        farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
+
         // Test commands
 
-        JoystickButton farm1 = new JoystickButton(m_farm, 1);
-        farm1.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_RAISE_ELEVATOR));
-
-        JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new SetElevatorLength(m_elevator, Elevator.ONSTAGE_LOWER_ELEVATOR));
-
-        JoystickButton farm3 = new JoystickButton(m_farm, 3);
-        farm3.onTrue(new SetElevatorLength(m_elevator,
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new SetElevatorLength(m_elevator,
                 () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
 
-        JoystickButton farm4 = new JoystickButton(m_farm, 4);
-        farm4.onTrue(new SetPivotAngle(m_shooterPivot,
+        JoystickButton farm14 = new JoystickButton(m_farm, 14);
+        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
-        JoystickButton farm10 = new JoystickButton(m_farm, 10);
-        farm10.onTrue(new TestShootSpeed(m_shooter,
+        JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        farm15.onTrue(new TestShootSpeed(m_shooter,
                 () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
-        JoystickButton farm11 = new JoystickButton(m_farm, 11);
-        farm11.onTrue(new TestShoot(m_driveTrain, m_shooter,
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
                 () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
                 () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
-        JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new OutTakeTransferRotations(m_shooter));
+        // JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
