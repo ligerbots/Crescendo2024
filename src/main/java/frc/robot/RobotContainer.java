@@ -34,7 +34,7 @@ public class RobotContainer {
     private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
 
-    private final Climber m_climber = new Climber();
+    private final Climber m_climber = new Climber(m_driveTrain);
 
     private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
     private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();

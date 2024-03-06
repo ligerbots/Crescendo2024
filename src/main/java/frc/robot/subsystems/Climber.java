@@ -5,14 +5,11 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
-import frc.robot.commands.Drive;
 
 public class Climber extends SubsystemBase {
 
@@ -42,11 +39,11 @@ public class Climber extends SubsystemBase {
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
 
     // Winch motor speed values
-    private static final double IDLE_MOTOR_SPEED = -0.01;
-    private static final double WINCH_EXTEND_SPEED = 0.5;
-    private static final double WINCH_RETRACT_SPEED = 0.5;
-    private static final double WINCH_CLIMB_SPEED = 0.5;
-    private static final double WINCH_CLIMB_ADJUST_SPEED = 0.2;
+    private static final double IDLE_MOTOR_SPEED = -0.05;
+    private static final double WINCH_EXTEND_SPEED = 0.1;
+    private static final double WINCH_RETRACT_SPEED = 0.1;
+    private static final double WINCH_CLIMB_SPEED = 0.1;
+    private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
     private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(5.0);
 
@@ -63,11 +60,11 @@ public class Climber extends SubsystemBase {
     private enum ClimberState {IDLE, EXTENDING_HOOKS, WAITING, RETRACTING_HOOKS, CLIMBING, HOLDING};
     private ClimberState m_climberState = ClimberState.IDLE;
 
-    private RobotContainer m_robotContainer;
-    private DriveTrain m_driveTrain;
-
+    private final DriveTrain m_driveTrain;
     
-    public Climber() {
+    public Climber(DriveTrain drivetrain) {
+        m_driveTrain = drivetrain;
+
         m_rightWinch = new CANSparkMax(Constants.RIGHT_CLIMBER_CAN_ID, MotorType.kBrushless);
         m_leftWinch = new CANSparkMax(Constants.LEFT_CLIMBER_CAN_ID, MotorType.kBrushless);
 
@@ -80,19 +77,16 @@ public class Climber extends SubsystemBase {
 
         m_leftWinch.restoreFactoryDefaults();
         // TODO only one will be inverted, not sure which
-        m_leftWinch.setInverted(true);
+        m_leftWinch.setInverted(false);
         m_leftWinch.setIdleMode(IdleMode.kBrake);
         // Reset position to 0
         m_leftEncoder.setPosition(0.0);
 
         m_rightWinch.restoreFactoryDefaults();
-        m_rightWinch.setInverted(false);
+        m_rightWinch.setInverted(true);
         m_rightWinch.setIdleMode(IdleMode.kBrake);
         // Reset position to 0
         m_rightEncoder.setPosition(0.0);
-
-        // Need the DriveTrain to get the roll angle of the robot.
-        m_driveTrain = m_robotContainer.getDriveTrain();
     }
 
     @Override
