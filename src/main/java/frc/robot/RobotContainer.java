@@ -98,6 +98,16 @@ public class RobotContainer {
         farm4.onTrue(new SetPivotAngle(m_shooterPivot,
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
+        // Climber Commands
+        JoystickButton farm6 = new JoystickButton(m_farm, 6);
+        farm6.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
+
+        JoystickButton farm7 = new JoystickButton(m_farm, 7);
+        farm7.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
+
+        JoystickButton farm8 = new JoystickButton(m_farm, 8);
+        farm8.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
+
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new TestShootSpeed(m_shooter,
                 () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
