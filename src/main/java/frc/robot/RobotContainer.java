@@ -82,7 +82,15 @@ public class RobotContainer {
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 
-        // Climber will be 1-3
+        // Climber Commands
+        JoystickButton farm1 = new JoystickButton(m_farm, 1);
+        farm1.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
+
+        JoystickButton farm2 = new JoystickButton(m_farm, 2);
+        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
+
+        JoystickButton farm3 = new JoystickButton(m_farm, 3);
+        farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
 
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
