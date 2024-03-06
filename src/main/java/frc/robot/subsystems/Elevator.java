@@ -55,6 +55,8 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double OFFSET_METER = 0.0;
 
+    private static final double ADJUSTMENT_STEP = 1.0;
+    
     // initializing Potentiometer
     // private final int POTENTIOMETER_CHANNEL = 2; //TODO: Update with actual value
     // private final double POTENTIOMETER_RANGE_METERS = -2.625; // meters, the string potentiometer on takes in range in integers TODO: update to correct value
@@ -145,6 +147,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_goal = limitElevatorLength(goal);
         super.setGoal(m_goal);
         SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
+    }
+
+    public void adjustLength(boolean goUp) {
+        double adjust = (goUp ? 1 : -1) * ADJUSTMENT_STEP;
+        setLength(getLength() + adjust);
     }
 
     public boolean lengthWithinTolerance() {
