@@ -363,7 +363,7 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getPitch() {
         // gets pitch of robot
-        return Rotation2d.fromDegrees(m_navx.getPitch());
+        return Rotation2d.fromDegrees(m_navx.getRoll());
     }
 
     public Rotation2d getYaw() {
@@ -373,7 +373,7 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getRoll() {
         // gets roll of robot
-        return Rotation2d.fromDegrees(m_navx.getRoll());
+        return Rotation2d.fromDegrees(-m_navx.getPitch());
     }
 
     public Field2d getField2d() {
