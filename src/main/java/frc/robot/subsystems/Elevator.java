@@ -29,11 +29,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
-    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(10.0);
+    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(15.0);
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 
-    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(10.0);
+    private static final double MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(20.0);
 
     private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
     
@@ -41,7 +41,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 50.0; //TODO: Need to tune
+    private static final double K_P = 5.0; //TODO: Need to tune
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
