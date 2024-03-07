@@ -46,7 +46,7 @@ public class NoteVision extends SubsystemBase {
     // use measurements to center of Swerve, and include offset
     // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToNoteCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-14.294 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(12.0)),
+            new Translation3d(Units.inchesToMeters(-16.726 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(12.0)),
             new Rotation3d(0.0, Math.toRadians(25.0), Math.toRadians(180.0)));
 
     // Simulation support
