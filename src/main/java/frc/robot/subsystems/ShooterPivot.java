@@ -35,13 +35,15 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     public static final double STOW_ANGLE_RADIANS = Math.toRadians(55.0);
     public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45.0);
     
+    private static final double ADJUSTMENT_STEP = Math.toRadians(2.0);
+    
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
     private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40);
     private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40);
 
-    private static final double POSITION_OFFSET = 59.5/360.0; 
+    private static final double POSITION_OFFSET = 115.6/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
 
     // 15:1 planetary plus 48:32 sprockets
@@ -152,6 +154,11 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     public boolean angleWithinTolerance() {
         return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
 
+    }
+
+    public void adjustAngle(boolean goUp) {
+        double adjust = (goUp ? 1 : -1) * ADJUSTMENT_STEP;
+        setAngle(getAngleRadians() + adjust);
     }
 
     public void resetGoal() {

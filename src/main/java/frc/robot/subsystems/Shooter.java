@@ -45,11 +45,11 @@ public class Shooter extends SubsystemBase {
 
     public static final double BACKUP_FEED_TIME = 0.5;  // seconds
 
-    public static final double RPM_TOLERANCE = 200; // TODO Tune this later
+    public static final double RPM_TOLERANCE = 200;
+    public static final double FEEDER_RPM_TOLERANCE = 100; 
 
-    // constants for side shooter, from SysId
-    // Not right. There is a units problem!
-    static final double K_P_LEFT = 1e-4; // 2.0766E-06;
+    // manually tuned kFF and guessed kP
+    static final double K_P_LEFT = 1e-4;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
@@ -76,7 +76,7 @@ public class Shooter extends SubsystemBase {
     private double m_rightGoalRPM;
 
     private boolean m_speakerShootMode = true;
-
+    
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
@@ -228,11 +228,17 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean rpmWithinTolerance() {
-        return Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
+        return m_leftGoalRPM > 1000.0
+                && Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
                 && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
-    public void turnOnFeeder() {
+    public void startForIntake() {
+        setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
+        setFeederSpeed(FEEDER_SPEED);
+    }
+
+    public void speakerShot() {
         setFeederSpeed(FEEDER_SPEED);
     }
 
@@ -245,8 +251,8 @@ public class Shooter extends SubsystemBase {
         turnOffFeeder();
     }
 
-    public void setFeederSpeed(double chute) {
-        m_feederMotor.set(-chute);
+    public void setFeederSpeed(double speed) {
+        m_feederMotor.set(-speed);
     }
 
     public void turnOffShooterWheels() {

@@ -66,11 +66,11 @@ public class AprilTagVision {
     // pitch is the Y angle, and it is positive down
     private final Transform3d m_robotToFrontAprilTagCam = new Transform3d(
             new Translation3d(Units.inchesToMeters(0.5 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(18.5)),
-            new Rotation3d(0.0, Math.toRadians(-15.0), 0.0));
+            new Rotation3d(0.0, Math.toRadians(-19.4), 0.0));
 
     private final Transform3d m_robotToBackAprilTagCam = new Transform3d(
-            new Translation3d(Units.inchesToMeters(-15.5 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(10.0)),
-            new Rotation3d(0.0, Math.toRadians(-15.0), Math.toRadians(180.0)));
+            new Translation3d(Units.inchesToMeters(-16.72 - DriveTrain.ROBOT_SWERVE_OFFSET_X_INCHES), 0, Units.inchesToMeters(10.0)),
+            new Rotation3d(0.0, Math.toRadians(-20.0), Math.toRadians(180.0)));
 
     private final PhotonPoseEstimator m_photonPoseEstimatorFront;
     private final PhotonPoseEstimator m_photonPoseEstimatorBack;

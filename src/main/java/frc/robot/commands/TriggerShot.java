@@ -28,7 +28,7 @@ public class TriggerShot extends Command {
 
         if (m_shooter.getSpeakerShootMode()) {
             // speaker shot
-            m_shooter.turnOnFeeder();
+            m_shooter.speakerShot();
         } else {
             // amp shot
             m_shooter.ampShot();

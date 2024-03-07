@@ -39,7 +39,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
 
     private Shooter.ShooterValues getShootValues() {
         double distance = m_driveTrain.getSpeakerDistance();
-        SmartDashboard.putNumber("shooter/speakDistance", distance);
+        SmartDashboard.putNumber("shooter/shotDistance", distance);
         return Shooter.calculateShooterSpeeds(distance); 
     }
 

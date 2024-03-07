@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Optional;
-
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -14,7 +12,6 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -212,6 +209,11 @@ public class DriveTrain extends SubsystemBase {
         m_odometry.resetPosition(getGyroscopeRotation(), getModulePositions(), pose);
     }
 
+    public boolean isInCenterZone() {
+        Pose2d poseBlue = FieldConstants.flipPose(getPose());
+        return poseBlue.getX() >= FieldConstants.BLUE_WING_LINE_X_METERS;
+    }
+
     public Rotation2d getHeading() {
         if (Robot.isSimulation()) {
             return m_simPose.getRotation();
@@ -361,7 +363,8 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getPitch() {
         // gets pitch of robot
-        return Rotation2d.fromDegrees(m_navx.getPitch());
+        // navX is rotate in robot, so pitch and roll are switched
+        return Rotation2d.fromDegrees(m_navx.getRoll());
     }
 
     public Rotation2d getYaw() {
@@ -371,7 +374,8 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getRoll() {
         // gets roll of robot
-        return Rotation2d.fromDegrees(m_navx.getRoll());
+        // navX is rotate in robot, so pitch and roll are switched
+        return Rotation2d.fromDegrees(-m_navx.getPitch());
     }
 
     public Field2d getField2d() {
@@ -441,7 +445,7 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
 
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
-        // SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
+        SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
         // SmartDashboard.putNumber("drivetrain/yaw", getYaw().getDegrees());
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);

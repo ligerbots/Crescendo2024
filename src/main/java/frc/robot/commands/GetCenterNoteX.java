@@ -15,6 +15,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
 
@@ -44,30 +46,46 @@ public class GetCenterNoteX extends GetNoteX {
 
         // Use note "monitoring" for center notes only
         addCommands(
-            new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .andThen(new WaitCommand(2))
-                .deadlineWith(
-                    new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this)
-                        .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
-                ),
+            // Drive out to the Note
+            // Monitor for the Note and maybe abort
+            // Turn on the Intake when we cross into the Center zone
+            ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
+            ).deadlineWith(
+                new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+            ),
+
+            // wait up to 1 second to suck the Note in all the way
+            // new WaitUntilCommand(intake::hasNote).withTimeout(1),
+            new WaitCommand(1),
+
+            // turn off Shooter and intake
             new InstantCommand(shooter::turnOffShooter),
-            new WaitCommand(1.0),
+            new InstantCommand(intake::stop),
             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
+
+            // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
-                .deadlineWith(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
-            new TriggerShot(shooter)
-            );
+                .deadlineWith(
+                    // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
+                    new WaitCommand(1.0)
+                        .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues))),
+            
+            // Shoot
+            new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
+        );
     }
 
     private PathPlannerPath getInitialPath() {
         Pose2d pose = m_driveTrain.getPose();
         Pose2d poseBlue = FieldConstants.flipPose(pose);
-        System.out.println("Starting getInitialPath " + poseBlue);
+        // System.out.println("Starting getInitialPath " + poseBlue);
 
-        // this part used when in center note area, if intended center note is not found
+        // this part is used when in center note area, if intended center note is not found
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
             Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
-            List<PathPoint> pathPoints = List.of(new PathPoint(poseBlue.getTranslation()), // starting pose
+            List<PathPoint> pathPoints = List.of(
+                    new PathPoint(poseBlue.getTranslation()), // starting pose
                     new PathPoint(m_targetNote));
             return PathPlannerPath.fromPathPoints(
                     pathPoints, // position, heading
