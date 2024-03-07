@@ -26,8 +26,8 @@ public class Climber extends SubsystemBase {
     private boolean m_rightHookReadyToEngage = false;
     private boolean m_leftHookEngaged = false;
     private boolean m_rightHookEngaged = false;
-    private boolean m_leftHookComplete = false;
-    private boolean m_rightHookComplete = false;
+    // private boolean m_leftHookComplete = false;
+    // private boolean m_rightHookComplete = false;
     private double m_rollAngle;
 
     // Constants to be used in this class
@@ -39,7 +39,7 @@ public class Climber extends SubsystemBase {
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
 
     // Winch motor speed values
-    private static final double IDLE_MOTOR_SPEED = -0.05;
+    private static final double IDLE_MOTOR_SPEED = -0.01;
     private static final double WINCH_EXTEND_SPEED = 0.1;
     private static final double WINCH_RETRACT_SPEED = 0.3;
     private static final double WINCH_CLIMB_SPEED = 0.1;
