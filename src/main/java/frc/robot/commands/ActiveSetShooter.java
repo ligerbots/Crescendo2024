@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
@@ -17,7 +18,7 @@ public class ActiveSetShooter extends Command {
     private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
 
     // Number of motor rotations
-    private final double NUMBER_OF_ROTATIONS = 2;
+    private final double NUMBER_OF_ROTATIONS = 1;
 
     private static final double PIVOT_WAIT_TIME = 0.2;
 
@@ -72,6 +73,8 @@ public class ActiveSetShooter extends Command {
             // Keep updating angle and speed
             m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
         }
+
+        SmartDashboard.putString("shooter/mode", m_state.toString());
     }
 
     // Called once the command ends or is interrupted.
