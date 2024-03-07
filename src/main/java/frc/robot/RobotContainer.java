@@ -104,17 +104,6 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
-
-        // Climber Commands
-        JoystickButton farm6 = new JoystickButton(m_farm, 6);
-        farm6.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
-
-        JoystickButton farm7 = new JoystickButton(m_farm, 7);
-        farm7.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
-
-        JoystickButton farm8 = new JoystickButton(m_farm, 8);
-        farm8.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
-
         // Test commands
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
@@ -281,5 +270,4 @@ public class RobotContainer {
     public ShooterPivot getShooterPivot() {
         return m_shooterPivot;
     }
-
 }
