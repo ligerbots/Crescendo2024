@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 import frc.robot.FieldConstants;
@@ -36,8 +37,9 @@ public class GetStageNoteX extends GetNoteX {
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
 
             // wait up to 1 second to suck the Note in all the way
-            new WaitUntilCommand(intake::hasNote).withTimeout(2),
-
+            //new WaitUntilCommand(intake::hasNote).withTimeout(2),
+            new WaitCommand(2),
+            
             // turn off Shooter, and wait for Feeder to be stopped
             new InstantCommand(shooter::turnOffShooter),
             new InstantCommand(intake::stop),

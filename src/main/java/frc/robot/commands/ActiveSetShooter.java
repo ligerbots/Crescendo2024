@@ -17,7 +17,7 @@ public class ActiveSetShooter extends Command {
     private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
 
     // Number of motor rotations
-    private final double NUMBER_OF_ROTATIONS = 1;
+    private final double NUMBER_OF_ROTATIONS = 2;
 
     private static final double PIVOT_WAIT_TIME = 0.2;
 
@@ -52,8 +52,9 @@ public class ActiveSetShooter extends Command {
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
         m_shooterPivot.setAngle(shootValues.shootAngle);
 
-        if (m_state == State.WAIT_FOR_PIVOT && 
-            (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
+        if (m_state == State.WAIT_FOR_PIVOT && m_shooterPivot.angleWithinTolerance()) {
+            // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
+            
             // start the feeder motor and timer to back the NOTE a bit
             m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
             m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
