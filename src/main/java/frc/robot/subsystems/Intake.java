@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -12,19 +13,21 @@ public class Intake extends SubsystemBase {
     
     final static double INTAKE_SPEED = 0.5;
     final static double INTAKE_CENTERING_SPEED = 0.5;
-    final static double OUTTAKE_SPEED = -0.3;
-    final static double OUTTAKE_CENTERING_SPEED = -0.3;
+    final static double OUTTAKE_SPEED = 0.3;
+    final static double OUTTAKE_CENTERING_SPEED = 0.3;
 
     // Variables and constants to detect a NOTE 
     private static final double INTAKE_BASE_MAX_CURRENT = 18.0;
     private static final double INTAKE_NOTE_MIN_CURRENT = 23.0;
     private static final double INTAKE_NOTE_OUT_MAX_CURRENT = 10.0;
-    private enum IntakeState {IDLE, MOTOR_START, WAITING, NOTE_ENTERING, HAS_NOTE};
+    private enum IntakeState {IDLE, MOTOR_START, WAITING, NOTE_ENTERING, NOTE_PAST_INTAKE, HAS_NOTE};
     private IntakeState m_noteIntakeState = IntakeState.IDLE;
 
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;
 
+    Timer m_timer = new Timer();
+    
     public Intake(){
         m_intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
         m_centeringMotor = new CANSparkMax(Constants.CENTERING_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -51,6 +54,11 @@ public class Intake extends SubsystemBase {
             }
         } else if (m_noteIntakeState == IntakeState.NOTE_ENTERING) {
             if (m_intakeMotor.getOutputCurrent() < INTAKE_NOTE_OUT_MAX_CURRENT) {
+                m_noteIntakeState = IntakeState.NOTE_PAST_INTAKE;
+                m_timer.restart();
+            }
+        } else if (m_noteIntakeState == IntakeState.NOTE_PAST_INTAKE) {
+            if (m_timer.hasElapsed(0.1)) {
                 m_noteIntakeState = IntakeState.HAS_NOTE;
             }
         }
@@ -71,6 +79,7 @@ public class Intake extends SubsystemBase {
 
     public void intake() {
         m_noteIntakeState = IntakeState.MOTOR_START;
+        System.err.println("*** RUNNING INTAKE");
         run(INTAKE_SPEED, INTAKE_CENTERING_SPEED);
     }
 

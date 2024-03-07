@@ -20,7 +20,7 @@ public class FalconDriveController implements DriveController {
     
     private static final double THRESHOLD_CURRENT_LIMIT = 80.0; // Amps 
     private static final double CURRENT_LIMIT = 40.0;  // Amps
-    private static final double CURRENT_LIMIT_TIME = 18;  // seconds. taken from the data sheet 
+    private static final double CURRENT_LIMIT_TIME = 5;  // seconds. taken from the data sheet 
     
     private static final boolean MOTOR_INVERTED = true;
 

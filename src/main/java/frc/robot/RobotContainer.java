@@ -54,7 +54,7 @@ public class RobotContainer {
 
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
-        m_driverController.leftTrigger(0.5).whileTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
+        m_driverController.leftTrigger().onTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
                         .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
 
@@ -104,15 +104,6 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
-        // Test commands
-
-        JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new SetElevatorLength(m_elevator,
-                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
-
-        JoystickButton farm14 = new JoystickButton(m_farm, 14);
-        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
-                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
         // Climber Commands
         JoystickButton farm6 = new JoystickButton(m_farm, 6);
@@ -123,6 +114,17 @@ public class RobotContainer {
 
         JoystickButton farm8 = new JoystickButton(m_farm, 8);
         farm8.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
+
+        // Test commands
+
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new SetElevatorLength(m_elevator,
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+
+        JoystickButton farm14 = new JoystickButton(m_farm, 14);
+        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
+
 
         JoystickButton farm15 = new JoystickButton(m_farm, 15);
         farm15.onTrue(new TestShootSpeed(m_shooter,
