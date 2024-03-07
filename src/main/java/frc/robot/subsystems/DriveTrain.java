@@ -363,6 +363,7 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getPitch() {
         // gets pitch of robot
+        // navX is rotate in robot, so pitch and roll are switched
         return Rotation2d.fromDegrees(m_navx.getRoll());
     }
 
@@ -373,6 +374,7 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d getRoll() {
         // gets roll of robot
+        // navX is rotate in robot, so pitch and roll are switched
         return Rotation2d.fromDegrees(-m_navx.getPitch());
     }
 

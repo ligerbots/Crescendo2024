@@ -36,14 +36,16 @@ public class GetStageNoteX extends GetNoteX {
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
 
-            // wait up to 1 second to suck the Note in all the way
+            // wait up to 1 more second to suck the Note in all the way
             //new WaitUntilCommand(intake::hasNote).withTimeout(2),
-            new WaitCommand(2),
+            new WaitCommand(1),
             
-            // turn off Shooter, and wait for Feeder to be stopped
+            // turn off Shooter and Intake
             new InstantCommand(shooter::turnOffShooter),
             new InstantCommand(intake::stop),
-            new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0),
+            // Wait for the Feeder to stop
+            // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0),
+            new WaitCommand(1.0),
 
             // Spin up and shoot
             new AutoSpeakerShot(driveTrain, shooter, shooterPivot).alongWith(new InstantCommand(intake::clearHasNote))

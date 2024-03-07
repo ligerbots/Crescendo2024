@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 // import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 import frc.robot.subsystems.Elevator;
@@ -18,10 +17,9 @@ public class StartIntake extends SequentialCommandGroup {
     /** Creates a new startIntake. */
     public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
         addCommands(
-                new PrintCommand("StartIntake COMMAND"),
                 new Stow(shooter, pivot, elevator),
-                new InstantCommand(shooter::startIntake),
-                new InstantCommand(intake::intake)
+                new InstantCommand(shooter::startForIntake, shooter),
+                new InstantCommand(intake::intake, intake)
         // new RunIntakeWaitNote(intake),
         // new Rumble(xbox)
         );

@@ -233,7 +233,7 @@ public class Shooter extends SubsystemBase {
                 && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
     }
 
-    public void startIntake() {
+    public void startForIntake() {
         setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
         setFeederSpeed(FEEDER_SPEED);
     }
@@ -251,8 +251,8 @@ public class Shooter extends SubsystemBase {
         turnOffFeeder();
     }
 
-    public void setFeederSpeed(double chute) {
-        m_feederMotor.set(-chute);
+    public void setFeederSpeed(double speed) {
+        m_feederMotor.set(-speed);
     }
 
     public void turnOffShooterWheels() {

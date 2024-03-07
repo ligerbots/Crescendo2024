@@ -13,8 +13,8 @@ public class Intake extends SubsystemBase {
     
     final static double INTAKE_SPEED = 0.5;
     final static double INTAKE_CENTERING_SPEED = 0.5;
-    final static double OUTTAKE_SPEED = 0.3;
-    final static double OUTTAKE_CENTERING_SPEED = 0.3;
+    final static double OUTTAKE_SPEED = -0.3;
+    final static double OUTTAKE_CENTERING_SPEED = -0.3;
 
     // Variables and constants to detect a NOTE 
     private static final double INTAKE_BASE_MAX_CURRENT = 18.0;
@@ -79,7 +79,7 @@ public class Intake extends SubsystemBase {
 
     public void intake() {
         m_noteIntakeState = IntakeState.MOTOR_START;
-        System.err.println("*** RUNNING INTAKE");
+        // System.err.println("*** RUNNING INTAKE");
         run(INTAKE_SPEED, INTAKE_CENTERING_SPEED);
     }
 

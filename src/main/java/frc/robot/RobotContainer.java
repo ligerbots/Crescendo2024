@@ -30,7 +30,6 @@ public class RobotContainer {
     private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
     private final Intake m_intake = new Intake();
     private final Shooter m_shooter = new Shooter();
-    // Java problem: the encoder needs to be created outside the constructor
     private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
 
