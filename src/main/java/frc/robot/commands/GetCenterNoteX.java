@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 import frc.robot.FieldConstants;
@@ -46,7 +47,8 @@ public class GetCenterNoteX extends GetNoteX {
         // Use note "monitoring" for center notes only
         addCommands(
             // Drive out to the Note
-            // Monitor for the Note and start Intake when we are close
+            // Monitor for the Note and maybe abort
+            // Turn on the Intake when we cross into the Center zone
             ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
             ).deadlineWith(
@@ -54,7 +56,8 @@ public class GetCenterNoteX extends GetNoteX {
             ),
 
             // wait up to 1 second to suck the Note in all the way
-            new WaitUntilCommand(intake::hasNote).withTimeout(1),
+            // new WaitUntilCommand(intake::hasNote).withTimeout(1),
+            new WaitCommand(1),
 
             // turn off Shooter and intake
             new InstantCommand(shooter::turnOffShooter),
@@ -64,7 +67,8 @@ public class GetCenterNoteX extends GetNoteX {
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
                 .deadlineWith(
-                    new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
+                    // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
+                    new WaitCommand(1.0)
                         .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues))),
             
             // Shoot
