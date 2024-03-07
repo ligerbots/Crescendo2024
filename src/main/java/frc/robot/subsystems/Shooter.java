@@ -96,9 +96,9 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(1.4, new ShooterValues(2000.0, 2000.0, Math.toRadians(50.0))),
-            Map.entry(2.65, new ShooterValues(2500.0, 2500.0, Math.toRadians(33.0))),
-            Map.entry(4.06, new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
+            Map.entry(Units.inchesToMeters(55.1), new ShooterValues(2000.0, 2000.0, Math.toRadians(50.0))),
+            Map.entry(Units.inchesToMeters(104.3), new ShooterValues(2500.0, 2500.0, Math.toRadians(33.0))),
+            Map.entry(Units.inchesToMeters(159.8), new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
             Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(21.0)))
             ));
 
@@ -136,7 +136,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/leftRpmTarget", 0);
         SmartDashboard.putNumber("shooter/rightRpmTarget", 0);
 
-        SmartDashboard.putNumber("shooter/shotDistance", 0);
+        SmartDashboard.putNumber("shooter/shotDistanceInches", 0);
     }
 
     private void setPidController(SparkPIDController pidController, double kP, double kFF) {
@@ -171,7 +171,7 @@ public class Shooter extends SubsystemBase {
         ShooterValues res = before.getValue().interpolate(after.getValue(), ratio);
 
         // for tuning. Leave in for diagnostics??
-        SmartDashboard.putNumber("shooter/shotDistance", Units.metersToInches(distance));
+        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
         SmartDashboard.putNumber("shooter/shotLeftRPM", res.leftRPM);
         SmartDashboard.putNumber("shooter/shotRightRPM", res.rightRPM);
         SmartDashboard.putNumber("shooter/shotAngle", Math.toDegrees(res.shootAngle));

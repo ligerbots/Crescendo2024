@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -39,7 +40,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
 
     private Shooter.ShooterValues getShootValues() {
         double distance = m_driveTrain.getSpeakerDistance();
-        SmartDashboard.putNumber("shooter/shotDistance", distance);
+        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
         return Shooter.calculateShooterSpeeds(distance); 
     }
 
