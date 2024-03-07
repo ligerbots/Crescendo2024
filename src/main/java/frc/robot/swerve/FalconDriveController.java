@@ -18,10 +18,12 @@ public class FalconDriveController implements DriveController {
     // Note: Phoenix 6 library uses rotations, so no need for tick count
     private static final double FALCON_DISTANCE_PER_UNIT = Math.PI * WHEEL_DIAMETER * DRIVE_REDUCTION;
     
-    private static final double CURRENT_LIMIT = 35.0;  // Amps
-    private static final double CURRENT_LIMIT_TIME = 0.25;  // seconds
+    private static final double THRESHOLD_CURRENT_LIMIT = 80.0; // Amps 
+    private static final double CURRENT_LIMIT = 40.0;  // Amps
+    private static final double CURRENT_LIMIT_TIME = 18;  // seconds. taken from the data sheet 
     
     private static final boolean MOTOR_INVERTED = true;
+
 
     private final TalonFX m_motor;
 
@@ -30,11 +32,14 @@ public class FalconDriveController implements DriveController {
         m_motor.setInverted(MOTOR_INVERTED);
     
         CurrentLimitsConfigs motorCurrentConfigs = new CurrentLimitsConfigs();
-        motorCurrentConfigs.withSupplyCurrentThreshold(CURRENT_LIMIT);
-        motorCurrentConfigs.withSupplyTimeThreshold(CURRENT_LIMIT_TIME);
+
+        motorCurrentConfigs.withSupplyCurrentThreshold(THRESHOLD_CURRENT_LIMIT);// this is the peak current it will take
+        motorCurrentConfigs.withSupplyTimeThreshold(CURRENT_LIMIT_TIME);// if the peak current is held for this long it drops to the current limit 
+        motorCurrentConfigs.withSupplyCurrentLimit(CURRENT_LIMIT);// regular current limit 
         motorCurrentConfigs.withSupplyCurrentLimitEnable(true);
+        motorCurrentConfigs.withStatorCurrentLimitEnable(false);
         m_motor.getConfigurator().apply(motorCurrentConfigs);
-    
+        
         m_motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
