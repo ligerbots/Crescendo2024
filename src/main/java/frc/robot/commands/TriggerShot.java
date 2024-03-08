@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
 
 public class TriggerShot extends Command { 
-    private static final double SHOOT_TIME = 0.5;  // seconds
+    private static final double SHOOT_TIME = 0.25;  // seconds
     
     Shooter m_shooter;
     Timer m_timer = new Timer();

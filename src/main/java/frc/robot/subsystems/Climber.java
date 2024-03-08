@@ -108,6 +108,7 @@ public class Climber extends SubsystemBase {
         SmartDashboard.putNumber("climber/pitch", m_driveTrain.getPitch().getDegrees());
         SmartDashboard.putString("climber/state", m_climberState.toString());
 
+        // TODO stop motors if over
         // Always check if we're too far off balance, but only while climbing.
         // If the robot tips while driving, don't worry about it.
         if (m_climberState != ClimberState.IDLE && Math.abs(m_rollAngle) > ROLL_ANGLE_EMERGENCY_STOP) {
