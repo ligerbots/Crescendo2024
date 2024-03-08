@@ -34,14 +34,15 @@ public class Climber extends SubsystemBase {
     private static final double WINCH_GEAR_RATIO = 1.0/15.0;
     private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
     private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
-    private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0 / NOMINAL_INCHES_PER_ROTATION;
+    private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
     private static final double CLIMB_ROTATIONS_ABOVE_FLOOR = 6.0 / NOMINAL_INCHES_PER_ROTATION;
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
-    private static final double WINCH_EXTEND_SPEED = 0.1;
-    private static final double WINCH_RETRACT_SPEED = 0.3;
+    private static final double WINCH_EXTEND_SPEED = 0.5;
+    private static final double WINCH_RETRACT_SPEED = 0.5;
+    public static final double WINCH_MANUAL_SPEED = 0.5;
     private static final double WINCH_CLIMB_SPEED = 0.1;
     private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
@@ -78,13 +79,13 @@ public class Climber extends SubsystemBase {
         m_leftWinch.restoreFactoryDefaults();
         // TODO only one will be inverted, not sure which
         m_leftWinch.setInverted(false);
-        m_leftWinch.setIdleMode(IdleMode.kBrake);
+        m_leftWinch.setIdleMode(IdleMode.kCoast);
         // Reset position to 0
         m_leftEncoder.setPosition(0.0);
 
         m_rightWinch.restoreFactoryDefaults();
         m_rightWinch.setInverted(true);
-        m_rightWinch.setIdleMode(IdleMode.kBrake);
+        m_rightWinch.setIdleMode(IdleMode.kCoast);
         // Reset position to 0
         m_rightEncoder.setPosition(0.0);
     }
@@ -101,7 +102,7 @@ public class Climber extends SubsystemBase {
         SmartDashboard.putNumber("climber/rightSpeed", m_rightVelocity);
 
         SmartDashboard.putNumber("climber/leftPosition", m_leftPosition);
-        SmartDashboard.putNumber("climber/rightPosition", m_leftVelocity);
+        SmartDashboard.putNumber("climber/rightPosition", m_rightPosition);
 
         SmartDashboard.putNumber("climber/roll", Math.toDegrees(m_rollAngle));
         SmartDashboard.putNumber("climber/pitch", m_driveTrain.getPitch().getDegrees());
@@ -190,7 +191,7 @@ public class Climber extends SubsystemBase {
                 // Keep the left side at that rate and adjust the right side based on the roll angle
                 if (Math.abs(m_rollAngle) > ROLL_ANGLE_TOLERANCE) {
                     m_rightWinch.set(WINCH_CLIMB_SPEED + 
-                        Math.signum(m_rollAngle) *
+                        -1 * Math.signum(m_rollAngle) *
                         Math.min(Math.abs(m_rollAngle)/ROLL_ANGLE_TOLERANCE, 1.0) * WINCH_CLIMB_ADJUST_SPEED);
                 }
             }
