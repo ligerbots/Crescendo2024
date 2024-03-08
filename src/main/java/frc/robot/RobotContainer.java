@@ -64,7 +64,7 @@ public class RobotContainer {
             .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
         );
 
-        m_driverController.rightBumper().whileTrue(new DropNote(m_shooterPivot, m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        m_driverController.rightBumper().onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
         
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 

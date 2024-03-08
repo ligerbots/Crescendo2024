@@ -6,26 +6,14 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.ShooterPivot;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
+import frc.robot.subsystems.Shooter;
+
 public class DropNote extends ParallelCommandGroup {
-  /** Creates a new DropNote. */
-  ShooterPivot m_shooterPivot; 
-  Shooter m_shooter;
-  public DropNote(ShooterPivot shooterPivot, Shooter shooter ) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
-    m_shooterPivot = shooterPivot;
-    m_shooter = shooter;
-    
-    addCommands(
-      new SetPivotAngle(m_shooterPivot, Math.toRadians(0)),//random values that might work 
-      new InstantCommand(m_shooter::turnOnFeeder),
-      new InstantCommand(()-> m_shooter.setShooterRpms(250, 250))
-    );
-  }
+    /** Creates a new DropNote. */
+    public DropNote(Shooter shooter) {
+        addCommands(
+                new InstantCommand(() -> shooter.setShooterRpms(1000, 1000)),
+                new InstantCommand(shooter::speakerShot));
+    }
 }
