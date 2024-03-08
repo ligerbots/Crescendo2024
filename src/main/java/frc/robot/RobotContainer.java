@@ -91,6 +91,19 @@ public class RobotContainer {
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
 
+        JoystickButton farm6 = new JoystickButton(m_farm, 6);
+        farm6.onTrue(new InstantCommand(() -> m_climber.run(Climber.WINCH_MANUAL_SPEED, 0), m_climber))
+                .onFalse(new InstantCommand(m_climber::holdHooks, m_climber));
+
+        JoystickButton farm7 = new JoystickButton(m_farm, 7);
+        farm7.onTrue(new InstantCommand(() -> m_climber.run(Climber.WINCH_MANUAL_SPEED, Climber.WINCH_MANUAL_SPEED), m_climber))
+                .onFalse(new InstantCommand(m_climber::holdHooks, m_climber));
+
+        JoystickButton farm8 = new JoystickButton(m_farm, 8);
+        farm8.onTrue(new InstantCommand(() -> m_climber.run(0, Climber.WINCH_MANUAL_SPEED), m_climber))
+                .onFalse(new InstantCommand(m_climber::holdHooks, m_climber));
+
+
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
         farm4.onTrue(new InstantCommand(() -> m_elevator.adjustLength(true)));
@@ -162,6 +175,11 @@ public class RobotContainer {
         autoName = "S3-S2";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "S2-S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
 
         autoName = "S3-S2-S1";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
