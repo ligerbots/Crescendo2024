@@ -36,7 +36,11 @@ public class Climber extends SubsystemBase {
     private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
     private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
     private static final double CLIMB_ROTATIONS_ABOVE_FLOOR = 6.0 / NOMINAL_INCHES_PER_ROTATION;
+
+    // Protection values
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
+    // TODO set a reasonable value
+    private static final double MAX_WINCH_CURRENT = 100.0;
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
@@ -77,7 +81,6 @@ public class Climber extends SubsystemBase {
         // m_rightEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO*Math.PI*NOMINAL_WINCH_DIAMETER);
 
         m_leftWinch.restoreFactoryDefaults();
-        // TODO only one will be inverted, not sure which
         m_leftWinch.setInverted(false);
         m_leftWinch.setIdleMode(IdleMode.kCoast);
         // Reset position to 0
@@ -92,23 +95,33 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // these probably should not be member variables, but change it later
         m_leftPosition = m_leftEncoder.getPosition();
         m_rightPosition = m_rightEncoder.getPosition();
         m_leftVelocity = m_leftEncoder.getVelocity();
         m_rightVelocity = m_rightEncoder.getVelocity();
         m_rollAngle = m_driveTrain.getRoll().getRadians();
 
+        double leftCurrent = m_leftWinch.getOutputCurrent();
+        double rightCurrent = m_rightWinch.getOutputCurrent();
+
         SmartDashboard.putNumber("climber/leftSpeed", m_leftVelocity);
         SmartDashboard.putNumber("climber/rightSpeed", m_rightVelocity);
 
-        SmartDashboard.putNumber("climber/leftPosition", m_leftPosition);
-        SmartDashboard.putNumber("climber/rightPosition", m_rightPosition);
+        SmartDashboard.putNumber("climber/leftCurrent", leftCurrent);
+        SmartDashboard.putNumber("climber/rightCurrent", rightCurrent);
 
         SmartDashboard.putNumber("climber/roll", Math.toDegrees(m_rollAngle));
         SmartDashboard.putNumber("climber/pitch", m_driveTrain.getPitch().getDegrees());
         SmartDashboard.putString("climber/state", m_climberState.toString());
 
-        // TODO stop motors if over
+        // Protection: stop if position is at max or current is too high
+        // Test no matter what State we are in. 
+        if (m_leftPosition >= MAX_WINCH_ROTATIONS_ALLOWED || leftCurrent > MAX_WINCH_CURRENT)
+            m_leftWinch.set(0);
+        if (m_rightPosition >= MAX_WINCH_ROTATIONS_ALLOWED || leftCurrent > MAX_WINCH_CURRENT)
+            m_rightWinch.set(0);
+
         // Always check if we're too far off balance, but only while climbing.
         // If the robot tips while driving, don't worry about it.
         if (m_climberState != ClimberState.IDLE && Math.abs(m_rollAngle) > ROLL_ANGLE_EMERGENCY_STOP) {
@@ -117,7 +130,7 @@ public class Climber extends SubsystemBase {
             m_rightWinch.set(0.0);
         }
 
-        // Wile idle, we want a small volatage applied to hold the hooks in place.
+        // While idle, we want a small voltage applied to hold the hooks in place.
         if (m_climberState == ClimberState.IDLE) {
             m_leftWinch.set(IDLE_MOTOR_SPEED);
             m_rightWinch.set(IDLE_MOTOR_SPEED);
@@ -136,6 +149,7 @@ public class Climber extends SubsystemBase {
                 m_rightWinch.set(0.0);
                 m_rightHookReadyToEngage = true;
             }
+
             // If both hooks are all the way up, wait to retract
             if (m_leftHookReadyToEngage && m_rightHookReadyToEngage) {
                 m_climberState = ClimberState.WAITING;
@@ -151,20 +165,24 @@ public class Climber extends SubsystemBase {
             // Once one side goes high, we need to stop that winch until the other hook "catches up"
             // Note that when we enetered this state, both winches started retracting. We only need to stop them one at a time until
             // the robot is level again and then we will go to the CLIMBING state
+
+            // TODO: what about if they both engage at the same time and stay ~level?
+            //  Maybe also look at current?
+
             if (m_rollAngle > ROLL_ANGLE_TOLERANCE) {
                 // The left side is high, so the left hook is engaged.
-                   // Stop the left motor. The ratchet wrench will hold it.
-                   m_leftWinch.set(0.0);
-                   m_leftHookEngaged = true;
-                   m_leftEngagedPosition = m_leftPosition;
-            }
-            else if (m_rollAngle < -ROLL_ANGLE_TOLERANCE) {
+                // Stop the left motor. The ratchet wrench will hold it.
+                m_leftWinch.set(0.0);
+                m_leftHookEngaged = true;
+                m_leftEngagedPosition = m_leftPosition;
+            } else if (m_rollAngle < -ROLL_ANGLE_TOLERANCE) {
                 // The right side is high, so the right hook is engaged.
-                   // Stop the right motor. The ratchet wrench will hold it.
-                   m_rightWinch.set(0.0);
-                   m_rightHookEngaged = true;
-                   m_rightEngagedPosition = m_rightPosition;
+                // Stop the right motor. The ratchet wrench will hold it.
+                m_rightWinch.set(0.0);
+                m_rightHookEngaged = true;
+                m_rightEngagedPosition = m_rightPosition;
             }
+
             // If both hooks are engaged, then we start climbing
             if (m_leftHookEngaged && m_rightHookEngaged) {
                 m_climberState = ClimberState.CLIMBING;
@@ -188,7 +206,7 @@ public class Climber extends SubsystemBase {
                 m_climberState = ClimberState.HOLDING;
             }
             else {
-                // Need to keep the robot level. We defiend a voltage for a decent climbing rate.
+                // Need to keep the robot level. We defined a voltage for a decent climbing rate.
                 // Keep the left side at that rate and adjust the right side based on the roll angle
                 if (Math.abs(m_rollAngle) > ROLL_ANGLE_TOLERANCE) {
                     m_rightWinch.set(WINCH_CLIMB_SPEED + 
