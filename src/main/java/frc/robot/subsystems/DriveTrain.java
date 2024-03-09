@@ -54,8 +54,8 @@ public class DriveTrain extends SubsystemBase {
     private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
 
     // TODO get correct values
-    public static final double PATH_PLANNER_MAX_VELOCITY = 2.0; //5.0;
-    public static final double PATH_PLANNER_MAX_ACCELERATION = 2.0; //5.0;
+    public static final double PATH_PLANNER_MAX_VELOCITY = 3.0; //5.0;
+    public static final double PATH_PLANNER_MAX_ACCELERATION = 3.0; //5.0;
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
@@ -255,10 +255,11 @@ public class DriveTrain extends SubsystemBase {
         return new Rotation2d(getNormalVector3d().getX(), getNormalVector3d().getY());
     }
 
-    public void joystickDrive(double inputX, double inputY, double inputRotation) {
+    public void joystickDrive(double inputX, double inputY, double inputRotation, boolean robotCentric) {
         SmartDashboard.putNumber("drivetrain/joystickX", inputX);
         SmartDashboard.putNumber("drivetrain/joystickY", inputY);
         SmartDashboard.putNumber("drivetrain/joystickR", inputRotation);
+        SmartDashboard.putBoolean("drivetrain/robotCentric", robotCentric);
 
         // apply SlewLimiters to the joystick values to control acceleration
         double newInputX = m_xLimiter.calculate(inputX);
@@ -273,7 +274,7 @@ public class DriveTrain extends SubsystemBase {
 
         ChassisSpeeds chassisSpeeds;
         // when in field-relative mode
-        if (m_fieldCentric) {
+        if (!robotCentric) {
             // if we are Red, field-cenric points the other way in absolute coordinates
             // this is equivalent to flipping the X and Y joysticks
             double redFlip = FieldConstants.isRedAlliance() ? -1.0 : 1.0;

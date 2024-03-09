@@ -63,8 +63,6 @@ public class RobotContainer {
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
             .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
         );
-
-        m_driverController.rightBumper().onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
         
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
@@ -105,6 +103,8 @@ public class RobotContainer {
         farm8.onTrue(new InstantCommand(() -> m_climber.run(0, Climber.WINCH_MANUAL_SPEED), m_climber))
                 .onFalse(new InstantCommand(m_climber::holdHooks, m_climber));
 
+        JoystickButton farm11 = new JoystickButton(m_farm, 11);
+        farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
@@ -248,7 +248,8 @@ public class RobotContainer {
                 m_driveTrain,
                 () -> -modifyAxis(m_driverController.getLeftY()),
                 () -> -modifyAxis(m_driverController.getLeftX()),
-                () -> -modifyAxis(m_driverController.getRightX()));
+                () -> -modifyAxis(m_driverController.getRightX()),
+                m_driverController.rightBumper());
     }
 
     private static double deadband(double value, double deadband) {

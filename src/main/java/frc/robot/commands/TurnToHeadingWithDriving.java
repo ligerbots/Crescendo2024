@@ -56,7 +56,7 @@ public class TurnToHeadingWithDriving extends Command {
   public void execute() {
     // auto aiming using PID
       double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
-      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
+      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed, false );
   }
 
   // Called once the command ends or is interrupted.
