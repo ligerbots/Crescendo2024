@@ -38,7 +38,7 @@ public class GetStageNoteX extends GetNoteX {
 
             // wait up to 1 more second to suck the Note in all the way
             //new WaitUntilCommand(intake::hasNote).withTimeout(2),
-            new WaitCommand(1),
+            new WaitCommand(0.5),
             
             // turn off Shooter and Intake
             new InstantCommand(shooter::turnOffShooter),
