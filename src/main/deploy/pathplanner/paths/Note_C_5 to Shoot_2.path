@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 4.67,
-        "y": 6.827988999164154
+        "x": 2.89,
+        "y": 6.25
       },
       "prevControl": {
-        "x": 5.875406043624587,
-        "y": 7.033793548608075
+        "x": 4.0954022683529,
+        "y": 6.455826660149213
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,11 +39,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -167.22,
+    "rotation": -160.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "note to shoot",
+  "folder": null,
   "previewStartingState": null,
   "useDefaultConstraints": false
 }
