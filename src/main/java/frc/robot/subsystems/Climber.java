@@ -20,8 +20,8 @@ public class Climber extends SubsystemBase {
     private double m_rightPosition;
     private double m_leftVelocity;
     private double m_rightVelocity;
-    private double m_leftEngagedPosition;
-    private double m_rightEngagedPosition;
+    // private double m_leftEngagedPosition;
+    // private double m_rightEngagedPosition;
     private boolean m_leftHookReadyToEngage = false;
     private boolean m_rightHookReadyToEngage = false;
     private boolean m_leftHookEngaged = false;
@@ -31,14 +31,14 @@ public class Climber extends SubsystemBase {
     private double m_rollAngle;
 
     // Constants to be used in this class
-    private static final double WINCH_GEAR_RATIO = 1.0/15.0;
-    private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
-    private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
+    // private static final double WINCH_GEAR_RATIO = 1.0/15.0;
+    // private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
+    // private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
     private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
-    private static final double CLIMB_ROTATIONS_ABOVE_FLOOR = 6.0 / NOMINAL_INCHES_PER_ROTATION;
+    private static final double CLIMB_ROTATIONS_FINAL = 200.0;
 
     // Protection values
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 200.0;
     // TODO set a reasonable value
     private static final double MAX_WINCH_CURRENT = 100.0;
 
@@ -108,6 +108,9 @@ public class Climber extends SubsystemBase {
         SmartDashboard.putNumber("climber/leftSpeed", m_leftVelocity);
         SmartDashboard.putNumber("climber/rightSpeed", m_rightVelocity);
 
+        SmartDashboard.putNumber("climber/leftPosition", m_leftPosition);
+        SmartDashboard.putNumber("climber/rightPosition", m_rightPosition);
+
         SmartDashboard.putNumber("climber/leftCurrent", leftCurrent);
         SmartDashboard.putNumber("climber/rightCurrent", rightCurrent);
 
@@ -174,13 +177,13 @@ public class Climber extends SubsystemBase {
                 // Stop the left motor. The ratchet wrench will hold it.
                 m_leftWinch.set(0.0);
                 m_leftHookEngaged = true;
-                m_leftEngagedPosition = m_leftPosition;
+                // m_leftEngagedPosition = m_leftPosition;
             } else if (m_rollAngle < -ROLL_ANGLE_TOLERANCE) {
                 // The right side is high, so the right hook is engaged.
                 // Stop the right motor. The ratchet wrench will hold it.
                 m_rightWinch.set(0.0);
                 m_rightHookEngaged = true;
-                m_rightEngagedPosition = m_rightPosition;
+                // m_rightEngagedPosition = m_rightPosition;
             }
 
             // If both hooks are engaged, then we start climbing
@@ -193,11 +196,11 @@ public class Climber extends SubsystemBase {
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
-            if (m_leftPosition - m_leftEngagedPosition > CLIMB_ROTATIONS_ABOVE_FLOOR) {
+            if (m_leftPosition > CLIMB_ROTATIONS_FINAL) {
                 m_leftWinch.set(0.0);
                 m_leftHookEngaged = true;
             }
-            if (m_rightPosition - m_rightEngagedPosition > CLIMB_ROTATIONS_ABOVE_FLOOR) {
+            if (m_rightPosition > CLIMB_ROTATIONS_FINAL) {
                 m_rightWinch.set(0.0);
                 m_rightHookEngaged = true;
             }
