@@ -26,8 +26,8 @@ public class Climber extends SubsystemBase {
     private boolean m_rightHookReadyToEngage = false;
     private boolean m_leftHookEngaged = false;
     private boolean m_rightHookEngaged = false;
-    // private boolean m_leftHookComplete = false;
-    // private boolean m_rightHookComplete = false;
+    private boolean m_leftHookComplete = false;
+    private boolean m_rightHookComplete = false;
     private double m_rollAngle;
 
     // Constants to be used in this class
@@ -35,10 +35,10 @@ public class Climber extends SubsystemBase {
     // private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
     // private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
     private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
-    private static final double CLIMB_ROTATIONS_FINAL = 200.0;
+    private static final double CLIMB_ROTATIONS_FINAL = 190.0;
 
     // Protection values
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 200.0;
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 235.0;
     // TODO set a reasonable value
     private static final double MAX_WINCH_CURRENT = 100.0;
 
@@ -196,16 +196,16 @@ public class Climber extends SubsystemBase {
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
-            if (m_leftPosition > CLIMB_ROTATIONS_FINAL) {
+            if (m_leftPosition >= CLIMB_ROTATIONS_FINAL) {
                 m_leftWinch.set(0.0);
-                m_leftHookEngaged = true;
+                m_leftHookComplete = true;
             }
-            if (m_rightPosition > CLIMB_ROTATIONS_FINAL) {
+            if (m_rightPosition >= CLIMB_ROTATIONS_FINAL) {
                 m_rightWinch.set(0.0);
-                m_rightHookEngaged = true;
+                m_rightHookComplete = true;
             }
             // If both hooks are in enough, just hold where we are.
-            if (m_leftHookEngaged && m_rightHookEngaged) {
+            if (m_leftHookComplete && m_rightHookComplete) {
                 m_climberState = ClimberState.HOLDING;
             }
             else {
