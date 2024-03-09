@@ -35,19 +35,21 @@ public class Climber extends SubsystemBase {
     // private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
     // private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
     private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
-    private static final double CLIMB_ROTATIONS_FINAL = 190.0;
+    private static final double CLIMB_ROTATIONS_FINAL = 225.0;
+
 
     // Protection values
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = 235.0;
-    // TODO set a reasonable value
     private static final double MAX_WINCH_CURRENT = 100.0;
+
+    private static final double MAX_ROTATION_RETRACT = 150.0;
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
     private static final double WINCH_EXTEND_SPEED = 0.5;
     private static final double WINCH_RETRACT_SPEED = 0.5;
-    public static final double WINCH_MANUAL_SPEED = 0.5;
-    private static final double WINCH_CLIMB_SPEED = 0.1;
+    public static final double WINCH_MANUAL_SPEED = 0.4;
+    private static final double WINCH_CLIMB_SPEED = 0.5;
     private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
     private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(5.0);
@@ -172,13 +174,14 @@ public class Climber extends SubsystemBase {
             // TODO: what about if they both engage at the same time and stay ~level?
             //  Maybe also look at current?
 
-            if (m_rollAngle > ROLL_ANGLE_TOLERANCE) {
+            if (m_rollAngle > ROLL_ANGLE_TOLERANCE || m_leftPosition > MAX_ROTATION_RETRACT) {
                 // The left side is high, so the left hook is engaged.
                 // Stop the left motor. The ratchet wrench will hold it.
                 m_leftWinch.set(0.0);
                 m_leftHookEngaged = true;
                 // m_leftEngagedPosition = m_leftPosition;
-            } else if (m_rollAngle < -ROLL_ANGLE_TOLERANCE) {
+            } 
+            if (m_rollAngle < -ROLL_ANGLE_TOLERANCE || m_rightPosition > MAX_ROTATION_RETRACT) {
                 // The right side is high, so the right hook is engaged.
                 // Stop the right motor. The ratchet wrench will hold it.
                 m_rightWinch.set(0.0);

@@ -53,8 +53,7 @@ public class DriveTrain extends SubsystemBase {
     // used in lots of places, so create a local constant
     private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
 
-    // TODO get correct values
-    public static final double PATH_PLANNER_MAX_VELOCITY = 3.0; //5.0;
+    public static final double PATH_PLANNER_MAX_VELOCITY = 4.0; //5.0;
     public static final double PATH_PLANNER_MAX_ACCELERATION = 3.0; //5.0;
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
