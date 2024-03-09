@@ -244,6 +244,7 @@ public class RobotContainer {
         // Left stick Y axis -> forward and backwards movement
         // Left stick X axis -> left and right movement
         // Right stick X axis -> rotation
+        // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
         return new Drive(
                 m_driveTrain,
                 () -> -modifyAxis(m_driverController.getLeftY()),
