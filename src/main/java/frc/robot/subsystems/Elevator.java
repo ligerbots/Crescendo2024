@@ -92,8 +92,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         m_encoder.setPositionConversionFactor(METER_PER_REVOLUTION);
 
         // m_stringPotentiometer = new AnalogPotentiometer(POTENTIOMETER_CHANNEL, POTENTIOMETER_RANGE_METERS, POTENTIOMETER_OFFSET);
-        m_encoder.setPosition(OFFSET_METER);
-        // updateMotorEncoderOffset();
+        zeroElevator();
 
         SmartDashboard.putBoolean("elevator/coastMode", false);
         setCoastMode();
@@ -128,6 +127,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     public double getLength() {
         return m_encoder.getPosition();
+    }
+
+    public void zeroElevator() {
+        m_encoder.setPosition(OFFSET_METER);
+        // updateMotorEncoderOffset();
     }
 
     // public double getPotentiometerReadingMeters(){

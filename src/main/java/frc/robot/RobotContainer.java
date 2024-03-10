@@ -119,6 +119,10 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
+        // reset zero of elevator
+        JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
+
         // Test commands
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
@@ -130,15 +134,15 @@ public class RobotContainer {
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
 
-        JoystickButton farm15 = new JoystickButton(m_farm, 15);
-        farm15.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        // farm15.onTrue(new TestShootSpeed(m_shooter,
+        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
-        JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        // farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
+        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         // JoystickButton farm12 = new JoystickButton(m_farm, 12);
         // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
