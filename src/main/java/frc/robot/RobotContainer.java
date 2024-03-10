@@ -86,7 +86,8 @@ public class RobotContainer {
         farm1.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
 
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
+        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber)
+                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS))));
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));

@@ -39,7 +39,7 @@ public class Climber extends SubsystemBase {
 
 
     // Protection values
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 233.0;
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 234.0;
     private static final double MAX_WINCH_CURRENT = 100.0;
 
     private static final double MAX_ROTATION_RETRACT = 150.0;

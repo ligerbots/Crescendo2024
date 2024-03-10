@@ -97,9 +97,9 @@ public class Shooter extends SubsystemBase {
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
             Map.entry(Units.inchesToMeters(52), new ShooterValues(2500.0, 2500.0, Math.toRadians(55.0))),
-            Map.entry(Units.inchesToMeters(104.3), new ShooterValues(2500.0, 2500.0, Math.toRadians(37.0))),
-            Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(30.5))),
-            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3300.0, 3300.0, Math.toRadians(29.0))),
+            Map.entry(Units.inchesToMeters(104.3), new ShooterValues(2500.0, 2500.0, Math.toRadians(38.0))),
+            Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(31.5))),
+            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3300.0, 3300.0, Math.toRadians(30.0))),
             Map.entry(Units.inchesToMeters(159.8), new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
             Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(21.0)))
             ));
