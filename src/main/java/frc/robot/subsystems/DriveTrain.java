@@ -286,9 +286,10 @@ public class DriveTrain extends SubsystemBase {
         }
         // when in robot-centric mode
         else {
+            // most driving is using *back* camera, so invert directions
             chassisSpeeds = new ChassisSpeeds(
-                    newInputX * m_maxVelocity,
-                    newInputY * m_maxVelocity,
+                    -newInputX * m_maxVelocity,
+                    -newInputY * m_maxVelocity,
                     newInputRotation * m_maxAngularVelocity);
         }
 
