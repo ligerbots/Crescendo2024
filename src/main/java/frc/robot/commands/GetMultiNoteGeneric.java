@@ -36,12 +36,12 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
 
     private static final double WAIT_INTERVAL_SECONDS = 1.0;
 
-    // public GetMultiNoteGeneric(String noteSequence, DriveTrain driveTrain, NoteVision noteVision,
-    //         Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
-    //     // Convenience constructor to use an encoded note sequence string i.e.
-    //     // "C1-C2-S3"
-    //     this(buildNoteList(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
-    // }
+    public GetMultiNoteGeneric(String[] noteSequence, DriveTrain driveTrain, NoteVision noteVision,
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
+        // Convenience constructor to use an encoded note sequence string i.e.
+        // "C1-C2-S3"
+        this(translateNoteNames(noteSequence), driveTrain, noteVision, shooter, shooterPivot, intake, elevator);
+    }
 
     public GetMultiNoteGeneric(Translation2d[] noteLocations, DriveTrain driveTrain, NoteVision noteVision,
             Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
@@ -52,8 +52,8 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
         // add all the fetching+shooting NOTE blocks
         for (Translation2d note : noteLocations) {
             if (FieldConstants.DUMMY_NOTE_WAIT_FLAG.equals(note)) {
-                addCommands(new PrintCommand("Auto Wait"),  // TODO remove print when ready
-                            new WaitCommand(WAIT_INTERVAL_SECONDS));
+                addCommands(new PrintCommand("Auto Wait"), // TODO remove print when ready
+                        new WaitCommand(WAIT_INTERVAL_SECONDS));
             } else if (FieldConstants.isCenterNote(note)) {
                 addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             } else {
@@ -62,22 +62,38 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
         }
     }
 
-    public static Translation2d[] buildNoteList(String noteSequence) {
+    public static Translation2d[] translateNoteNames(String[] noteNameList) {
+        Translation2d[] noteLocations = new Translation2d[noteNameList.length];
 
-        String[] separateNoteNames = noteSequence.split("\\s*-\\s*");
-        Translation2d[] noteCoordList = new Translation2d[separateNoteNames.length];
-
-        for (int i = 0; i < separateNoteNames.length; i++) {
-            Translation2d foundNote = s_noteNameMap.get(separateNoteNames[i].toUpperCase());
-            if (foundNote == null) {
-                throw new IllegalArgumentException("note name not found: " + separateNoteNames[i]);
+        for (int i = 0; i < noteNameList.length; i++) {
+            if (s_noteNameMap.containsKey(noteNameList[i])) {
+                noteLocations[i] = s_noteNameMap.get(noteNameList[i]);
+            } else {
+                throw new IllegalArgumentException("Illegal note name:" + noteNameList[i]);
             }
-            noteCoordList[i] = foundNote;
         }
-        return noteCoordList;
+        return noteLocations;
+
     }
 
+    // public static Translation2d[] buildNoteList(String noteSequence) {
+
+    // String[] separateNoteNames = noteSequence.split("\\s*-\\s*");
+    // Translation2d[] noteCoordList = new Translation2d[separateNoteNames.length];
+
+    // for (int i = 0; i < separateNoteNames.length; i++) {
+    // Translation2d foundNote =
+    // s_noteNameMap.get(separateNoteNames[i].toUpperCase());
+    // if (foundNote == null) {
+    // throw new IllegalArgumentException("note name not found: " +
+    // separateNoteNames[i]);
+    // }
+    // noteCoordList[i] = foundNote;
+    // }
+    // return noteCoordList;
+    // }
+
     // public static void main(String[] args) {
-    //     System.out.println(Arrays.asList(buildNoteList("S2-S3-S1")));
+    // System.out.println(Arrays.asList(buildNoteList("S2-S3-S1")));
     // }
 }
