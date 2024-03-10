@@ -17,7 +17,7 @@ public class StartIntake extends SequentialCommandGroup {
     /** Creates a new startIntake. */
     public StartIntake(Intake intake, Shooter shooter, ShooterPivot pivot, Elevator elevator) {
         addCommands(
-                new Stow(shooter, pivot, elevator).withTimeout(2),
+                new Stow(shooter, pivot, elevator).withTimeout(0.75),
                 new InstantCommand(shooter::startForIntake, shooter),
                 new InstantCommand(intake::intake, intake)
         // new RunIntakeWaitNote(intake),
