@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -35,7 +36,7 @@ public class TestShoot extends SequentialCommandGroup {
     }
 
     private Shooter.ShooterValues getShootValues() {
-        SmartDashboard.putNumber("shooter/shotDistance", m_driveTrain.getSpeakerDistance());
+        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.inchesToMeters(m_driveTrain.getSpeakerDistance()));
         return new Shooter.ShooterValues(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble(), 0);
     }
 }

@@ -32,9 +32,6 @@ public class FieldConstants {
     public static final Translation2d BLUE_NOTE_S_1 = new Translation2d(NOTE_S_X, 4.26);
     public static final Translation2d BLUE_NOTE_S_2 = new Translation2d(NOTE_S_X, 5.52);
     public static final Translation2d BLUE_NOTE_S_3 = new Translation2d(NOTE_S_X, 7.00);
-
-    // Used for testing a shed-only cross-field path
-    public static final Translation2d TEST_NOTE_S_3 = new Translation2d(NOTE_S_X, 7.00);  
    
     // Needed for the Note simulation. 
     // For Autos, always use BLUE and flipTranslation
@@ -63,8 +60,6 @@ public class FieldConstants {
     public static final Pose2d ROBOT_START_1 = new Pose2d(1.25, 3.85, Rotation2d.fromDegrees(126.5));
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(180));
     public static final Pose2d ROBOT_START_3 = new Pose2d(1.25,6.95, Rotation2d.fromDegrees(-131.6));  // same as 228.4
-
-    public static final Pose2d TEST_START_SOURCE = new Pose2d(1.91, 0.58, Rotation2d.fromDegrees(255));
 
     public static boolean isCenterNote(Translation2d targetNote) {
         return Math.abs(NOTE_C_X - targetNote.getX()) < 0.1;
