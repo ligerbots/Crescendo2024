@@ -179,8 +179,6 @@ public class DriveTrain extends SubsystemBase {
         }
 
         SmartDashboard.putData("Field", m_field);
-        SmartDashboard.putNumber("driveTrain/redFlip", 0);
-
     }
 
     // sets the heading to zero with the existing pose
