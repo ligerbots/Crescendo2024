@@ -171,8 +171,8 @@ public class Climber extends SubsystemBase {
             // Note that when we enetered this state, both winches started retracting. We only need to stop them one at a time until
             // the robot is level again and then we will go to the CLIMBING state
 
-            // TODO: what about if they both engage at the same time and stay ~level?
-            //  Maybe also look at current?
+            // Also check for position going well past the Raise position. This fixes the case
+            //   where the robot goes straight up, never tilts. Also helps in testing not on the chain.
 
             if (m_rollAngle > ROLL_ANGLE_TOLERANCE || m_leftPosition > MAX_ROTATION_RETRACT) {
                 // The left side is high, so the left hook is engaged.

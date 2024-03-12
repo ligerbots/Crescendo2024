@@ -57,7 +57,7 @@ public class GetCenterNoteX extends GetNoteX {
 
             // wait up to 1 second to suck the Note in all the way
             // new WaitUntilCommand(intake::hasNote).withTimeout(1),
-            new WaitCommand(0.5),
+            new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
             // turn off Shooter and intake
             new InstantCommand(shooter::turnOffShooter),
