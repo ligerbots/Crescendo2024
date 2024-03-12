@@ -407,6 +407,10 @@ public class DriveTrain extends SubsystemBase {
         return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
     }
 
+    public Rotation2d headingToSpeaker() {
+        return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(getPose().getTranslation()).getAngle();
+    }
+
     public Command followPath(PathPlannerPath path) {
 
         return new FollowPathHolonomic(path, this::getPose, this::getChassisSpeeds, this::drive, PATH_FOLLOWER_CONFIG,

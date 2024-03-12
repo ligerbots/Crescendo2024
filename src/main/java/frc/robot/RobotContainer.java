@@ -133,6 +133,12 @@ public class RobotContainer {
         farm14.onTrue(new SetPivotAngle(m_shooterPivot,
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
+        JoystickButton farm20 = new JoystickButton(m_farm, 20);
+        farm20.onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+                        () -> -modifyAxis(m_driverController.getLeftY()),
+                        () -> -modifyAxis(m_driverController.getLeftX()),
+                        () -> -modifyAxis(m_driverController.getRightX())));
+
 
         // JoystickButton farm15 = new JoystickButton(m_farm, 15);
         // farm15.onTrue(new TestShootSpeed(m_shooter,
