@@ -17,58 +17,62 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.DriveTrain;
 
-
 public class TurnToHeadingWithDriving extends Command {
 
-  private final DriveTrain m_driveTrain;
-  private final PIDController m_turnHeadingPID;
-  private Double m_wantedDegrees;
-  private final Supplier<Rotation2d> m_wantedHeadingSupplier;
-  private final DoubleSupplier m_translationXSupplier;
-  private final DoubleSupplier m_translationYSupplier;
-  private final static double KP = 0.2; 
-  private final static double KI = 0.0; 
-  private final static double KD = 0.0; 
+    private final DriveTrain m_driveTrain;
+    private final PIDController m_turnHeadingPID;
+    private Double m_wantedRadians;
+    private final Supplier<Rotation2d> m_wantedHeadingSupplier;
+    private final DoubleSupplier m_translationXSupplier;
+    private final DoubleSupplier m_translationYSupplier;
 
-  /**
-   * Creates a new autoAim.
-   */
-  public TurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading, DoubleSupplier translationXSupplier,
-      DoubleSupplier translationYSupplier) {
-    m_driveTrain = driveTrain;
-    m_wantedHeadingSupplier = wantedHeading;
-    m_translationXSupplier = translationXSupplier;
-    m_translationYSupplier = translationYSupplier;
+    private final static double KP = 0.5;
+    private final static double KI = 0.0;
+    private final static double KD = 0.0;
 
-    m_turnHeadingPID = new PIDController(KP,KI,KD);// random number TODO
-    addRequirements(m_driveTrain);
-    // Use addRequirements() here to declare subsystem dependencies.
-  }
+    public TurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
+            DoubleSupplier translationXSupplier,
+            DoubleSupplier translationYSupplier) {
+        m_driveTrain = driveTrain;
+        m_wantedHeadingSupplier = wantedHeading;
+        m_translationXSupplier = translationXSupplier;
+        m_translationYSupplier = translationYSupplier;
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    m_turnHeadingPID.reset();
-    m_wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
-  }
+        m_turnHeadingPID = new PIDController(KP, KI, KD);
+        m_turnHeadingPID.enableContinuousInput(-Math.PI, Math.PI);
 
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    // auto aiming using PID
-      double speed = MathUtil.clamp(m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees), -1.0, 1.0);
-      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed, false );
-  }
+        addRequirements(m_driveTrain);
+    }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
+    // Called when the command is initially scheduled.
+    @Override
+    public void initialize() {
+        m_turnHeadingPID.reset();
 
-  }
+        // MathUtil.angleModulus forces -pi -> pi
+        m_wantedRadians = MathUtil.angleModulus(m_wantedHeadingSupplier.get().getRadians());
+    }
 
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return Math.abs(m_driveTrain.getHeading().getDegrees() - m_wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES;
-  }
+    // Called every time the scheduler runs while the command is scheduled.
+    @Override
+    public void execute() {
+        // auto aiming using PID
+
+        double currentRadians = MathUtil.angleModulus(m_driveTrain.getHeading().getRadians());
+        double speed = MathUtil.clamp(m_turnHeadingPID.calculate(currentRadians, m_wantedRadians), -1.0, 1.0);
+
+        m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), speed, false);
+    }
+
+    // Called once the command ends or is interrupted.
+    @Override
+    public void end(boolean interrupted) {
+    }
+
+    // Returns true when the command should end.
+    @Override
+    public boolean isFinished() {
+        double currentRadians = MathUtil.angleModulus(m_driveTrain.getHeading().getRadians());
+        return Math.abs(currentRadians - m_wantedRadians) < DriveTrain.ANGLE_TOLERANCE_RADIANS;
+    }
 }
