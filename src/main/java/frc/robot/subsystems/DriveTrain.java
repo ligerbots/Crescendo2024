@@ -58,7 +58,7 @@ public class DriveTrain extends SubsystemBase {
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
-    public static final double ANGLE_TOLERANCE_DEGREES = 5;
+    public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
