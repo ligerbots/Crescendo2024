@@ -138,7 +138,9 @@ public class RobotContainer {
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()),
                         () -> -modifyAxis(m_driverController.getRightX())));
-
+        
+        JoystickButton farm21 = new JoystickButton(m_farm, 21);
+        farm21.onTrue(new Rumble(m_driverController.getHID()));
 
         // JoystickButton farm15 = new JoystickButton(m_farm, 15);
         // farm15.onTrue(new TestShootSpeed(m_shooter,
