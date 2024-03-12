@@ -6,14 +6,12 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
-import frc.robot.FieldConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
@@ -31,7 +29,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 // this backs up the NOTE before turning on the shooter motors
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
-                // new ActiveTurnToHeadingWithDriving(driveTrain, this::getWantedHeading, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
+                // new ActiveTurnToHeadingWithDriving(driveTrain, driveTrain::headingToSpeaker, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );
@@ -42,10 +40,5 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
         double distance = m_driveTrain.getSpeakerDistance();
         SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
         return Shooter.calculateShooterSpeeds(distance); 
-    }
-
-    private Rotation2d getWantedHeading() {
-        return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
-                .getAngle();
     }
 }
