@@ -20,30 +20,36 @@ public class Climber extends SubsystemBase {
     private double m_rightPosition;
     private double m_leftVelocity;
     private double m_rightVelocity;
-    private double m_leftEngagedPosition;
-    private double m_rightEngagedPosition;
+    // private double m_leftEngagedPosition;
+    // private double m_rightEngagedPosition;
     private boolean m_leftHookReadyToEngage = false;
     private boolean m_rightHookReadyToEngage = false;
     private boolean m_leftHookEngaged = false;
     private boolean m_rightHookEngaged = false;
-    // private boolean m_leftHookComplete = false;
-    // private boolean m_rightHookComplete = false;
+    private boolean m_leftHookComplete = false;
+    private boolean m_rightHookComplete = false;
     private double m_rollAngle;
 
     // Constants to be used in this class
-    private static final double WINCH_GEAR_RATIO = 1.0/15.0;
-    private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
-    private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
+    // private static final double WINCH_GEAR_RATIO = 1.0/15.0;
+    // private static final double NOMINAL_WINCH_DIAMETER = Units.inchesToMeters(0.75);
+    // private static final double NOMINAL_INCHES_PER_ROTATION = Math.PI * NOMINAL_WINCH_DIAMETER * WINCH_GEAR_RATIO;
     private static final double HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION = 100.0;
-    private static final double CLIMB_ROTATIONS_ABOVE_FLOOR = 6.0 / NOMINAL_INCHES_PER_ROTATION;
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION + CLIMB_ROTATIONS_ABOVE_FLOOR;
+    private static final double CLIMB_ROTATIONS_FINAL = 225.0;
+
+
+    // Protection values
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 234.0;
+    private static final double MAX_WINCH_CURRENT = 100.0;
+
+    private static final double MAX_ROTATION_RETRACT = 150.0;
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
     private static final double WINCH_EXTEND_SPEED = 0.5;
     private static final double WINCH_RETRACT_SPEED = 0.5;
-    public static final double WINCH_MANUAL_SPEED = 0.5;
-    private static final double WINCH_CLIMB_SPEED = 0.1;
+    public static final double WINCH_MANUAL_SPEED = 0.3;
+    private static final double WINCH_CLIMB_SPEED = 0.5;
     private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
     private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(5.0);
@@ -77,7 +83,6 @@ public class Climber extends SubsystemBase {
         // m_rightEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO*Math.PI*NOMINAL_WINCH_DIAMETER);
 
         m_leftWinch.restoreFactoryDefaults();
-        // TODO only one will be inverted, not sure which
         m_leftWinch.setInverted(false);
         m_leftWinch.setIdleMode(IdleMode.kCoast);
         // Reset position to 0
@@ -92,11 +97,15 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // these probably should not be member variables, but change it later
         m_leftPosition = m_leftEncoder.getPosition();
         m_rightPosition = m_rightEncoder.getPosition();
         m_leftVelocity = m_leftEncoder.getVelocity();
         m_rightVelocity = m_rightEncoder.getVelocity();
         m_rollAngle = m_driveTrain.getRoll().getRadians();
+
+        double leftCurrent = m_leftWinch.getOutputCurrent();
+        double rightCurrent = m_rightWinch.getOutputCurrent();
 
         SmartDashboard.putNumber("climber/leftSpeed", m_leftVelocity);
         SmartDashboard.putNumber("climber/rightSpeed", m_rightVelocity);
@@ -104,11 +113,20 @@ public class Climber extends SubsystemBase {
         SmartDashboard.putNumber("climber/leftPosition", m_leftPosition);
         SmartDashboard.putNumber("climber/rightPosition", m_rightPosition);
 
+        SmartDashboard.putNumber("climber/leftCurrent", leftCurrent);
+        SmartDashboard.putNumber("climber/rightCurrent", rightCurrent);
+
         SmartDashboard.putNumber("climber/roll", Math.toDegrees(m_rollAngle));
         SmartDashboard.putNumber("climber/pitch", m_driveTrain.getPitch().getDegrees());
         SmartDashboard.putString("climber/state", m_climberState.toString());
 
-        // TODO stop motors if over
+        // Protection: stop if position is at max or current is too high
+        // Test no matter what State we are in. 
+        if (m_leftPosition >= MAX_WINCH_ROTATIONS_ALLOWED || leftCurrent > MAX_WINCH_CURRENT)
+            m_leftWinch.set(0);
+        if (m_rightPosition >= MAX_WINCH_ROTATIONS_ALLOWED || leftCurrent > MAX_WINCH_CURRENT)
+            m_rightWinch.set(0);
+
         // Always check if we're too far off balance, but only while climbing.
         // If the robot tips while driving, don't worry about it.
         if (m_climberState != ClimberState.IDLE && Math.abs(m_rollAngle) > ROLL_ANGLE_EMERGENCY_STOP) {
@@ -117,7 +135,7 @@ public class Climber extends SubsystemBase {
             m_rightWinch.set(0.0);
         }
 
-        // Wile idle, we want a small volatage applied to hold the hooks in place.
+        // While idle, we want a small voltage applied to hold the hooks in place.
         if (m_climberState == ClimberState.IDLE) {
             m_leftWinch.set(IDLE_MOTOR_SPEED);
             m_rightWinch.set(IDLE_MOTOR_SPEED);
@@ -136,6 +154,7 @@ public class Climber extends SubsystemBase {
                 m_rightWinch.set(0.0);
                 m_rightHookReadyToEngage = true;
             }
+
             // If both hooks are all the way up, wait to retract
             if (m_leftHookReadyToEngage && m_rightHookReadyToEngage) {
                 m_climberState = ClimberState.WAITING;
@@ -151,20 +170,25 @@ public class Climber extends SubsystemBase {
             // Once one side goes high, we need to stop that winch until the other hook "catches up"
             // Note that when we enetered this state, both winches started retracting. We only need to stop them one at a time until
             // the robot is level again and then we will go to the CLIMBING state
-            if (m_rollAngle > ROLL_ANGLE_TOLERANCE) {
+
+            // Also check for position going well past the Raise position. This fixes the case
+            //   where the robot goes straight up, never tilts. Also helps in testing not on the chain.
+
+            if (m_rollAngle > ROLL_ANGLE_TOLERANCE || m_leftPosition > MAX_ROTATION_RETRACT) {
                 // The left side is high, so the left hook is engaged.
-                   // Stop the left motor. The ratchet wrench will hold it.
-                   m_leftWinch.set(0.0);
-                   m_leftHookEngaged = true;
-                   m_leftEngagedPosition = m_leftPosition;
-            }
-            else if (m_rollAngle < -ROLL_ANGLE_TOLERANCE) {
+                // Stop the left motor. The ratchet wrench will hold it.
+                m_leftWinch.set(0.0);
+                m_leftHookEngaged = true;
+                // m_leftEngagedPosition = m_leftPosition;
+            } 
+            if (m_rollAngle < -ROLL_ANGLE_TOLERANCE || m_rightPosition > MAX_ROTATION_RETRACT) {
                 // The right side is high, so the right hook is engaged.
-                   // Stop the right motor. The ratchet wrench will hold it.
-                   m_rightWinch.set(0.0);
-                   m_rightHookEngaged = true;
-                   m_rightEngagedPosition = m_rightPosition;
+                // Stop the right motor. The ratchet wrench will hold it.
+                m_rightWinch.set(0.0);
+                m_rightHookEngaged = true;
+                // m_rightEngagedPosition = m_rightPosition;
             }
+
             // If both hooks are engaged, then we start climbing
             if (m_leftHookEngaged && m_rightHookEngaged) {
                 m_climberState = ClimberState.CLIMBING;
@@ -175,20 +199,20 @@ public class Climber extends SubsystemBase {
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
-            if (m_leftPosition - m_leftEngagedPosition > CLIMB_ROTATIONS_ABOVE_FLOOR) {
+            if (m_leftPosition >= CLIMB_ROTATIONS_FINAL) {
                 m_leftWinch.set(0.0);
-                m_leftHookEngaged = true;
+                m_leftHookComplete = true;
             }
-            if (m_rightPosition - m_rightEngagedPosition > CLIMB_ROTATIONS_ABOVE_FLOOR) {
+            if (m_rightPosition >= CLIMB_ROTATIONS_FINAL) {
                 m_rightWinch.set(0.0);
-                m_rightHookEngaged = true;
+                m_rightHookComplete = true;
             }
             // If both hooks are in enough, just hold where we are.
-            if (m_leftHookEngaged && m_rightHookEngaged) {
+            if (m_leftHookComplete && m_rightHookComplete) {
                 m_climberState = ClimberState.HOLDING;
             }
             else {
-                // Need to keep the robot level. We defiend a voltage for a decent climbing rate.
+                // Need to keep the robot level. We defined a voltage for a decent climbing rate.
                 // Keep the left side at that rate and adjust the right side based on the roll angle
                 if (Math.abs(m_rollAngle) > ROLL_ANGLE_TOLERANCE) {
                     m_rightWinch.set(WINCH_CLIMB_SPEED + 

@@ -37,8 +37,8 @@ public class CheckPrepStatsAndRumble extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        if (m_shooterPivot.angleWithinTolerance() && m_shooter.rpmWithinTolerance()
-                && m_driveTrain.getOnGoalForActiveTurn()) {
+        if (m_shooterPivot.angleWithinTolerance() && m_shooter.rpmWithinTolerance()) {
+                // && m_driveTrain.getOnGoalForActiveTurn()) {
             // Sets rumble
             m_controller.setRumble(RumbleType.kBothRumble, RUMBLE_INTENSITY);
         } else {

@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.736773746695641,
-        "y": 5.591157960093699
+        "x": 7.803819244002124,
+        "y": 6.418177199990764
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.666681856613877,
-        "y": 6.827988999164154
+        "x": 2.89,
+        "y": 6.25
       },
       "prevControl": {
-        "x": 5.872087900238465,
-        "y": 7.033793548608075
+        "x": 3.960375920751841,
+        "y": 6.968573209873693
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,11 +45,11 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -167.22088331180348,
+    "rotation": -160.0,
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "note to shoot",
+  "folder": null,
   "previewStartingState": null,
   "useDefaultConstraints": false
 }

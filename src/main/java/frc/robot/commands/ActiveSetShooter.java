@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +16,7 @@ import frc.robot.subsystems.ShooterPivot;
 public class ActiveSetShooter extends Command {
     private final Shooter m_shooter;
     private final ShooterPivot m_shooterPivot;
-    private final Supplier<Shooter.ShooterValues>  m_valueSupplier;
+    private final Supplier<Shooter.ShooterValues> m_valueSupplier;
 
     // Number of motor rotations
     private final double NUMBER_OF_ROTATIONS = 1;
@@ -55,22 +56,34 @@ public class ActiveSetShooter extends Command {
 
         if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
             // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
-            
+
             // start the feeder motor and timer to back the NOTE a bit
             m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
             m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
             m_state = State.BACKUP_NOTE;
+            m_timer.restart();
         }
 
-        if (m_state == State.BACKUP_NOTE
-                && Math.abs(m_shooter.getFeederRotations() - m_initialRotations) >= NUMBER_OF_ROTATIONS) {
-            // NOTE should be out of the shooter wheels. Start the spin up.
-            m_shooter.turnOffFeeder();
-            m_state = State.SPEED_UP_SHOOTER;
+        if (m_state == State.BACKUP_NOTE) {
+            double pullback = Math.abs(m_shooter.getFeederRotations() - m_initialRotations);
+            SmartDashboard.putNumber("shooter/pullback", pullback);
+
+            boolean doneBackup = pullback >= NUMBER_OF_ROTATIONS;
+            if (m_timer.hasElapsed(1)) {
+                // test timer separately so we can log a problem
+                DriverStation.reportError("Note pullback timed out", false);
+                doneBackup = true;
+            }
+
+            if (doneBackup) {
+                // NOTE should be out of the shooter wheels. Start the spin up.
+                m_shooter.turnOffFeeder();
+                m_state = State.SPEED_UP_SHOOTER;
+            }
         }
 
         if (m_state == State.SPEED_UP_SHOOTER) {
-            // Keep updating angle and speed
+            // Keep updating speed
             m_shooter.setShooterRpms(shootValues.leftRPM, shootValues.rightRPM);
         }
 

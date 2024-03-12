@@ -63,7 +63,7 @@ public class RobotContainer {
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
             .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
         );
-
+        
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
         // don't require the Drivetrain. Otherwise you cannot drive.
@@ -86,7 +86,8 @@ public class RobotContainer {
         farm1.onTrue(new InstantCommand(m_climber::extendHooks, m_climber));
 
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
-        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber));
+        farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber)
+                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS))));
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
@@ -103,6 +104,8 @@ public class RobotContainer {
         farm8.onTrue(new InstantCommand(() -> m_climber.run(0, Climber.WINCH_MANUAL_SPEED), m_climber))
                 .onFalse(new InstantCommand(m_climber::holdHooks, m_climber));
 
+        JoystickButton farm11 = new JoystickButton(m_farm, 11);
+        farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
@@ -116,6 +119,10 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
+        // reset zero of elevator
+        JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
+
         // Test commands
 
         JoystickButton farm12 = new JoystickButton(m_farm, 12);
@@ -127,15 +134,15 @@ public class RobotContainer {
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
 
-        JoystickButton farm15 = new JoystickButton(m_farm, 15);
-        farm15.onTrue(new TestShootSpeed(m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // JoystickButton farm15 = new JoystickButton(m_farm, 15);
+        // farm15.onTrue(new TestShootSpeed(m_shooter,
+        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
-        JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        // farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
+        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         // JoystickButton farm12 = new JoystickButton(m_farm, 12);
         // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
@@ -187,6 +194,13 @@ public class RobotContainer {
         
         autoName = "S2-S3-C5";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        autoName = "S2-S3-C4";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_4  }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "S3-C5-C4";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5 , FieldConstants.NOTE_C_4  }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "C4-C5";
@@ -242,11 +256,13 @@ public class RobotContainer {
         // Left stick Y axis -> forward and backwards movement
         // Left stick X axis -> left and right movement
         // Right stick X axis -> rotation
+        // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
         return new Drive(
                 m_driveTrain,
                 () -> -modifyAxis(m_driverController.getLeftY()),
                 () -> -modifyAxis(m_driverController.getLeftX()),
-                () -> -modifyAxis(m_driverController.getRightX()));
+                () -> -modifyAxis(m_driverController.getRightX()),
+                m_driverController.rightBumper());
     }
 
     private static double deadband(double value, double deadband) {

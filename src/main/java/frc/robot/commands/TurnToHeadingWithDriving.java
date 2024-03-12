@@ -10,6 +10,7 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,8 +56,8 @@ public class TurnToHeadingWithDriving extends Command {
   @Override
   public void execute() {
     // auto aiming using PID
-      double speed = m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees);
-      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed );
+      double speed = MathUtil.clamp(m_turnHeadingPID.calculate(m_driveTrain.getHeading().getDegrees(), m_wantedDegrees), -1.0, 1.0);
+      m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), -speed, false );
   }
 
   // Called once the command ends or is interrupted.

@@ -22,14 +22,16 @@ import frc.robot.subsystems.Shooter;
 
 public abstract class GetNoteX extends SequentialCommandGroup {
 
+    public static final double INTAKE_EXTRA_WAIT_TIME = 0.5;
+    
     // NOTE: the last path in the list is the "return" path done before shooting (which is optional, set to null if not needed)
     protected static final Map<Translation2d, String[]> s_pathLookup = new HashMap<>() {
         {
             put(FieldConstants.NOTE_C_1, new String[] { "Start_1 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
             put(FieldConstants.NOTE_C_2, new String[] { "Start_1 to Note_C_2", "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
             put(FieldConstants.NOTE_C_3, new String[] { "Start_2 to Note_C_3", "Note_C_3 to Shoot_3" });
-            put(FieldConstants.NOTE_C_4, new String[] { "Start_3 to Note_C_4", "Note_C_4 to Shoot_2" });
-            put(FieldConstants.NOTE_C_5, new String[] { "Start_3 to Note_C_5", "Note_C_5 to Shoot_2" });
+            put(FieldConstants.NOTE_C_4, new String[] { "Start_3 to Note_C_4", "Shoot_2 to Note_C_4", "Note_S_3 to Note_C_4", "Note_C_4 to Shoot_2" });
+            put(FieldConstants.NOTE_C_5, new String[] { "Start_3 to Note_C_5", "Note_S_3 to Note_C_5", "Shoot_2 to Note_C_5","Note_C_5 to Shoot_2" });
 
             put(FieldConstants.BLUE_NOTE_S_1, new String[] { "Start_1 to Note_S_1", "Start_2 to Note_S_1", "Start_3 to Note_S_1", "Note_S_2 to Note_S_1", null });
             put(FieldConstants.BLUE_NOTE_S_2, new String[] { "Start_1 to Note_S_2", "Start_2 to Note_S_2", "Start_3 to Note_S_2", "Note_S_1 to Note_S_2", "Note_S_3 to Note_S_2", null });
