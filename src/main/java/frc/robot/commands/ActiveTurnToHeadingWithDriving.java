@@ -30,7 +30,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final static double KD = 0.0;
 
     // Angle offset from directly at Speaker
-    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(0);
+    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
 
     private final PIDController m_turnHeadingPID;
 
