@@ -34,8 +34,6 @@ public class DriveToAmp extends SequentialCommandGroup {
         m_driveTrain = driveTrain;
 
         addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getPath()), Set.of(m_driveTrain)));
-        
-        addRequirements(driveTrain);
     }
 
     private PathPlannerPath getPath() {
