@@ -404,7 +404,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public double getSpeakerDistance() {
-        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER));
     }
 
     public Command followPath(PathPlannerPath path) {

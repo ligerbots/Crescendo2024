@@ -45,7 +45,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
     }
 
     private Rotation2d getWantedHeading() {
-        return FieldConstants.flipTranslation(FieldConstants.SPEAKER).minus(m_driveTrain.getPose().getTranslation())
+        return FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER).minus(m_driveTrain.getPose().getTranslation())
                 .getAngle();
     }
 }

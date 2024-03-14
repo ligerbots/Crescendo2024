@@ -41,7 +41,8 @@ public class FieldConstants {
 
     public static final Translation2d DUMMY_NOTE_WAIT_FLAG = new Translation2d(NOTE_S_X, 0); 
    
-    public static final Translation2d SPEAKER = new Translation2d(0, 5.54);
+    public static final Translation2d BLUE_SPEAKER = new Translation2d(0, 5.54);
+    public static final Translation2d BLUE_AMP = new Translation2d(2, FIELD_WIDTH);
 
     public static final Pose2d ROBOT_NOTE_C_1 = new Pose2d(7.85, 0.78, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_C_2 = new Pose2d(7.85, 2.44, Rotation2d.fromDegrees(0));
