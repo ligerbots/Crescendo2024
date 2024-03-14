@@ -14,8 +14,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.FieldConstants;
 
@@ -25,14 +25,15 @@ public class DriveToAmp extends SequentialCommandGroup {
     private final DriveTrain m_driveTrain;
 
     private static final Rotation2d FINAL_HEADING = new Rotation2d(-Math.PI / 2.0);
-    private static final Translation2d FINAL_POSITION = FieldConstants.BLUE_AMP.minus(new Translation2d(0, 1.0));
+    // Position of center of the robot. 
+    // TODO: start a little far away and test
+    private static final Translation2d FINAL_POSITION = FieldConstants.BLUE_AMP.minus(new Translation2d(0, Units.inchesToMeters(20.0)));
 
     /** Creates a new DriveToAmp. */
     public DriveToAmp(DriveTrain driveTrain) {
         m_driveTrain = driveTrain;
 
-        addCommands(new PrintCommand("DriveToAmp"), 
-            new DeferredCommand(() -> m_driveTrain.followPath(getPath()), Set.of(m_driveTrain)));
+        addCommands(new DeferredCommand(() -> m_driveTrain.followPath(getPath()), Set.of(m_driveTrain)));
         
         addRequirements(driveTrain);
     }
