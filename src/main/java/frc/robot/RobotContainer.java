@@ -77,6 +77,13 @@ public class RobotContainer {
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()), 
                         () -> -modifyAxis(m_driverController.getRightX())));
+        // Bind the header control separately from the other parts of PrepSpeakerShot
+        // This allows us to kill the heading command without killing the rest of it.
+        // TODO: if this works, remove joysticks from above
+        m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+                        () -> -modifyAxis(m_driverController.getLeftY()),
+                        () -> -modifyAxis(m_driverController.getLeftX()),
+                        () -> -modifyAxis(m_driverController.getRightX())));
                         
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
@@ -119,29 +126,30 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
+        // schedule Drive command, which will cancel other control of Drivetrain, ie active heading
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()));
+
         // reset zero of elevator
         JoystickButton farm15 = new JoystickButton(m_farm, 15);
         farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
 
         // Test commands
 
-        JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new SetElevatorLength(m_elevator,
+        JoystickButton farm22 = new JoystickButton(m_farm, 22);
+        farm22.onTrue(new SetElevatorLength(m_elevator,
                 () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
 
-        JoystickButton farm14 = new JoystickButton(m_farm, 14);
-        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
+        JoystickButton farm23 = new JoystickButton(m_farm, 23);
+        farm23.onTrue(new SetPivotAngle(m_shooterPivot,
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
 
-        JoystickButton farm20 = new JoystickButton(m_farm, 20);
-        farm20.whileTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
-                        () -> -modifyAxis(m_driverController.getLeftY()),
-                        () -> -modifyAxis(m_driverController.getLeftX()),
-                        () -> -modifyAxis(m_driverController.getRightX())));
+        // JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        // farm24.whileTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+        //                 () -> -modifyAxis(m_driverController.getLeftY()),
+        //                 () -> -modifyAxis(m_driverController.getLeftX()),
+        //                 () -> -modifyAxis(m_driverController.getRightX())));
         
-        JoystickButton farm21 = new JoystickButton(m_farm, 21);
-        farm21.onTrue(new Rumble(m_driverController.getHID()));
-
         // JoystickButton farm15 = new JoystickButton(m_farm, 15);
         // farm15.onTrue(new TestShootSpeed(m_shooter,
         //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
