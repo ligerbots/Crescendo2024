@@ -41,15 +41,12 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 10.0; //TODO: Need to tune
+    private static final double K_P = 10.0; 
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
 
     // constants for various commands
-    public static final double ONSTAGE_RAISE_ELEVATOR = Units.inchesToMeters(30.0); //TODO: TUNE THIS LATER
-    public static final double ONSTAGE_LOWER_ELEVATOR = Units.inchesToMeters(10.0); //TODO: TUNE THIS LATER
-
     public static final double STOW_LENGTH = Units.inchesToMeters(0.5);
     public static final double AMP_SCORE_LENGTH = Units.inchesToMeters(13.0);
 
@@ -68,7 +65,9 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     // private final AnalogPotentiometer m_stringPotentiometer;
     private final SparkPIDController m_PIDController;
+
     private double m_goal = 0;
+    private double m_lengthAdjustment = 0;
 
     /** Creates a new Elevator. */
     public Elevator() {
@@ -148,16 +147,17 @@ public class Elevator extends TrapezoidProfileSubsystem {
         return MathUtil.clamp(length, MIN_LENGTH_METERS, MAX_LENGTH_METERS);
     }
 
-    // set reacher length in inches
-    public void setLength(double goal) {
-        m_goal = limitElevatorLength(goal);
+    // set elevator length in meters
+    public void setLength(double goal, boolean includeAdjustment) {
+        m_goal = limitElevatorLength(goal + (includeAdjustment ? 1 : 0) * m_lengthAdjustment);
         super.setGoal(m_goal);
         SmartDashboard.putNumber("elevator/goal", Units.metersToInches(m_goal));
     }
 
     public void adjustLength(boolean goUp) {
         double adjust = (goUp ? 1 : -1) * ADJUSTMENT_STEP;
-        setLength(getLength() + adjust);
+        m_lengthAdjustment += adjust;
+        setLength(getLength() + adjust, false);
     }
 
     public boolean lengthWithinTolerance() {

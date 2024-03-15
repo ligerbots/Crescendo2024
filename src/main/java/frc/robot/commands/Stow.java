@@ -17,7 +17,7 @@ public class Stow extends ParallelCommandGroup {
     addCommands(
         // Turn off shooter, just in case
         new InstantCommand(shooter::turnOffShooter),
-        new SetElevatorLength(elevator, Elevator.STOW_LENGTH),
+        new SetElevatorLength(elevator, Elevator.STOW_LENGTH, false),
         new SetPivotAngle(shooterPivot, ShooterPivot.STOW_ANGLE_RADIANS, false)
     );
   }

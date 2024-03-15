@@ -139,7 +139,7 @@ public class RobotContainer {
 
         JoystickButton farm22 = new JoystickButton(m_farm, 22);
         farm22.onTrue(new SetElevatorLength(m_elevator,
-                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0)), false).withTimeout(5.0));
 
         JoystickButton farm23 = new JoystickButton(m_farm, 23);
         farm23.onTrue(new SetPivotAngle(m_shooterPivot,
