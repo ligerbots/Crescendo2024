@@ -315,4 +315,8 @@ public class RobotContainer {
     public ShooterPivot getShooterPivot() {
         return m_shooterPivot;
     }
+
+    public Intake getIntake() {
+        return m_intake;
+    }
 }

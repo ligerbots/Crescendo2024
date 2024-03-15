@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Intake;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand = null;
@@ -28,6 +29,11 @@ public class Robot extends TimedRobot {
         DriverStation.startDataLog(DataLogManager.getLog());
 
         m_robotContainer = new RobotContainer();
+
+        Intake intake = m_robotContainer.getIntake();
+        // update Intake centering motor current reading every 2ms
+        // for detecting whether we've picked up a note
+        addPeriodic(intake.updateCenteringCurrentReadingPeriodic(), 0.002);
     }
 
     @Override
