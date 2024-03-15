@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 # usage:
-# python ./src/main/scripts/path_tools.py Note_S_1 `find src/main/deploy/pathplanner/paths/` | less
+# python ./src/main/scripts/path_points_check.py Note_S_1 `find src/main/deploy/pathplanner/paths/` | less
 
 field_points = {}
 
