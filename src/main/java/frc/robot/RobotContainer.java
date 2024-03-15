@@ -62,6 +62,7 @@ public class RobotContainer {
         m_driverController.rightTrigger().onTrue(
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
             .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
+            .alongWith(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()))
         );
         
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
