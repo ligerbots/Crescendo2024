@@ -27,7 +27,7 @@ public class DriveToAmp extends SequentialCommandGroup {
     private static final Rotation2d FINAL_HEADING = new Rotation2d(-Math.PI / 2.0);
     // Position of center of the robot. 
     // TODO: start a little far away and test
-    private static final Translation2d FINAL_POSITION = FieldConstants.BLUE_AMP.minus(new Translation2d(0, Units.inchesToMeters(20.0)));
+    private static final Translation2d FINAL_POSITION = FieldConstants.BLUE_AMP.minus(new Translation2d(0, Units.inchesToMeters(25.0)));
 
     /** Creates a new DriveToAmp. */
     public DriveToAmp(DriveTrain driveTrain) {
