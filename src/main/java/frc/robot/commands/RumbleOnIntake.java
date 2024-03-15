@@ -18,6 +18,7 @@ public class RumbleOnIntake extends Command {
     
     private final Timer m_timer = new Timer();
     private boolean m_prevState;
+    private boolean m_pastFirst;
 
     /** Creates a new RumbleOnIntake. */
     public RumbleOnIntake(Intake intake, XboxController xbox) {
@@ -29,21 +30,27 @@ public class RumbleOnIntake extends Command {
     @Override
     public void initialize() {
         m_prevState = false;
+        m_pastFirst = false;
         m_timer.reset();
+        m_timer.stop();
     }
 
     @Override
     public void execute() {
         // check status of Note in the Intake
         // If it transitions from True to False, Note has passed through, so Rumble
-        
         boolean currState = m_intake.noteInCentering();
 
         if (m_prevState && !currState) {
-            // note has passed through the Centering Wheels
-            // start rumbling
-            m_xbox.setRumble(RumbleType.kBothRumble, 1);
-            m_timer.restart();
+            if (!m_pastFirst) {
+                m_pastFirst = true;
+            }
+            else {
+                // note has passed through the Centering Wheels
+                // start rumbling
+                m_xbox.setRumble(RumbleType.kBothRumble, 1);
+                m_timer.restart();
+            }
         }
 
         m_prevState = currState;

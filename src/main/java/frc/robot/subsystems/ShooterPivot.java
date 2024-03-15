@@ -53,7 +53,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 8.0;
+    private static final double K_P = 5.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
