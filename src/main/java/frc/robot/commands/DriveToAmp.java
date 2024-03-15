@@ -48,10 +48,11 @@ public class DriveToAmp extends SequentialCommandGroup {
         // Create the path using the bezier points created above
         return new PathPlannerPath(
                 bezierPoints,
-                new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
+                new PathConstraints(
+                        DriveTrain.PATH_PLANNER_MAX_VELOCITY / 2.0, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
                         DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
                         DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
-                new GoalEndState(0, FINAL_HEADING, false)
+                new GoalEndState(0, FINAL_HEADING, true)
         );
     }
 }
