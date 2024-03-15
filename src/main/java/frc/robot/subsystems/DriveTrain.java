@@ -60,6 +60,8 @@ public class DriveTrain extends SubsystemBase {
 
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
+    public static final double AMP_DRIVE_MAX_METERS = 1.5;
+    
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
@@ -409,6 +411,10 @@ public class DriveTrain extends SubsystemBase {
 
     public Rotation2d headingToSpeaker() {
         return FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER).minus(getPose().getTranslation()).getAngle();
+    }
+
+    public double getAmpDistance() {
+        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.BLUE_AMP));
     }
 
     public Command followPath(PathPlannerPath path) {
