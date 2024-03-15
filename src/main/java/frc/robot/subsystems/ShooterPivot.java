@@ -70,6 +70,9 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // Used for checking if on goal
     private double m_goalRadians = 0;
 
+    // adjustment offset. Starts at 0, but retained throughout a match
+    private double m_angleAdjustment = 0.0;
+
     // Construct a new shooterPivot subsystem
     public ShooterPivot() {
         super(new TrapezoidProfile.Constraints(MAX_VEL_RADIAN_PER_SEC, MAX_ACC_RADIAN_PER_SEC_SQ));
@@ -157,24 +160,24 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     // set shooterPivot angle in radians
-    public void setAngle(double angle) {
-        m_goalRadians = limitPivotAngle(angle);
+    public void setAngle(double angle, boolean includeAdjustment) {
+        m_goalRadians = limitPivotAngle(angle + (includeAdjustment ? 1 : 0) * m_angleAdjustment);
         super.setGoal(m_goalRadians / TWO_PI);
         SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
     }
 
     public boolean angleWithinTolerance() {
         return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
-
     }
 
     public void adjustAngle(boolean goUp) {
         double adjust = (goUp ? 1 : -1) * ADJUSTMENT_STEP;
-        setAngle(getAngleRadians() + adjust);
+        m_angleAdjustment += adjust;
+        setAngle(m_goalRadians + adjust, false);
     }
 
     public void resetGoal() {
-        setAngle(getAngleRadians());
+        setAngle(getAngleRadians(), false);
     }
 
     public void setCoastMode() {

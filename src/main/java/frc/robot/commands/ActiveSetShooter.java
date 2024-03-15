@@ -52,7 +52,7 @@ public class ActiveSetShooter extends Command {
     public void execute() {
         // always adjust the pivot
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
-        m_shooterPivot.setAngle(shootValues.shootAngle);
+        m_shooterPivot.setAngle(shootValues.shootAngle, true);
 
         if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
             // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {

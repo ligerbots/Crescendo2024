@@ -95,7 +95,7 @@ public class RobotContainer {
 
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
         farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber)
-                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS))));
+                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS, false))));
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
@@ -143,7 +143,7 @@ public class RobotContainer {
 
         JoystickButton farm23 = new JoystickButton(m_farm, 23);
         farm23.onTrue(new SetPivotAngle(m_shooterPivot,
-                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0)), false).withTimeout(5.0));
 
         // JoystickButton farm24 = new JoystickButton(m_farm, 24);
         // farm24.whileTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,

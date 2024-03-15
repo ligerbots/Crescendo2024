@@ -18,7 +18,7 @@ public class PrepareAmpShot extends ParallelCommandGroup {
 
     addCommands(
       new SetElevatorLength(elevator, Elevator.AMP_SCORE_LENGTH),
-      new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS),
+      new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS, true),
       new InstantCommand(() -> shooter.setSpeakerShootMode(false)),
       new DriveToAmp(driveTrain)
     );
