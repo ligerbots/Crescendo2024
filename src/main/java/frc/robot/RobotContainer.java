@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -126,6 +127,12 @@ public class RobotContainer {
         farm5.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(true)));
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
+
+        // Adjust shoot heading angle, using DPad
+        POVButton dpadLeft = new POVButton(m_driverController.getHID(), 270);
+        dpadLeft.onTrue(new InstantCommand(() -> m_driveTrain.adjustHeading(false)));
+        POVButton dpadRight = new POVButton(m_driverController.getHID(), 90);
+        dpadRight.onTrue(new InstantCommand(() -> m_driveTrain.adjustHeading(true)));
 
         // schedule Drive command, which will cancel other control of Drivetrain, ie active heading
         JoystickButton farm12 = new JoystickButton(m_farm, 12);

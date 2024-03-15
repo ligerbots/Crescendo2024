@@ -122,6 +122,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
         SmartDashboard.putBoolean("shooterPivot/onGoal", angleWithinTolerance());
+        SmartDashboard.putNumber("shooterPivot/adjustment", Math.toDegrees(m_angleAdjustment));
 
         setCoastMode();
 

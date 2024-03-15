@@ -105,6 +105,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
         SmartDashboard.putNumber("elevator/encoder", Units.metersToInches(getLength()));
         SmartDashboard.putNumber("elevator/current", m_motor.getOutputCurrent());
         SmartDashboard.putBoolean("elevator/onGoal", lengthWithinTolerance());
+        SmartDashboard.putNumber("elevator/adjustment", Units.metersToInches(m_lengthAdjustment));
         
         // SmartDashboard.putNumber("elevator/stringPot", Units.metersToInches(getPotentiometerReadingMeters()));
 

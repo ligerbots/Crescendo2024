@@ -29,9 +29,6 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final static double KI = 0.0;
     private final static double KD = 0.0;
 
-    // Angle offset from directly at Speaker
-    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
-
     private final PIDController m_turnHeadingPID;
 
     public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
@@ -60,7 +57,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
         // auto aiming using PID
 
         // MathUtil.angleModulus forces -pi -> pi
-        double wantedRadians = MathUtil.angleModulus(m_wantedHeadingSupplier.get().getRadians() + SHOOT_OFFSET_RADIANS);
+        double wantedRadians = MathUtil.angleModulus(m_wantedHeadingSupplier.get().getRadians() + m_driveTrain.getHeadingAdjustment());
         double headingRadians = MathUtil.angleModulus(m_driveTrain.getHeading().getRadians());
 
         double turnJoyStick = m_joystickTurnSupplier.getAsDouble();
