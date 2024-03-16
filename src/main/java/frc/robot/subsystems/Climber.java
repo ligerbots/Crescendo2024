@@ -41,6 +41,8 @@ public class Climber extends SubsystemBase {
     // Protection values
     private static final double MAX_WINCH_ROTATIONS_ALLOWED = 350.0;
     private static final double MAX_WINCH_CURRENT = 100.0;
+    // Current limit in the SparkMax
+    private static final int WINCH_CURRENT_LIMIT = 40;
 
     private static final double MAX_ROTATION_RETRACT = 290.0;
 
@@ -50,7 +52,7 @@ public class Climber extends SubsystemBase {
     private static final double WINCH_RETRACT_SPEED = 0.5;
     public static final double WINCH_MANUAL_SPEED = 0.3;
     private static final double WINCH_CLIMB_SPEED = 0.5;
-    private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
+    private static final double WINCH_CLIMB_ADJUST_SPEED = 0.5;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
     private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(15.0);
 
@@ -73,14 +75,15 @@ public class Climber extends SubsystemBase {
         m_driveTrain = drivetrain;
 
         m_rightWinch = new CANSparkMax(Constants.RIGHT_CLIMBER_CAN_ID, MotorType.kBrushless);
+        m_rightWinch.restoreFactoryDefaults();
+        m_rightWinch.setSmartCurrentLimit(WINCH_CURRENT_LIMIT);
+
         m_leftWinch = new CANSparkMax(Constants.LEFT_CLIMBER_CAN_ID, MotorType.kBrushless);
+        m_leftWinch.restoreFactoryDefaults();
+        m_leftWinch.setSmartCurrentLimit(WINCH_CURRENT_LIMIT);
 
         m_leftEncoder = m_leftWinch.getEncoder();
         m_rightEncoder = m_rightWinch.getEncoder();
-
-        // Let's keep everything in rotations
-        // m_leftEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO*Math.PI*NOMINAL_WINCH_DIAMETER);
-        // m_rightEncoder.setPositionConversionFactor(WINCH_GEAR_RATIO*Math.PI*NOMINAL_WINCH_DIAMETER);
 
         m_leftWinch.restoreFactoryDefaults();
         m_leftWinch.setInverted(false);
