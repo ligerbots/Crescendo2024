@@ -58,8 +58,10 @@ public class DriveTrain extends SubsystemBase {
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
 
-    public static final double ANGLE_TOLERANCE_DEGREES = 5;
+    public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
+    public static final double AMP_DRIVE_MAX_METERS = 1.5;
+    
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
@@ -131,14 +133,14 @@ public class DriveTrain extends SubsystemBase {
 
     private final Field2d m_field = new Field2d();
 
-    // // PID controller for swerve
-    // private final PIDController m_xController = new PIDController(X_PID_CONTROLLER_P, 0, 0);
-    // private final PIDController m_yController = new PIDController(Y_PID_CONTROLLER_P, 0, 0);
-    // private final ProfiledPIDController m_thetaController = new ProfiledPIDController(THETA_PID_CONTROLLER_P,
-    //         0, 0,
-    //         new TrapezoidProfile.Constraints(4 * Math.PI, 4 * Math.PI));
+    // offset to heading when shooting into Speaker
+    // persists throughout the match
+    private final static double HEADING_ADJUSTMENT_STEP = Math.toRadians(1);
+    // Angle offset from directly at Speaker
+    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
 
-    // TODO: test if using MAX_VELOCITY_METERS_PER_SECOND of whole robot for Max
+    private double m_headingAdjustment = SHOOT_OFFSET_RADIANS;
+
     // Module Speed per module is appropriate
     private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
@@ -324,6 +326,14 @@ public class DriveTrain extends SubsystemBase {
         m_simChassisSpeeds = new ChassisSpeeds();
     }
 
+    public void adjustHeading(boolean goUp) {
+        m_headingAdjustment += (goUp ? 1 : -1) * HEADING_ADJUSTMENT_STEP;
+    }
+
+    public double getHeadingAdjustment() {
+        return m_headingAdjustment;
+    }
+
     // for the beginning of auto rountines
     public void resetDrivingModes() {
         setFieldCentricMode(true);
@@ -404,7 +414,15 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public double getSpeakerDistance() {
-        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.SPEAKER));
+        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER));
+    }
+
+    public Rotation2d headingToSpeaker() {
+        return FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER).minus(getPose().getTranslation()).getAngle();
+    }
+
+    public double getAmpDistance() {
+        return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.BLUE_AMP));
     }
 
     public Command followPath(PathPlannerPath path) {
@@ -446,6 +464,7 @@ public class DriveTrain extends SubsystemBase {
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
         SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
         // SmartDashboard.putNumber("drivetrain/yaw", getYaw().getDegrees());
+        SmartDashboard.putNumber("drivetrain/headingAdjust", m_headingAdjustment);
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
         
