@@ -36,7 +36,7 @@ public class TestShoot extends SequentialCommandGroup {
     }
 
     private Shooter.ShooterValues getShootValues() {
-        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.inchesToMeters(m_driveTrain.getSpeakerDistance()));
+        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(m_driveTrain.getSpeakerDistance()));
         return new Shooter.ShooterValues(m_leftRpm.getAsDouble(), m_rightRpm.getAsDouble(), 0);
     }
 }

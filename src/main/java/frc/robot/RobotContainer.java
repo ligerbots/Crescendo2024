@@ -167,13 +167,10 @@ public class RobotContainer {
         //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
         //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
-        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        // farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
-        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
-
-        // JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
+        JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        farm24.onTrue(new TestShoot(m_driveTrain, m_shooter,
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
