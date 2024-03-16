@@ -111,15 +111,18 @@ public class AprilTagVision implements Subsystem {
         }
 
         // set the driver mode to false
-        m_aprilTagCameraFront.setDriverMode(false);
-        m_aprilTagCameraBack.setDriverMode(false);
+        setDriverMode(false);
+    }
+
+    public void setDriverMode(boolean mode) {
+        m_aprilTagCameraFront.setDriverMode(mode);
+        m_aprilTagCameraBack.setDriverMode(mode);
     }
 
     @Override
     public void periodic() {
         // set the driver mode to false
-        m_aprilTagCameraFront.setDriverMode(false);
-        m_aprilTagCameraBack.setDriverMode(false);
+        setDriverMode(false);
     }
             
     public void updateSimulation(Pose2d pose) {

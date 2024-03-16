@@ -142,6 +142,10 @@ public class RobotContainer {
         JoystickButton farm15 = new JoystickButton(m_farm, 15);
         farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
 
+        // fix camera mode
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new CameraMode(m_noteVision, m_aprilTagVision));
+
         // Test commands
 
         JoystickButton farm22 = new JoystickButton(m_farm, 22);

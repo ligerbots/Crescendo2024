@@ -59,11 +59,15 @@ public class NoteVision extends SubsystemBase {
         }
 
         // set the driver mode to false
-        m_noteCamera.setDriverMode(false);
+        setDriverMode(false);
     }
 
     public void updateSimulation(Pose2d pose) {
         m_visionSim.update(pose);
+    }
+
+    public void setDriverMode(boolean mode) {
+        m_noteCamera.setDriverMode(mode);
     }
 
     // Get visible NOTEs in robot-centric coordinates
@@ -153,7 +157,7 @@ public class NoteVision extends SubsystemBase {
     @Override
     public void periodic() {
         // set the driver mode to false
-        m_noteCamera.setDriverMode(false);
+        setDriverMode(false);
 
         // // DEBUG
         // List<Translation2d> notes = getNotes();

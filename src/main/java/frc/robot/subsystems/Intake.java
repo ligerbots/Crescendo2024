@@ -34,7 +34,8 @@ public class Intake extends SubsystemBase {
     CANSparkMax m_centeringMotor;
 
     Timer m_timer = new Timer();
-    
+    boolean m_prevHasNote = false;
+
     public Intake(){
         m_intakeMotor = new CANSparkMax(Constants.INTAKE_MOTOR_CAN_ID, MotorType.kBrushless);
         m_centeringMotor = new CANSparkMax(Constants.CENTERING_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -55,16 +56,24 @@ public class Intake extends SubsystemBase {
             // feeder current spikes when the motors start
             if (m_intakeMotor.getOutputCurrent() < INTAKE_BASE_MAX_CURRENT) {
                 m_noteIntakeState = IntakeState.WAITING;
+                m_prevHasNote = false;
             }
         } else if (m_noteIntakeState == IntakeState.WAITING) {
-            if (m_intakeMotor.getOutputCurrent() > INTAKE_NOTE_MIN_CURRENT) {
-                m_noteIntakeState = IntakeState.NOTE_ENTERING;
-            }
-        } else if (m_noteIntakeState == IntakeState.NOTE_ENTERING) {
-            if (m_intakeMotor.getOutputCurrent() < INTAKE_NOTE_OUT_MAX_CURRENT) {
+            boolean noteState = noteInCentering();
+            if (m_prevHasNote && !noteState) {
                 m_noteIntakeState = IntakeState.NOTE_PAST_INTAKE;
                 m_timer.restart();
             }
+            m_prevHasNote = noteState;
+            
+        //     if (m_intakeMotor.getOutputCurrent() > INTAKE_NOTE_MIN_CURRENT) {
+        //         m_noteIntakeState = IntakeState.NOTE_ENTERING;
+        //     }
+        // } else if (m_noteIntakeState == IntakeState.NOTE_ENTERING) {
+        //     if (m_intakeMotor.getOutputCurrent() < INTAKE_NOTE_OUT_MAX_CURRENT) {
+        //         m_noteIntakeState = IntakeState.NOTE_PAST_INTAKE;
+        //         m_timer.restart();
+        //     }
         } else if (m_noteIntakeState == IntakeState.NOTE_PAST_INTAKE) {
             if (m_timer.hasElapsed(0.1)) {
                 m_noteIntakeState = IntakeState.HAS_NOTE;
