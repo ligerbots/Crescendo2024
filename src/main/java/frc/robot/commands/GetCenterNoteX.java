@@ -51,7 +51,8 @@ public class GetCenterNoteX extends GetNoteX {
             ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
             ).deadlineWith(
-                new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+                // new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+                new StartIntake(intake, shooter, shooterPivot, elevator)
             ),
 
             // wait up to 1 second to suck the Note in all the way
