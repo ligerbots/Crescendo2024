@@ -29,7 +29,7 @@ public abstract class GetNoteX extends SequentialCommandGroup {
         {
             put(FieldConstants.NOTE_C_1, new String[] { "Start_1 to Note_C_1", "Start_2 to Note_C_1", "Note_C_1 to Shoot_1" });
             put(FieldConstants.NOTE_C_2, new String[] { "Start_1 to Note_C_2", "Start_2 to Note_C_2", "Shoot_1 to Note_C_2", "Note_C_2 to Shoot_1" });
-            put(FieldConstants.NOTE_C_3, new String[] { "Start_2 to Note_C_3", "Note_C_3 to Shoot_3" });
+            put(FieldConstants.NOTE_C_3, new String[] { "Start_2 to Note_C_3", "Note_C_3 to Shoot_1" });
             put(FieldConstants.NOTE_C_4, new String[] { "Start_3 to Note_C_4", "Shoot_2 to Note_C_4", "Note_S_3 to Note_C_4", "Note_C_4 to Shoot_2" });
             put(FieldConstants.NOTE_C_5, new String[] { "Start_3 to Note_C_5", "Note_S_3 to Note_C_5", "Shoot_2 to Note_C_5","Note_C_5 to Shoot_2" });
 
