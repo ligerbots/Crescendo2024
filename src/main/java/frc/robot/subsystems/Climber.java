@@ -39,7 +39,7 @@ public class Climber extends SubsystemBase {
 
 
     // Protection values
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 234.0;
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 350.0;  // TODO TOO BIG!!
     private static final double MAX_WINCH_CURRENT = 100.0;
 
     private static final double MAX_ROTATION_RETRACT = 150.0;
@@ -52,7 +52,7 @@ public class Climber extends SubsystemBase {
     private static final double WINCH_CLIMB_SPEED = 0.5;
     private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
-    private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(5.0);
+    private static final double ROLL_ANGLE_EMERGENCY_STOP = Units.degreesToRadians(15.0);
 
     // State definitions:
     // IDLE - Winches holding hooks in place, Should be used for entire match until End Game.
