@@ -12,6 +12,8 @@ note_name = sys.argv[1]
 
 file_list = sys.argv[2:]
 
+show_rotation = True 
+
 def find_point_in_files(note_name, file_list):
     for i in file_list:
         # pathfilename = os.path.basename(i)
@@ -30,10 +32,21 @@ def find_point_in_files(note_name, file_list):
         else:
             field_points[start_point] = [{pathfilename: start['anchor']}]
 
+#        print(path_doc['goalEndState']['rotation'])
+#        if show_rotation and note_name == end_point:
+#            display_point = {pathfilename: [ end['anchor'], {'rotation': path_doc['goalEndState']['rotation']} ] }
+#        else:
+#            display_point = {pathfilename: end['anchor']}
+
+        if show_rotation and note_name == end_point:
+            end['anchor']['rotation'] = path_doc['goalEndState']['rotation'] 
+
+        display_point = {pathfilename: end['anchor']}
+
         if end_point in field_points:
-            field_points[end_point].append({pathfilename: end['anchor']})
+            field_points[end_point].append(display_point)
         else:
-            field_points[end_point] = [{pathfilename: end['anchor']}]
+            field_points[end_point] = [display_point]
     return field_points
 
 field_points = find_point_in_files(note_name, file_list)
