@@ -22,7 +22,7 @@ import frc.robot.subsystems.Shooter;
 
 public abstract class GetNoteX extends SequentialCommandGroup {
 
-    public static final double INTAKE_EXTRA_WAIT_TIME = 0.5;
+    public static final double INTAKE_EXTRA_WAIT_TIME = 0.6;
     
     // NOTE: the last path in the list is the "return" path done before shooting (which is optional, set to null if not needed)
     protected static final Map<Translation2d, String[]> s_pathLookup = new HashMap<>() {
