@@ -152,14 +152,17 @@ public class NoteVision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // DEBUG
-        List<Translation2d> notes = getNotes();
-        SmartDashboard.putNumber("noteVision/nFound", notes.size());
-        if (notes.size() > 0) {
-            Translation2d p = notes.get(0);
-            SmartDashboard.putNumber("noteVision/x", p.getX());
-            SmartDashboard.putNumber("noteVision/y", p.getY());
-        }
+        // set the driver mode to false
+        m_noteCamera.setDriverMode(false);
+
+        // // DEBUG
+        // List<Translation2d> notes = getNotes();
+        // SmartDashboard.putNumber("noteVision/nFound", notes.size());
+        // if (notes.size() > 0) {
+        //     Translation2d p = notes.get(0);
+        //     SmartDashboard.putNumber("noteVision/x", p.getX());
+        //     SmartDashboard.putNumber("noteVision/y", p.getY());
+        // }
     }
 
     private void initializeSimulation() {
