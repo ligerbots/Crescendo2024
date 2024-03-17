@@ -12,11 +12,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Intake;
 
 public class RumbleOnIntake extends Command {
-    static final double RUMBLING_WAIT_TIME = 0.3;
+    private static final double RUMBLING_WAIT_TIME = 0.3;
     private final XboxController m_xbox;
     private final Intake m_intake;
     
     private final Timer m_timer = new Timer();
+
+    // track on/off state. We want to trigger on the 2nd True->False transition
     private boolean m_prevState;
     private boolean m_pastFirst;
 

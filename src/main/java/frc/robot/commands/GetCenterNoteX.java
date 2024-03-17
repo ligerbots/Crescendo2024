@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+// import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
@@ -86,12 +86,13 @@ public class GetCenterNoteX extends GetNoteX {
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
             Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
 
+            // heading here is the heading along the path
             List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
                     new Pose2d(poseBlue.getTranslation(), heading),
                     new Pose2d(m_targetNote, heading));
 
             // Create the path using the bezier points created above
-            // Note final heading should be "backward" since the intake is on the back
+            // Note final Robot heading should be "backward" since the intake is on the back
             return new PathPlannerPath(
                     bezierPoints,
                     new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,

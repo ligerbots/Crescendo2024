@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterPivot;
 
 public class SetPivotAngle extends Command {
-    ShooterPivot m_shooterPivot;
-    DoubleSupplier m_angleProvider;
-    final boolean m_inclAdjustment;
+    private final ShooterPivot m_shooterPivot;
+    private final DoubleSupplier m_angleProvider;
+    private final boolean m_inclAdjustment;
 
     public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians, boolean includeAdjustment) {
         m_shooterPivot = shooterPivot;

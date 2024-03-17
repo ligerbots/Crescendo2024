@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
 
 public class SetElevatorLength extends Command {
-    Elevator m_elevator;
-    DoubleSupplier m_lengthSupplier;
-    final boolean m_inclAdjustment;
+    private final Elevator m_elevator;
+    private final DoubleSupplier m_lengthSupplier;
+    private final boolean m_inclAdjustment;
 
     /** Creates a new SetElevatorLength. */
     public SetElevatorLength(Elevator elevator, DoubleSupplier length, boolean includeAdjustment) {
