@@ -37,7 +37,7 @@ public class GetStageNoteX extends GetNoteX {
                 .deadlineWith(new StartIntake(intake, shooter, shooterPivot, elevator)),
 
             // wait up to 1 more second to suck the Note in all the way
-            //new WaitUntilCommand(intake::hasNote).withTimeout(2),
+            // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
             
             // turn off Shooter and Intake

@@ -25,15 +25,12 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final DoubleSupplier m_joystickYSupplier;
     private final DoubleSupplier m_joystickTurnSupplier;
 
-    private final static double KP = 0.01; // TODO pick correct values
+    private final static double KP = 0.5; // TODO pick correct values
     private final static double KI = 0.0;
     private final static double KD = 0.0;
 
     private final PIDController m_turnHeadingPID;
 
-    /**
-     * Creates a new autoAim.
-     */
     public ActiveTurnToHeadingWithDriving(DriveTrain driveTrain, Supplier<Rotation2d> wantedHeading,
             DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier, DoubleSupplier joystickTurnSupplier) {
         m_driveTrain = driveTrain;
@@ -43,6 +40,8 @@ public class ActiveTurnToHeadingWithDriving extends Command {
         m_joystickTurnSupplier = joystickTurnSupplier;
 
         m_turnHeadingPID = new PIDController(KP, KI, KD);
+        m_turnHeadingPID.enableContinuousInput(-Math.PI, Math.PI);
+
         addRequirements(m_driveTrain);
     }
 
@@ -56,15 +55,17 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     @Override
     public void execute() {
         // auto aiming using PID
-        double wantedDegrees = m_wantedHeadingSupplier.get().getDegrees();
-        double headingDegrees = m_driveTrain.getHeading().getDegrees();
+
+        // MathUtil.angleModulus forces -pi -> pi
+        double wantedRadians = MathUtil.angleModulus(m_wantedHeadingSupplier.get().getRadians() + m_driveTrain.getHeadingAdjustment());
+        double headingRadians = MathUtil.angleModulus(m_driveTrain.getHeading().getRadians());
 
         double turnJoyStick = m_joystickTurnSupplier.getAsDouble();
         double speed;
         if (Math.abs(turnJoyStick) > 0.01) {
             speed = turnJoyStick;
         } else {
-            speed = -MathUtil.clamp(m_turnHeadingPID.calculate(headingDegrees, wantedDegrees), -1.0, 1.0);
+            speed = MathUtil.clamp(m_turnHeadingPID.calculate(headingRadians, wantedRadians), -1.0, 1.0);
         }
 
         // last param "false" is robotCentric driving. Only used in "precision mode".
@@ -72,8 +73,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
         m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), speed, false);
 
         // Record whether at the right heading, so that other commands can check
-        m_driveTrain.setOnGoalForActiveTurn(
-            Math.abs(headingDegrees - wantedDegrees) < DriveTrain.ANGLE_TOLERANCE_DEGREES);
+        m_driveTrain.setOnGoalForActiveTurn(Math.abs(headingRadians - wantedRadians) < DriveTrain.ANGLE_TOLERANCE_RADIANS);
     }
 
     // Called once the command ends or is interrupted.

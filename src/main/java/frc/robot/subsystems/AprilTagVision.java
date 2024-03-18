@@ -32,10 +32,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 
-public class AprilTagVision {
+public class AprilTagVision implements Subsystem {
     // variable to turn on/off our private tag layout
     // if this is false, the compiler should remove all the unused code.
     public static final boolean USE_PRIVATE_TAG_LAYOUT = false;
@@ -111,10 +111,20 @@ public class AprilTagVision {
         }
 
         // set the driver mode to false
-        m_aprilTagCameraFront.setDriverMode(false);
-        m_aprilTagCameraBack.setDriverMode(false);
+        setDriverMode(false);
     }
 
+    public void setDriverMode(boolean mode) {
+        m_aprilTagCameraFront.setDriverMode(mode);
+        m_aprilTagCameraBack.setDriverMode(mode);
+    }
+
+    @Override
+    public void periodic() {
+        // set the driver mode to false
+        setDriverMode(false);
+    }
+            
     public void updateSimulation(Pose2d pose) {
         m_visionSim.update(pose);
     }

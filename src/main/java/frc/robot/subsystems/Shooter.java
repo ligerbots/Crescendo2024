@@ -53,8 +53,8 @@ public class Shooter extends SubsystemBase {
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
-    static final double K_FF_LEFT = 0.000234;
-    static final double K_FF_RIGHT = 0.000215;
+    static final double K_FF_LEFT = 0.00024;
+    static final double K_FF_RIGHT = 0.00022;
 
     CANSparkMax m_feederMotor;
     RelativeEncoder m_feederMotorEncoder;
@@ -99,9 +99,9 @@ public class Shooter extends SubsystemBase {
             Map.entry(Units.inchesToMeters(52), new ShooterValues(3000.0, 3000.0, Math.toRadians(55.0))),
             Map.entry(Units.inchesToMeters(104.3), new ShooterValues(3000.0, 3000.0, Math.toRadians(38.0))),
             Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(31.5))),
-            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3300.0, 3300.0, Math.toRadians(30.0))),
-            Map.entry(Units.inchesToMeters(159.8), new ShooterValues(3500.0, 3500.0, Math.toRadians(24.0))),
-            Map.entry(Units.feetToMeters(17.0), new ShooterValues(3500.0, 4000.0, Math.toRadians(21.0)))
+            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3300.0, 3300.0, Math.toRadians(30.5))),
+            Map.entry(Units.inchesToMeters(159.8), new ShooterValues(3500.0, 3500.0, Math.toRadians(26.0))),
+            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4500.0, 4500.0, Math.toRadians(23.25)))
             ));
 
     // Shooter class constructor, initialize arrays for motors controllers,

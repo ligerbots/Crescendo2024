@@ -7,7 +7,6 @@ import java.util.Set;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.PathPoint;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,7 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+// import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
@@ -52,11 +51,12 @@ public class GetCenterNoteX extends GetNoteX {
             ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
             ).deadlineWith(
-                new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+                // new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
+                new StartIntake(intake, shooter, shooterPivot, elevator)
             ),
 
             // wait up to 1 second to suck the Note in all the way
-            // new WaitUntilCommand(intake::hasNote).withTimeout(1),
+            // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
             // turn off Shooter and intake
@@ -81,19 +81,24 @@ public class GetCenterNoteX extends GetNoteX {
         Pose2d poseBlue = FieldConstants.flipPose(pose);
         // System.out.println("Starting getInitialPath " + poseBlue);
 
-        // this part is used when in center note area, if intended center note is not found
+        // this part is used when in center note area, if intended center note is not
+        // found
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
             Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
-            List<PathPoint> pathPoints = List.of(
-                    new PathPoint(poseBlue.getTranslation()), // starting pose
-                    new PathPoint(m_targetNote));
-            return PathPlannerPath.fromPathPoints(
-                    pathPoints, // position, heading
+
+            // heading here is the heading along the path
+            List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+                    new Pose2d(poseBlue.getTranslation(), heading),
+                    new Pose2d(m_targetNote, heading));
+
+            // Create the path using the bezier points created above
+            // Note final Robot heading should be "backward" since the intake is on the back
+            return new PathPlannerPath(
+                    bezierPoints,
                     new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
                             DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
                             DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
-                    new GoalEndState(0, heading, true)// velocity, acceleration
-            );
+                    new GoalEndState(0, heading.rotateBy(Rotation2d.fromRadians(Math.PI)), true));
         }
 
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));

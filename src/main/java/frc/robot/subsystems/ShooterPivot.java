@@ -4,15 +4,16 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
+// import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+// import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.TrapezoidProfileSubsystem;
 
@@ -49,10 +50,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
 
     // 15:1 planetary plus 48:32 sprockets
-    private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
+    // private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 10.0;
+    private static final double K_P = 5.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -60,13 +61,17 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // Used in conversion factor
     // private static final double RADIANS_PER_MOTOR_ROTATION = 2 * Math.PI * GEAR_RATIO;
 
-    private final DutyCycleEncoder m_absoluteEncoder = new DutyCycleEncoder(0);  
+    // private final DutyCycleEncoder m_absoluteEncoder = new DutyCycleEncoder(0);  
     private final CANSparkMax m_motor;
     private final SparkPIDController m_pidController;
-    private final RelativeEncoder m_encoder;
-
+    // private final RelativeEncoder m_encoder;
+    private final AbsoluteEncoder m_absoluteEncoder;
+    
     // Used for checking if on goal
     private double m_goalRadians = 0;
+
+    // adjustment offset. Starts at 0, but retained throughout a match
+    private double m_angleAdjustment = 0.0;
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot() {
@@ -78,23 +83,30 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
         m_motor.setSmartCurrentLimit(CURRENT_LIMIT);
     
+        m_absoluteEncoder = m_motor.getAbsoluteEncoder();
+        m_absoluteEncoder.setZeroOffset(POSITION_OFFSET);
+
         m_pidController = m_motor.getPIDController();
         m_pidController.setP(K_P);
         m_pidController.setI(K_I);
         m_pidController.setD(K_D);
         m_pidController.setFF(K_FF);
         m_pidController.setOutputRange(-1, 1);
+        m_pidController.setFeedbackDevice(m_absoluteEncoder);
+        m_pidController.setPositionPIDWrappingEnabled(true);
+        m_pidController.setPositionPIDWrappingMinInput(0);
+        m_pidController.setPositionPIDWrappingMaxInput(1.0);
 
         // Absolute encoder - work in rotations
         // m_absoluteEncoder.setDistancePerRotation(2 * Math.PI);
-        m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
+        // m_absoluteEncoder.setPositionOffset(POSITION_OFFSET);
 
         // motor encoder - set calibration and offset to match absolute encoder
-        m_encoder = m_motor.getEncoder();
-        // m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
-        m_encoder.setPositionConversionFactor(GEAR_RATIO);
-        updateMotorEncoderOffset();
-        resetGoal();
+        // m_encoder = m_motor.getEncoder();
+        // // m_encoder.setPositionConversionFactor(RADIANS_PER_MOTOR_ROTATION);
+        // m_encoder.setPositionConversionFactor(GEAR_RATIO);
+        // updateMotorEncoderOffset();
+        // resetGoal();
 
         SmartDashboard.putBoolean("shooterPivot/coastMode", false);
         setCoastMode();
@@ -107,9 +119,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         // Display current values on the SmartDashboard
         // This also gets logged to the log file on the Rio and aids in replaying a match
         SmartDashboard.putNumber("shooterPivot/encoder", Math.toDegrees(getAngleRadians()));
-        SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
+        // SmartDashboard.putNumber("shooterPivot/absoluteEncoder", Math.toDegrees(getAbsEncoderAngleRadians()));
         SmartDashboard.putNumber("shooterPivot/current", m_motor.getOutputCurrent());
         SmartDashboard.putBoolean("shooterPivot/onGoal", angleWithinTolerance());
+        SmartDashboard.putNumber("shooterPivot/adjustment", Math.toDegrees(m_angleAdjustment));
 
         setCoastMode();
 
@@ -128,18 +141,19 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
 
     // get the current pivot angle in radians
     public double getAngleRadians() {
-        return TWO_PI * m_encoder.getPosition();
+        // return TWO_PI * m_encoder.getPosition();
+        return TWO_PI * m_absoluteEncoder.getPosition();
     }
 
     // get the angle from the absolute encoder
-    public double getAbsEncoderAngleRadians() {
-        return TWO_PI * m_absoluteEncoder.getDistance();
-    }
+    // public double getAbsEncoderAngleRadians() {
+    //     return TWO_PI * m_absoluteEncoder.getDistance();
+    // }
 
-    // update the motor encoder offset to match the absolute encoder
-    public void updateMotorEncoderOffset() {
-        m_encoder.setPosition(m_absoluteEncoder.getDistance());
-    }
+    // // update the motor encoder offset to match the absolute encoder
+    // public void updateMotorEncoderOffset() {
+    //     m_encoder.setPosition(m_absoluteEncoder.getDistance());
+    // }
 
     // needs to be public so that commands can get the restricted angle
     public static double limitPivotAngle(double angle) {
@@ -147,24 +161,24 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     }
 
     // set shooterPivot angle in radians
-    public void setAngle(double angle) {
-        m_goalRadians = limitPivotAngle(angle);
+    public void setAngle(double angle, boolean includeAdjustment) {
+        m_goalRadians = limitPivotAngle(angle + (includeAdjustment ? 1 : 0) * m_angleAdjustment);
         super.setGoal(m_goalRadians / TWO_PI);
         SmartDashboard.putNumber("shooterPivot/goal", Math.toDegrees(m_goalRadians));
     }
 
     public boolean angleWithinTolerance() {
         return Math.abs(m_goalRadians - getAngleRadians()) < ANGLE_TOLERANCE_RADIAN;
-
     }
 
     public void adjustAngle(boolean goUp) {
         double adjust = (goUp ? 1 : -1) * ADJUSTMENT_STEP;
-        setAngle(getAngleRadians() + adjust);
+        m_angleAdjustment += adjust;
+        setAngle(m_goalRadians + adjust, false);
     }
 
     public void resetGoal() {
-        setAngle(getAngleRadians());
+        setAngle(getAngleRadians(), false);
     }
 
     public void setCoastMode() {

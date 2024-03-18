@@ -10,24 +10,26 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterPivot;
 
 public class SetPivotAngle extends Command {
-    ShooterPivot m_shooterPivot;
-    DoubleSupplier m_angleProvider;
+    private final ShooterPivot m_shooterPivot;
+    private final DoubleSupplier m_angleProvider;
+    private final boolean m_inclAdjustment;
 
-    public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians) {
+    public SetPivotAngle(ShooterPivot shooterPivot, DoubleSupplier angleRadians, boolean includeAdjustment) {
         m_shooterPivot = shooterPivot;
         m_angleProvider = angleRadians;
+        m_inclAdjustment = includeAdjustment;
 
         addRequirements(m_shooterPivot);
     }
 
-    public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians) {
-        this(shooterPivot, () -> angleRadians);
+    public SetPivotAngle(ShooterPivot shooterPivot, double angleRadians, boolean includeAdjustment) {
+        this(shooterPivot, () -> angleRadians, includeAdjustment);
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_shooterPivot.setAngle(m_angleProvider.getAsDouble());
+        m_shooterPivot.setAngle(m_angleProvider.getAsDouble(), m_inclAdjustment);
     }
 
     // Returns true when the command should end.

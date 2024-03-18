@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -48,12 +49,11 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Intake
-        // m_controller.leftBumper().whileTrue(new StartEndCommand(m_intake::intake, m_intake::stop, m_intake));
-
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
-        m_driverController.leftTrigger().onTrue(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator))
+        m_driverController.leftTrigger()
+                .onTrue(new RumbleOnIntake(m_intake, m_driverController.getHID())
+                        .alongWith(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator)))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
                         .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
 
@@ -62,6 +62,7 @@ public class RobotContainer {
         m_driverController.rightTrigger().onTrue(
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
             .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
+            .alongWith(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()))
         );
         
         m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
@@ -70,12 +71,20 @@ public class RobotContainer {
         m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
                 () -> m_driveTrain.setPrecisionMode(false)));
 
-        m_driverController.a().onTrue(new PrepareAmpShot(m_elevator, m_shooterPivot, m_shooter));
+        m_driverController.a().onTrue(new PrepareAmpShot(m_driveTrain, m_elevator, m_shooterPivot, m_shooter)
+                .onlyIf(() -> m_driveTrain.getAmpDistance() < DriveTrain.AMP_DRIVE_MAX_METERS));
 
         m_driverController.x()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()), 
+                        () -> -modifyAxis(m_driverController.getRightX())));
+        // Bind the header control separately from the other parts of PrepSpeakerShot
+        // This allows us to kill the heading command without killing the rest of it.
+        // TODO: if this works, remove joysticks from above
+        m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+                        () -> -modifyAxis(m_driverController.getLeftY()),
+                        () -> -modifyAxis(m_driverController.getLeftX()),
                         () -> -modifyAxis(m_driverController.getRightX())));
                         
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
@@ -87,7 +96,7 @@ public class RobotContainer {
 
         JoystickButton farm2 = new JoystickButton(m_farm, 2);
         farm2.onTrue(new InstantCommand(m_climber::retractHooks, m_climber)
-                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS))));
+                        .alongWith(new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.CLIMB_ANGLE_RADIANS, false))));
 
         JoystickButton farm3 = new JoystickButton(m_farm, 3);
         farm3.onTrue(new InstantCommand(m_climber::holdHooks, m_climber));
@@ -119,33 +128,49 @@ public class RobotContainer {
         JoystickButton farm10 = new JoystickButton(m_farm, 10);
         farm10.onTrue(new InstantCommand(() -> m_shooterPivot.adjustAngle(false)));
 
+        // Adjust shoot heading angle, using DPad
+        POVButton dpadLeft = new POVButton(m_driverController.getHID(), 270);
+        dpadLeft.onTrue(new InstantCommand(() -> m_driveTrain.adjustHeading(false)));
+        POVButton dpadRight = new POVButton(m_driverController.getHID(), 90);
+        dpadRight.onTrue(new InstantCommand(() -> m_driveTrain.adjustHeading(true)));
+
+        // schedule Drive command, which will cancel other control of Drivetrain, ie active heading
+        JoystickButton farm12 = new JoystickButton(m_farm, 12);
+        farm12.onTrue(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()));
+
         // reset zero of elevator
         JoystickButton farm15 = new JoystickButton(m_farm, 15);
         farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
 
+        // fix camera mode
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new CameraMode(m_noteVision, m_aprilTagVision));
+
         // Test commands
 
-        JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        farm12.onTrue(new SetElevatorLength(m_elevator,
-                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0))).withTimeout(5.0));
+        JoystickButton farm22 = new JoystickButton(m_farm, 22);
+        farm22.onTrue(new SetElevatorLength(m_elevator,
+                () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0)), false).withTimeout(5.0));
 
-        JoystickButton farm14 = new JoystickButton(m_farm, 14);
-        farm14.onTrue(new SetPivotAngle(m_shooterPivot,
-                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0))).withTimeout(5.0));
+        JoystickButton farm23 = new JoystickButton(m_farm, 23);
+        farm23.onTrue(new SetPivotAngle(m_shooterPivot,
+                () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0)), false).withTimeout(5.0));
 
+        JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        farm24.onTrue(new TestShoot(m_driveTrain, m_shooter,
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
+        // JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        // farm24.whileTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+        //                 () -> -modifyAxis(m_driverController.getLeftY()),
+        //                 () -> -modifyAxis(m_driverController.getLeftX()),
+        //                 () -> -modifyAxis(m_driverController.getRightX())));
+        
         // JoystickButton farm15 = new JoystickButton(m_farm, 15);
         // farm15.onTrue(new TestShootSpeed(m_shooter,
         //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
         //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
-
-        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        // farm16.onTrue(new TestShoot(m_driveTrain, m_shooter,
-        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
-
-        // JoystickButton farm12 = new JoystickButton(m_farm, 12);
-        // farm12.onTrue(new OutTakeTransferRotations(m_shooter));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter
@@ -192,6 +217,10 @@ public class RobotContainer {
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
+        autoName = "S1-S2-S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
         autoName = "S2-S3-C5";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
@@ -208,6 +237,11 @@ public class RobotContainer {
                 new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
+        autoName = "C5-C4";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
         autoName = "C2-C1";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
@@ -216,6 +250,26 @@ public class RobotContainer {
         autoName = "C1-C2";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        
+        autoName = "C1-C3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                
+        autoName = "C1-C3-C2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "C2-C3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+
+        autoName = "C3-C2";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
         autoName = "C3";
@@ -297,5 +351,9 @@ public class RobotContainer {
 
     public ShooterPivot getShooterPivot() {
         return m_shooterPivot;
+    }
+
+    public Intake getIntake() {
+        return m_intake;
     }
 }

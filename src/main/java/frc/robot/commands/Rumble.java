@@ -10,21 +10,19 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class Rumble extends Command {
     static final double RUMBLING_WAIT_TIME = 0.3;
-    XboxController m_xbox;
-    Timer m_timer;
+    private final XboxController m_xbox;
+    private final Timer m_timer = new Timer();
 
     /** Creates a new Rumble. */
     public Rumble(XboxController xbox) {
-        // Use addRequirements() here to declare subsystem dependencies.
         m_xbox = xbox;
-        m_timer = new Timer();
     }
 
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_timer.reset();
-        m_timer.start();
+        m_timer.restart();
+
         // start rumbling
         m_xbox.setRumble(RumbleType.kBothRumble, 1);
     }
