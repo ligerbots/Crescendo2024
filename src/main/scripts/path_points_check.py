@@ -1,10 +1,27 @@
 import json
 import os
 import sys
+from math import atan, degrees
 from pathlib import Path
 
 # usage:
 # python ./src/main/scripts/path_points_check.py Note_S_1 `find src/main/deploy/pathplanner/paths/` | less
+
+# calc angle to speaker shot from field coords in meters
+def calc_shoot_angle(x, y):
+
+    if y == 5.54:
+        ret_val = 180
+
+    if y > 5.54:
+        ratio = (y-5.54)/x
+        ret_val = -1 * (180-degrees(atan(ratio)))
+
+    if y < 5.54:
+        ratio = (5.54-y)/x
+        ret_val = 180-degrees(atan(ratio))
+
+    return round(ret_val, 3)
 
 field_points = {}
 
@@ -40,6 +57,7 @@ def find_point_in_files(note_name, file_list):
 
         if show_rotation and note_name == end_point:
             end['anchor']['rotation'] = path_doc['goalEndState']['rotation'] 
+            end['anchor']['speakerShotAngle'] = calc_shoot_angle(end['anchor']['x'], end['anchor']['y'])
 
         display_point = {pathfilename: end['anchor']}
 
