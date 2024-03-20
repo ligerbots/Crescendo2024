@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -197,26 +198,27 @@ public class Climber extends SubsystemBase {
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
+            //TODO: Check if roll & pitch in drivetrain are swaped correctly, may need to flip sign.
+            final double ADJUST_SPEED = Math.signum(rollAngle) *
+                        Math.min(Math.abs(rollAngle)/ROLL_ANGLE_TOLERANCE, 1.0) * WINCH_CLIMB_ADJUST_SPEED;
+
+            //Left side.
             if (leftPosition - m_leftEngagedPosition >= CLIMB_ROTATIONS_AFTER_ENGAGE) {
                 m_leftWinch.set(0.0);
                 m_leftHookComplete = true;
+            } else if (Math.abs(rollAngle) > ROLL_ANGLE_TOLERANCE) { //If not done, adjust speed according to tilt
+                    m_leftWinch.set(MathUtil.clamp(WINCH_CLIMB_SPEED + ADJUST_SPEED,-1,1)); //TODO: Check if sign need flipping
             }
+            //Right side.
             if (rightPosition - m_rightEngagedPosition >= CLIMB_ROTATIONS_AFTER_ENGAGE) {
                 m_rightWinch.set(0.0);
                 m_rightHookComplete = true;
+            } else if (Math.abs(rollAngle) > ROLL_ANGLE_TOLERANCE) { //If not done, adjust speed according to tilt
+                    m_rightWinch.set(MathUtil.clamp(WINCH_CLIMB_SPEED - ADJUST_SPEED,-1,1)); //TODO: Check if sign need fliping
             }
             // If both hooks are in enough, just hold where we are.
             if (m_leftHookComplete && m_rightHookComplete) {
                 m_climberState = ClimberState.HOLDING;
-            }
-            else {
-                // Need to keep the robot level. We defined a voltage for a decent climbing rate.
-                // Keep the left side at that rate and adjust the right side based on the roll angle
-                if (Math.abs(rollAngle) > ROLL_ANGLE_TOLERANCE) {
-                    m_rightWinch.set(WINCH_CLIMB_SPEED + 
-                        -1 * Math.signum(rollAngle) *
-                        Math.min(Math.abs(rollAngle)/ROLL_ANGLE_TOLERANCE, 1.0) * WINCH_CLIMB_ADJUST_SPEED);
-                }
             }
         }
     }
