@@ -10,15 +10,18 @@ from pathlib import Path
 # calc angle to speaker shot from field coords in meters
 def calc_shoot_angle(x, y):
 
-    if y == 5.54:
+#    TARGET_X = 0  ## currently unused, assuming target is ON the speaker wall
+    TARGET_Y = 5.54
+
+    if y == TARGET_Y:
         ret_val = 180
 
-    if y > 5.54:
-        ratio = (y-5.54)/x
+    if y > TARGET_Y:
+        ratio = (y-TARGET_Y)/x
         ret_val = -1 * (180-degrees(atan(ratio)))
 
-    if y < 5.54:
-        ratio = (5.54-y)/x
+    if y < TARGET_Y:
+        ratio = (TARGET_Y-y)/x
         ret_val = 180-degrees(atan(ratio))
 
     return round(ret_val, 3)
