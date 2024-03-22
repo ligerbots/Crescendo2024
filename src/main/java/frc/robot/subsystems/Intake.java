@@ -50,6 +50,7 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("intake/intakeCurrent", m_intakeMotor.getOutputCurrent());
         SmartDashboard.putNumber("intake/centeringCurrent", m_centeringMotor.getOutputCurrent());
         SmartDashboard.putBoolean("intake/noteInCentering", noteInCentering());
+        SmartDashboard.putBoolean("intake/hasNote", hasNote());
 
         // look for the Note by checking the Intake current
         if (m_noteIntakeState == IntakeState.MOTOR_START) {
