@@ -464,7 +464,7 @@ public class DriveTrain extends SubsystemBase {
         // SmartDashboard.putNumber("drivetrain/pitch", getPitch().getDegrees());
         SmartDashboard.putNumber("drivetrain/roll", getRoll().getDegrees());
         // SmartDashboard.putNumber("drivetrain/yaw", getYaw().getDegrees());
-        SmartDashboard.putNumber("drivetrain/headingAdjust", m_headingAdjustment);
+        SmartDashboard.putNumber("drivetrain/headingAdjust", Math.toDegrees(m_headingAdjustment));
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
         
