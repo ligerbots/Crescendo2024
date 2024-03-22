@@ -37,11 +37,11 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
     private static final double METER_PER_REVOLUTION = Units.inchesToMeters((1.504*Math.PI)*GEAR_REDUCTION);
     
-    private static final int CURRENT_LIMIT = 30;
+    private static final int CURRENT_LIMIT = 45;
 
     // PID Constants for the reacher PID controller
     // Since we're using Trapeziodal control, all values will be 0 except for P
-    private static final double K_P = 10.0; 
+    private static final double K_P = 20.0; 
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;

@@ -17,8 +17,13 @@ public class PrepareAmpShot extends ParallelCommandGroup {
   public PrepareAmpShot(DriveTrain driveTrain, Elevator elevator, ShooterPivot shooterPivot, Shooter shooter) {
 
     addCommands(
-      new SetElevatorLength(elevator, Elevator.AMP_SCORE_LENGTH, true),
-      new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS, true),
+      // new SetElevatorLength(elevator, Elevator.AMP_SCORE_LENGTH, true),
+      // new SetPivotAngle(shooterPivot, ShooterPivot.AMP_SCORE_ANGLE_RADIANS, true),
+      
+      // just set the elevator and pivot targets, and don't wait for them.
+      // let's driver take control as soon as DriveToAmp stops
+      new InstantCommand(() -> elevator.setLength(Elevator.AMP_SCORE_LENGTH, true)),
+      new InstantCommand(() -> shooterPivot.setAngle(ShooterPivot.AMP_SCORE_ANGLE_RADIANS, true)),
       new InstantCommand(() -> shooter.setSpeakerShootMode(false)),
       new DriveToAmp(driveTrain)
     );
