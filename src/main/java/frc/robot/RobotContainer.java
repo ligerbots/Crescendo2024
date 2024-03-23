@@ -251,20 +251,20 @@ public class RobotContainer {
                 new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
-        // autoName = "C4-C5-C3";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-        //         new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_3 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        autoName = "C4-C5-C3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "C5-C4";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
-        // autoName = "C5-C4-C3";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-        //         new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_3 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+        autoName = "C5-C4-C3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "S3-C5-C4";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5 , FieldConstants.NOTE_C_4  }, 
