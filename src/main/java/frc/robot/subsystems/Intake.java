@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase {
     private IntakeState m_noteIntakeState = IntakeState.IDLE;
 
     // median filter to filter the feeder current, to signal holding a note
-    private final MedianFilter m_medianFilter = new MedianFilter(10);
+    private final MedianFilter m_medianFilter = new MedianFilter(15);
     protected double m_curCenteringMotorCurrent = 0.0;
 
     CANSparkMax m_intakeMotor;
