@@ -59,14 +59,14 @@ public class GetCenterNoteX extends GetNoteX {
             // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
-            // turn off Shooter and intake
-            new InstantCommand(shooter::turnOffShooter),
-            new InstantCommand(intake::stop),
-            new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
 
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
                 .deadlineWith(
+                    // turn off Shooter and intake
+                    new InstantCommand(shooter::turnOffShooter),
+                    new InstantCommand(intake::stop),
+                    new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                     // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
                     new WaitCommand(1.0)
                         .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues))),
