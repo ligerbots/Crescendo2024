@@ -11,6 +11,8 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -59,6 +61,9 @@ public class GetCenterNoteX extends GetNoteX {
             // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
+            // make return path conditional on pickup up note
+            // if (intake.hasNote()) {
+            new ConditionalCommand( 
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
                 .deadlineWith(
@@ -71,10 +76,16 @@ public class GetCenterNoteX extends GetNoteX {
                             // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
                             new WaitCommand(0.5)
                                 .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)))
-                ),
-            // Shoot
-            new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
+                )
+                // .andThen(
+                // // Shoot
+                // new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
+                // )
+                ,
+                Commands.none(),
+                intake.hasNote())
         );
+            // }
     }
 
     private PathPlannerPath getInitialPath() {
@@ -84,27 +95,33 @@ public class GetCenterNoteX extends GetNoteX {
 
         // this part is used when in center note area, if intended center note is not
         // found
-        if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
-            Rotation2d heading = m_targetNote.minus(poseBlue.getTranslation()).getAngle();
 
-            // heading here is the heading along the path
-            List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
-                    new Pose2d(poseBlue.getTranslation(), heading),
-                    new Pose2d(m_targetNote, heading));
+        // // try skipping this, require paths instead
+        // if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
+        // Rotation2d heading =
+        // m_targetNote.minus(poseBlue.getTranslation()).getAngle();
 
-            // Create the path using the bezier points created above
-            // Note final Robot heading should be "backward" since the intake is on the back
-            return new PathPlannerPath(
-                    bezierPoints,
-                    new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY, DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
-                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
-                            DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
-                    new GoalEndState(0, heading.rotateBy(Rotation2d.fromRadians(Math.PI)), true));
-        }
+        // // heading here is the heading along the path
+        // List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
+        // new Pose2d(poseBlue.getTranslation(), heading),
+        // new Pose2d(m_targetNote, heading));
+
+        // // Create the path using the bezier points created above
+        // // Note final Robot heading should be "backward" since the intake is on the
+        // back
+        // return new PathPlannerPath(
+        // bezierPoints,
+        // new PathConstraints(DriveTrain.PATH_PLANNER_MAX_VELOCITY,
+        // DriveTrain.PATH_PLANNER_MAX_ACCELERATION,
+        // DriveTrain.PATH_PLANNER_MAX_ANGULAR_VELOCITY,
+        // DriveTrain.PATH_PLANNER_MAX_ANGULAR_ACCELERATION),
+        // new GoalEndState(0, heading.rotateBy(Rotation2d.fromRadians(Math.PI)),
+        // true));
+        // }
 
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         System.out.println("getInitialPath nearest = " + closestPathStart);
-        return m_candidateStartPaths.get(closestPathStart);       
+        return m_candidateStartPaths.get(closestPathStart);
     }
 
     private Shooter.ShooterValues getShootValues() {
