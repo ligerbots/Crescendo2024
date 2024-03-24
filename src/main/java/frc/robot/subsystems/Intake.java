@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
     // median filter to filter the feeder current, to signal holding a note
     private final MedianFilter m_medianFilter = new MedianFilter(15);
     protected double m_curCenteringMotorCurrent = 0.0;
-    private final LinearFilter m_aveFilter = LinearFilter.movingAverage(1);
+    private final LinearFilter m_aveFilter = LinearFilter.movingAverage(10);
     protected double m_aveCenteringMotorCurrent = 0.0;
 
     CANSparkMax m_intakeMotor;

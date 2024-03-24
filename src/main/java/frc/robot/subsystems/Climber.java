@@ -125,7 +125,8 @@ public class Climber extends SubsystemBase {
 
         // Always check if we're too far off balance, but only while climbing.
         // If the robot tips while driving, don't worry about it.
-        if (m_climberState != ClimberState.IDLE && Math.abs(rollAngle) > ROLL_ANGLE_EMERGENCY_STOP) {
+        if ((m_climberState != ClimberState.IDLE && m_climberState != ClimberState.HOLDING)
+                 && Math.abs(rollAngle) > ROLL_ANGLE_EMERGENCY_STOP) {
             m_climberState = ClimberState.HOLDING;
             m_leftWinch.set(0.0);
             m_rightWinch.set(0.0);
