@@ -59,6 +59,7 @@ public class Intake extends SubsystemBase {
         boolean currState = noteInCentering();
         SmartDashboard.putBoolean("intake/noteInCentering", currState);
         SmartDashboard.putBoolean("intake/hasNote", hasNote());
+        SmartDashboard.putString("intake/intakeState", m_noteIntakeState.toString());
 
         if (m_noteIntakeState == IntakeState.WAITING_FOR_NOTE) {
             if (m_prevState && !currState) {
