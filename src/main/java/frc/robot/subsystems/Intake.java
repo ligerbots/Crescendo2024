@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +30,8 @@ public class Intake extends SubsystemBase {
     // median filter to filter the feeder current, to signal holding a note
     private final MedianFilter m_medianFilter = new MedianFilter(15);
     protected double m_curCenteringMotorCurrent = 0.0;
+    private final LinearFilter m_aveFilter = LinearFilter.movingAverage(1);
+    protected double m_aveCenteringMotorCurrent = 0.0;
 
     CANSparkMax m_intakeMotor;
     CANSparkMax m_centeringMotor;
@@ -51,6 +54,7 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("intake/intakeCurrent", m_intakeMotor.getOutputCurrent());
         SmartDashboard.putNumber("intake/centeringCurrent", m_centeringMotor.getOutputCurrent());
         SmartDashboard.putNumber("intake/filterCenterCurrent", m_curCenteringMotorCurrent);
+        SmartDashboard.putNumber("intake/aveCenterCurrent", m_aveCenteringMotorCurrent);
 
         boolean currState = noteInCentering();
         SmartDashboard.putBoolean("intake/noteInCentering", currState);
@@ -132,6 +136,7 @@ public class Intake extends SubsystemBase {
     public Runnable updateCenteringCurrentReadingPeriodic(){
         return () -> {
             m_curCenteringMotorCurrent = m_medianFilter.calculate(m_centeringMotor.getOutputCurrent());
+            m_aveCenteringMotorCurrent = m_aveFilter.calculate(m_centeringMotor.getOutputCurrent());
         };
     }
 
