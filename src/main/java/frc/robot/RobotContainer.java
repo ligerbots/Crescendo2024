@@ -53,7 +53,7 @@ public class RobotContainer {
         if (Robot.isSimulation()) {
             DriverStation.silenceJoystickConnectionWarning(true);
         }
-        
+
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
         m_driverController.leftTrigger()
@@ -80,13 +80,9 @@ public class RobotContainer {
                 // .onlyIf(() -> m_driveTrain.getAmpDistance() < DriveTrain.AMP_DRIVE_MAX_METERS));
 
         m_driverController.x()
-                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID(),
-                        () -> -modifyAxis(m_driverController.getLeftY()),
-                        () -> -modifyAxis(m_driverController.getLeftX()), 
-                        () -> -modifyAxis(m_driverController.getRightX())));
+                .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID()));
         // Bind the header control separately from the other parts of PrepSpeakerShot
         // This allows us to kill the heading command without killing the rest of it.
-        // TODO: if this works, remove joysticks from above
         m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
                         () -> -modifyAxis(m_driverController.getLeftY()),
                         () -> -modifyAxis(m_driverController.getLeftX()),
@@ -196,11 +192,6 @@ public class RobotContainer {
         m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
         m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
         SmartDashboard.putData("Start Location", m_startLocation);
-
-
-
-
-
         
         // autoName = "S2-S3-C5";
         // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
@@ -208,8 +199,6 @@ public class RobotContainer {
         // autoName = "S2-S3-C4";
         // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_4  }, 
         //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-
-
         
         String autoName = "C1-C2";
         m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(
@@ -335,12 +324,6 @@ public class RobotContainer {
         // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
         //         new Translation2d[] { FieldConstants.NOTE_C_3 }, 
         //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-
-        // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
-
-        // for (String autoNm : autonamesDropdown) {
-        //     m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // }
         
         // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
         SmartDashboard.putData("Chosen Auto", m_chosenAuto);
