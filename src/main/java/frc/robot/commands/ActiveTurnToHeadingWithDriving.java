@@ -25,7 +25,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
     private final DoubleSupplier m_joystickYSupplier;
     private final DoubleSupplier m_joystickTurnSupplier;
 
-    private final static double KP = 0.5; // TODO pick correct values
+    private final static double KP = 0.3; // TODO pick correct values
     private final static double KI = 0.0;
     private final static double KD = 0.0;
 

@@ -24,8 +24,8 @@ public class PrepareAmpShot extends ParallelCommandGroup {
       // let's driver take control as soon as DriveToAmp stops
       new InstantCommand(() -> elevator.setLength(Elevator.AMP_SCORE_LENGTH, true)),
       new InstantCommand(() -> shooterPivot.setAngle(ShooterPivot.AMP_SCORE_ANGLE_RADIANS, true)),
-      new InstantCommand(() -> shooter.setSpeakerShootMode(false)),
-      new DriveToAmp(driveTrain)
+      new InstantCommand(() -> shooter.setSpeakerShootMode(false))
+      // new DriveToAmp(driveTrain)
     );
   }
 }

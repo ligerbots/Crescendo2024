@@ -19,7 +19,7 @@ public class ActiveSetShooter extends Command {
     private final Supplier<Shooter.ShooterValues> m_valueSupplier;
 
     // Number of motor rotations
-    private final double NUMBER_OF_ROTATIONS = 1;
+    private final double NUMBER_OF_ROTATIONS = 1.2;
 
     private static final double PIVOT_WAIT_TIME = 0.2;
 
