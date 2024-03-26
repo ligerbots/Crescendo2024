@@ -45,7 +45,7 @@ public class Climber extends SubsystemBase {
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
-    private static final double WINCH_EXTEND_MAX_SPEED = 0.7;
+    private static final double WINCH_EXTEND_MAX_SPEED = 1.0;
     private static final double WINCH_EXTEND_MIN_SPEED = 0.2;
     private static final double WINCH_RETRACT_SPEED = 0.5;
     public static final double WINCH_MANUAL_SPEED = 0.3;
@@ -210,7 +210,6 @@ public class Climber extends SubsystemBase {
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
-            // TODO: Check if roll & pitch in drivetrain are swapped correctly, may need to flip sign.
             // roll > 0 means left side is high, and adjustSpeed is also > 0
             final double adjustSpeed = WINCH_CLIMB_ADJUST_SPEED * (rollAngle / ROLL_ANGLE_TOLERANCE);
 
