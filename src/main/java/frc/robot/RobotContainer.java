@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -49,6 +50,10 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        if (Robot.isSimulation()) {
+            DriverStation.silenceJoystickConnectionWarning(true);
+        }
+        
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
         m_driverController.leftTrigger()
