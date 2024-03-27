@@ -33,7 +33,7 @@ public class GetCenterNoteX extends GetNoteX {
     }
 
     public GetCenterNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, 
-            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator, boolean alwaysDriveBack) {
 
         super(targetNote, driveTrain, noteVision, shooter, intake);
 
@@ -73,7 +73,7 @@ public class GetCenterNoteX extends GetNoteX {
                                 // we have a Note, so keep going
                                 new WaitCommand(0.5).andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
                                 // no Note, skip
-                                Commands.none(), intake::hasNote)
+                                Commands.print("** SKIPPING DRIVE TO SHOOT **"), () -> (alwaysDriveBack || intake.hasNote()))
                         )
                 ),
 
