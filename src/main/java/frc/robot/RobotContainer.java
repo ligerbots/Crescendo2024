@@ -22,31 +22,32 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-    private final CommandXboxController m_driverController = new CommandXboxController(0);
-    // private final CommandXboxController m_operatorController = new CommandXboxController(1);
-    private final Joystick m_farm = new Joystick(1);
+        private final CommandXboxController m_driverController = new CommandXboxController(0);
+        // private final CommandXboxController m_operatorController = new
+        // CommandXboxController(1);
+        private final Joystick m_farm = new Joystick(1);
 
-    private final NoteVision m_noteVision = new NoteVision();
-    private final AprilTagVision m_aprilTagVision = new AprilTagVision();
-    private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
-    private final Intake m_intake = new Intake();
-    private final Shooter m_shooter = new Shooter();
-    private final ShooterPivot m_shooterPivot = new ShooterPivot();
-    private final Elevator m_elevator = new Elevator();
+        private final NoteVision m_noteVision = new NoteVision();
+        private final AprilTagVision m_aprilTagVision = new AprilTagVision();
+        private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
+        private final Intake m_intake = new Intake();
+        private final Shooter m_shooter = new Shooter();
+        private final ShooterPivot m_shooterPivot = new ShooterPivot();
+        private final Elevator m_elevator = new Elevator();
 
-    private final Climber m_climber = new Climber(m_driveTrain);
+        private final Climber m_climber = new Climber(m_driveTrain);
 
-    private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
-    private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
-    private Command m_prevAutoCommand = null;
-    private Pose2d m_prevInitialPose = new Pose2d();
+        private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
+        private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
+        private Command m_prevAutoCommand = null;
+        private Pose2d m_prevInitialPose = new Pose2d();
 
-    public RobotContainer() {
-        configureBindings();
-        configureAutos();
+        public RobotContainer() {
+                configureBindings();
+                configureAutos();
 
-        m_driveTrain.setDefaultCommand(getDriveCommand());
-    }
+                m_driveTrain.setDefaultCommand(getDriveCommand());
+        }
 
     private void configureBindings() {
         // run the intake as long as the bumper is held.
@@ -57,11 +58,13 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
                         .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
 
-        m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+        // m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
+
+        m_driverController.leftBumper().whileTrue(new InstantCommand(m_intake::intake).alongWith(new InstantCommand(()-> m_shooter.setShooterSpeeds(3000,3000))));
 
         m_driverController.rightTrigger().onTrue(
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
-            .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator))
+            .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)).onlyIf(() -> !m_driverController.leftBumper().getAsBoolean())
             .alongWith(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()))
         );
         
@@ -185,229 +188,262 @@ public class RobotContainer {
         // farm4.onTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
-    private void configureAutos() {
-        // List of start locations
-        m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
-        m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
-        m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
-        SmartDashboard.putData("Start Location", m_startLocation);
+        private void configureAutos() {
+                // List of start locations
+                m_startLocation.setDefaultOption("NotAmp Side", FieldConstants.ROBOT_START_1);
+                m_startLocation.addOption("Center", FieldConstants.ROBOT_START_2);
+                m_startLocation.addOption("Amp Side", FieldConstants.ROBOT_START_3);
+                SmartDashboard.putData("Start Location", m_startLocation);
 
+                // autoName = "S2-S3-C5";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3,
+                // FieldConstants.NOTE_C_5 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
+                // autoName = "S2-S3-C4";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3,
+                // FieldConstants.NOTE_C_4 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
+                String autoName = "C1-C2";
+                m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
+                autoName = "C1-C2-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2,
+                                                FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
+                autoName = "C1-C2-C1";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2,
+                                                FieldConstants.NOTE_C_1 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        
-        // autoName = "S2-S3-C5";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5  }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        // autoName = "S2-S3-C4";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_4  }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C2-C1";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
+                autoName = "C2-C1-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1,
+                                                FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        
-        String autoName = "C1-C2";
-        m_chosenAuto.setDefaultOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C1-C3-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3,
+                                                FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C1-C2-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        autoName = "C1-C2-C1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C1-C3-C2";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3,
+                                                FieldConstants.NOTE_C_2 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C2-C1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C1-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C2-C1-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C2-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C1-C3-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C3-C2";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C1-C3-C2";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C1-C2-S1";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2,
+                                                FieldConstants.BLUE_NOTE_S_1 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C1-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-                
-        autoName = "C2-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_2, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C4-C5";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C3-C2";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C4-C5-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5,
+                                                FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C1-C2-S1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_2, FieldConstants.BLUE_NOTE_S_1 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C5-C4";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C4-C5";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        autoName = "C4-C5-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "C5-C4-C3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4,
+                                                FieldConstants.NOTE_C_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "C5-C4";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        autoName = "C5-C4-C3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "S3-C5-C4";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5,
+                                                FieldConstants.NOTE_C_4 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "S3-C5-C4";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5 , FieldConstants.NOTE_C_4  }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "S3-S2-S1";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2,
+                                                FieldConstants.BLUE_NOTE_S_1 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "S3-S2-S1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        autoName = "S3-S2-S1-C1";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "S3-S2-S1-C1";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2,
+                                                FieldConstants.BLUE_NOTE_S_1, FieldConstants.NOTE_C_1 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "S1-S2-S3";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "S1-S2-S3";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2,
+                                                FieldConstants.BLUE_NOTE_S_3 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        autoName = "S1-S2-S3-C5";
-        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5 }, 
-                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                autoName = "S1-S2-S3-C5";
+                m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                                new Translation2d[] { FieldConstants.BLUE_NOTE_S_1, FieldConstants.BLUE_NOTE_S_2,
+                                                FieldConstants.BLUE_NOTE_S_3, FieldConstants.NOTE_C_5 },
+                                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
-        // autoName = "S1";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_1 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "S1";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_1 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // autoName = "S2";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "S2";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_2 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // autoName = "S3";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "S3";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_3 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // autoName = "S3-S2";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "S3-S2";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_3, FieldConstants.BLUE_NOTE_S_2 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // autoName = "S2-S3";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[] { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "S2-S3";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(new Translation2d[]
+                // { FieldConstants.BLUE_NOTE_S_2, FieldConstants.BLUE_NOTE_S_3 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // autoName = "C1-C3-C2";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-        //         new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_2 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
-        // autoName = "C3";
-        // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-        //         new Translation2d[] { FieldConstants.NOTE_C_3 }, 
-        //         m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                // autoName = "C1-C3-C2";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                // new Translation2d[] { FieldConstants.NOTE_C_1, FieldConstants.NOTE_C_3,
+                // FieldConstants.NOTE_C_2 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3", "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
+                // autoName = "C3";
+                // m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                // new Translation2d[] { FieldConstants.NOTE_C_3 },
+                // m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake,
+                // m_elevator));
 
-        // for (String autoNm : autonamesDropdown) {
-        //     m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain, m_noteVision, m_shooter, m_intake));
-        // }
-        
-        // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
-        SmartDashboard.putData("Chosen Auto", m_chosenAuto);
-    }
+                // List<String> autonamesDropdown = Arrays.asList("S1-S2", "S3-S2", "S1-S2-S3",
+                // "S3-S2-S1", "S2-S1", "S1-C1", "C4", "C5", "S3-C4-C5" );
 
-    public Pose2d getInitialPose() {
-        return FieldConstants.flipPose(m_startLocation.getSelected());
-    }
+                // for (String autoNm : autonamesDropdown) {
+                // m_chosenAuto.addOption(autoNm, new GetMultiNoteGeneric(autoNm, m_driveTrain,
+                // m_noteVision, m_shooter, m_intake));
+                // }
 
-    public Command getAutonomousCommand() {
-        return m_chosenAuto.getSelected();
-    }
-
-    public boolean autoHasChanged() {
-        Command autoCommand = getAutonomousCommand();
-        Pose2d pose = getInitialPose();
-        // warning do not compare poses with "==". That compares object IDs, not value.
-        boolean changed = !pose.equals(m_prevInitialPose) || (m_prevAutoCommand != null && autoCommand != m_prevAutoCommand);
-        m_prevAutoCommand = autoCommand;
-        m_prevInitialPose = pose;
-        return changed;
-    }
-
-    public Command getDriveCommand() {
-        // The controls are for field-oriented driving:
-        // Left stick Y axis -> forward and backwards movement
-        // Left stick X axis -> left and right movement
-        // Right stick X axis -> rotation
-        // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
-        return new Drive(
-                m_driveTrain,
-                () -> -modifyAxis(m_driverController.getLeftY()),
-                () -> -modifyAxis(m_driverController.getLeftX()),
-                () -> -modifyAxis(m_driverController.getRightX()),
-                m_driverController.rightBumper());
-    }
-
-    private static double deadband(double value, double deadband) {
-        if (Math.abs(value) > deadband) {
-            if (value > 0.0) {
-                return (value - deadband) / (1.0 - deadband);
-            } else {
-                return (value + deadband) / (1.0 - deadband);
-            }
-        } else {
-            return 0.0;
+                // m_chosenAuto.addOption("Test Auto", new NoteAuto(m_driveTrain));
+                SmartDashboard.putData("Chosen Auto", m_chosenAuto);
         }
-    }
 
-    private static double modifyAxis(double value) {
-        // Deadband
-        value = deadband(value, 0.05);
+        public Pose2d getInitialPose() {
+                return FieldConstants.flipPose(m_startLocation.getSelected());
+        }
 
-        // Square the axis
-        value = Math.copySign(value * value, value);
+        public Command getAutonomousCommand() {
+                return m_chosenAuto.getSelected();
+        }
 
-        return value;
-    }
+        public boolean autoHasChanged() {
+                Command autoCommand = getAutonomousCommand();
+                Pose2d pose = getInitialPose();
+                // warning do not compare poses with "==". That compares object IDs, not value.
+                boolean changed = !pose.equals(m_prevInitialPose)
+                                || (m_prevAutoCommand != null && autoCommand != m_prevAutoCommand);
+                m_prevAutoCommand = autoCommand;
+                m_prevInitialPose = pose;
+                return changed;
+        }
 
-    public DriveTrain getDriveTrain() {
-        return m_driveTrain;
-    }
+        public Command getDriveCommand() {
+                // The controls are for field-oriented driving:
+                // Left stick Y axis -> forward and backwards movement
+                // Left stick X axis -> left and right movement
+                // Right stick X axis -> rotation
+                // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
+                return new Drive(
+                                m_driveTrain,
+                                () -> -modifyAxis(m_driverController.getLeftY()),
+                                () -> -modifyAxis(m_driverController.getLeftX()),
+                                () -> -modifyAxis(m_driverController.getRightX()),
+                                m_driverController.rightBumper());
+        }
 
-    public NoteVision getNoteVision() {
-        return m_noteVision;
-    }
+        private static double deadband(double value, double deadband) {
+                if (Math.abs(value) > deadband) {
+                        if (value > 0.0) {
+                                return (value - deadband) / (1.0 - deadband);
+                        } else {
+                                return (value + deadband) / (1.0 - deadband);
+                        }
+                } else {
+                        return 0.0;
+                }
+        }
 
-    public ShooterPivot getShooterPivot() {
-        return m_shooterPivot;
-    }
+        private static double modifyAxis(double value) {
+                // Deadband
+                value = deadband(value, 0.05);
 
-    public Intake getIntake() {
-        return m_intake;
-    }
+                // Square the axis
+                value = Math.copySign(value * value, value);
+
+                return value;
+        }
+
+        public DriveTrain getDriveTrain() {
+                return m_driveTrain;
+        }
+
+        public NoteVision getNoteVision() {
+                return m_noteVision;
+        }
+
+        public ShooterPivot getShooterPivot() {
+                return m_shooterPivot;
+        }
+
+        public Intake getIntake() {
+                return m_intake;
+        }
 }
