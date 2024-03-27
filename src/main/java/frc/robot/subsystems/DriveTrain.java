@@ -418,7 +418,11 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public Rotation2d headingToSpeaker() {
-        return FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER).minus(getPose().getTranslation()).getAngle();
+        Translation2d robotTrans = getPose().getTranslation();
+        double blueX = FieldConstants.flipTranslation(robotTrans).getX();
+        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? 
+                FieldConstants.BLUE_PASS_TARGET : FieldConstants.BLUE_SPEAKER;
+        return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle();
     }
 
     public double getAmpDistance() {
