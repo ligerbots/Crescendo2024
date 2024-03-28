@@ -260,9 +260,9 @@ public class RobotContainer {
                 new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
-        autoName = "C4-C5-C3";
+        autoName = "C3-C4-C5";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
-                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_3 }, 
+                new Translation2d[] { FieldConstants.NOTE_C_3, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
 
         autoName = "C5-C4";
