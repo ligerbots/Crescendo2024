@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
         m_robotContainer = new RobotContainer();
 
         Intake intake = m_robotContainer.getIntake();
-        // update Intake centering motor current reading every 2ms
+        // update Intake centering motor current reading every 10ms
         // for detecting whether we've picked up a note
         addPeriodic(intake.updateCenteringCurrentReadingPeriodic(), 0.010);
     }
