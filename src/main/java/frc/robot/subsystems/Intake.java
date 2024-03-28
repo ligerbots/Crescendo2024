@@ -13,8 +13,8 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
     
-    final static double INTAKE_SPEED = 0.5;
-    final static double INTAKE_CENTERING_SPEED = 0.5;
+    final static double INTAKE_SPEED = 0.7;
+    final static double INTAKE_CENTERING_SPEED = 0.7;
     final static double INTAKE_CENTERING_CURRENT_THRESHOLD = 15;
     final static double OUTTAKE_SPEED = -0.3;
     final static double OUTTAKE_CENTERING_SPEED = -0.3;

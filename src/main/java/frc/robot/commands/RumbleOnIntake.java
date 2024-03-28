@@ -41,18 +41,25 @@ public class RumbleOnIntake extends Command {
     public void execute() {
         // check status of Note in the Intake
         // If it transitions from True to False, Note has passed through, so Rumble
-        boolean currState = m_intake.noteInCentering();
+        // boolean currState = m_intake.noteInCentering();
 
+        // if (m_prevState && !currState) {
+        //     if (!m_pastFirst) {
+        //         m_pastFirst = true;
+        //     }
+        //     else {
+        //         // note has passed through the Centering Wheels
+        //         // start rumbling
+        //         m_xbox.setRumble(RumbleType.kBothRumble, 1);
+        //         m_timer.restart();
+        //     }
+        // }
+        boolean currState = m_intake.hasNote();
         if (m_prevState && !currState) {
-            if (!m_pastFirst) {
-                m_pastFirst = true;
-            }
-            else {
-                // note has passed through the Centering Wheels
-                // start rumbling
-                m_xbox.setRumble(RumbleType.kBothRumble, 1);
-                m_timer.restart();
-            }
+            // note has passed through the Centering Wheels
+            // start rumbling
+            m_xbox.setRumble(RumbleType.kBothRumble, 1);
+            m_timer.restart();
         }
 
         m_prevState = currState;
