@@ -44,6 +44,8 @@ public class FieldConstants {
    
     public static final Translation2d BLUE_SPEAKER = new Translation2d(0, 5.54);
     public static final Translation2d BLUE_AMP = new Translation2d(Units.inchesToMeters(72.5), FIELD_WIDTH);
+    // target location for Pass shots
+    public static final Translation2d BLUE_PASS_TARGET = new Translation2d(1.0, FIELD_WIDTH - 1.0);
 
     public static final Pose2d ROBOT_NOTE_C_1 = new Pose2d(7.85, 0.78, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_C_2 = new Pose2d(7.85, 2.44, Rotation2d.fromDegrees(0));
@@ -54,10 +56,6 @@ public class FieldConstants {
     public static final Pose2d ROBOT_NOTE_S_1 = new Pose2d(2.49, 4.26, Rotation2d.fromDegrees(157.45));
     public static final Pose2d ROBOT_NOTE_S_2 = new Pose2d(2.43, 5.55, Rotation2d.fromDegrees(0));
     public static final Pose2d ROBOT_NOTE_S_3 = new Pose2d(2.49, 6.81, Rotation2d.fromDegrees(161.94));
-
-    // these are all placeholders and subject to change
-    public static final Pose2d ROBOT_SHOOT_M_1 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
-    public static final Pose2d ROBOT_SHOOT_M_2 = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
     public static final Pose2d ROBOT_START_1 = new Pose2d(1.25, 3.85, Rotation2d.fromDegrees(126.5));
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(180));

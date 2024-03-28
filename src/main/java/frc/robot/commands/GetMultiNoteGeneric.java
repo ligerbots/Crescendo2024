@@ -50,12 +50,15 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
         addCommands(new AutoSpeakerShot(driveTrain, shooter, shooterPivot));
 
         // add all the fetching+shooting NOTE blocks
-        for (Translation2d note : noteLocations) {
+        for (int i=0; i < noteLocations.length; i++) {
+            Translation2d note = noteLocations[i];
+
             if (FieldConstants.DUMMY_NOTE_WAIT_FLAG.equals(note)) {
                 addCommands(new PrintCommand("Auto Wait"),  // TODO remove print when ready
                             new WaitCommand(WAIT_INTERVAL_SECONDS));
             } else if (FieldConstants.isCenterNote(note)) {
-                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
+                boolean alwaysDriveBack = (i+1 < noteLocations.length) && ! FieldConstants.isCenterNote(noteLocations[i+1]);
+                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator, alwaysDriveBack));
             } else {
                 addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             }

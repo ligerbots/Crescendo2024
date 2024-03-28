@@ -45,11 +45,14 @@ public class Climber extends SubsystemBase {
 
     // Winch motor speed values
     private static final double IDLE_MOTOR_SPEED = -0.01;
-    private static final double WINCH_EXTEND_MAX_SPEED = 0.7;
+    private static final double WINCH_EXTEND_MAX_SPEED = 1.0;
     private static final double WINCH_EXTEND_MIN_SPEED = 0.2;
     private static final double WINCH_RETRACT_SPEED = 0.5;
     public static final double WINCH_MANUAL_SPEED = 0.3;
     private static final double WINCH_CLIMB_SPEED = 0.5;
+
+    private static final double EXTEND_SLOWDOWN_INTERVAL = 30.0;
+
     // speed adjustment amount if Roll is off by ROLL_ANGLE_TOLERANCE
     private static final double WINCH_CLIMB_ADJUST_SPEED = 0.1;
     private static final double ROLL_ANGLE_TOLERANCE = Units.degreesToRadians(2.0);
@@ -149,7 +152,7 @@ public class Climber extends SubsystemBase {
             }
             else {
                 // slow down over the last 20 rotations
-                double speed = (HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION - leftPosition) / 20.0 * WINCH_EXTEND_MAX_SPEED;
+                double speed = (HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION - leftPosition) / EXTEND_SLOWDOWN_INTERVAL * WINCH_EXTEND_MAX_SPEED;
                 m_leftWinch.set(MathUtil.clamp(speed, WINCH_EXTEND_MIN_SPEED, WINCH_EXTEND_MAX_SPEED));
             }
 
@@ -161,8 +164,8 @@ public class Climber extends SubsystemBase {
             }
             else {
                 // slow down over the last 20 rotations
-                double speed = (HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION - rightPosition) / 20.0 * WINCH_EXTEND_MAX_SPEED;
-                m_leftWinch.set(MathUtil.clamp(speed, WINCH_EXTEND_MIN_SPEED, WINCH_EXTEND_MAX_SPEED));
+                double speed = (HOOK_DEPLOYED_ROTATIONS_ABOVE_INITIAL_POSITION - rightPosition) / EXTEND_SLOWDOWN_INTERVAL * WINCH_EXTEND_MAX_SPEED;
+                m_rightWinch.set(MathUtil.clamp(speed, WINCH_EXTEND_MIN_SPEED, WINCH_EXTEND_MAX_SPEED));
             }
 
             // If both hooks are all the way up, wait to retract
@@ -205,12 +208,10 @@ public class Climber extends SubsystemBase {
                 m_climberState = ClimberState.CLIMBING;
                 m_leftWinch.set(WINCH_CLIMB_SPEED);
                 m_rightWinch.set(WINCH_CLIMB_SPEED);
-                
             }
         }
         else if (m_climberState == ClimberState.CLIMBING) {
             // If we climbed far enough, stop the winches and let the ratchets hold the robot.
-            // TODO: Check if roll & pitch in drivetrain are swapped correctly, may need to flip sign.
             // roll > 0 means left side is high, and adjustSpeed is also > 0
             final double adjustSpeed = WINCH_CLIMB_ADJUST_SPEED * (rollAngle / ROLL_ANGLE_TOLERANCE);
 

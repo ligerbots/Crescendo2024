@@ -11,10 +11,11 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-// import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
@@ -32,7 +33,7 @@ public class GetCenterNoteX extends GetNoteX {
     }
 
     public GetCenterNoteX(Translation2d targetNote, DriveTrain driveTrain, NoteVision noteVision, 
-            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator) {
+            Shooter shooter, ShooterPivot shooterPivot, Intake intake, Elevator elevator, boolean alwaysDriveBack) {
 
         super(targetNote, driveTrain, noteVision, shooter, intake);
 
@@ -48,32 +49,36 @@ public class GetCenterNoteX extends GetNoteX {
             // Drive out to the Note
             // Monitor for the Note and maybe abort
             // Turn on the Intake when we cross into the Center zone
-            ( new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
-                .deadlineWith(new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this))
-            ).deadlineWith(
-                // new WaitUntilCommand(m_driveTrain::isInCenterZone).andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
-                new StartIntake(intake, shooter, shooterPivot, elevator)
-            ),
+            new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
+                .deadlineWith(
+                    // new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this),
+                    new StartIntake(intake, shooter, shooterPivot, elevator)
+                ),
 
-            // wait up to 1 second to suck the Note in all the way
-            // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
+            // wait up to 0.5 second to suck the Note in all the way
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
             m_driveTrain.followPath(m_returnPath)
-                .deadlineWith(
+                .raceWith(
                     new WaitCommand(0.5)
                         .andThen(
                             // turn off Shooter and intake
                             new InstantCommand(shooter::turnOffShooter),
                             new InstantCommand(intake::stop),
                             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
-                            // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
-                            new WaitCommand(0.5)
-                                .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)))
+                            // after turning stuff off, check if we have a Note
+                            // skip the rest if no Note
+                            new ConditionalCommand(
+                                // we have a Note, so keep going
+                                new WaitCommand(0.5).andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
+                                // no Note, skip
+                                Commands.print("** SKIPPING DRIVE TO SHOOT **"), () -> (alwaysDriveBack || intake.hasNote()))
+                        )
                 ),
-            // Shoot
-            new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
+
+            // Shoot if we have a Note
+            new ConditionalCommand(new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote)), Commands.none(), intake::hasNote)
         );
     }
 
@@ -103,7 +108,7 @@ public class GetCenterNoteX extends GetNoteX {
         }
 
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
-        System.out.println("getInitialPath nearest = " + closestPathStart);
+        // System.out.println("Center: getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
     }
 

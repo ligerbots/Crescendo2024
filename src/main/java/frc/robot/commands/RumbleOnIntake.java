@@ -20,7 +20,7 @@ public class RumbleOnIntake extends Command {
 
     // track on/off state. We want to trigger on the 2nd True->False transition
     private boolean m_prevState;
-    private boolean m_pastFirst;
+    // private boolean m_pastFirst;
 
     /** Creates a new RumbleOnIntake. */
     public RumbleOnIntake(Intake intake, XboxController xbox) {
@@ -32,7 +32,7 @@ public class RumbleOnIntake extends Command {
     @Override
     public void initialize() {
         m_prevState = false;
-        m_pastFirst = false;
+        // m_pastFirst = false;
         m_timer.reset();
         m_timer.stop();
     }
@@ -41,18 +41,26 @@ public class RumbleOnIntake extends Command {
     public void execute() {
         // check status of Note in the Intake
         // If it transitions from True to False, Note has passed through, so Rumble
-        boolean currState = m_intake.noteInCentering();
+        // boolean currState = m_intake.noteInCentering();
 
-        if (m_prevState && !currState) {
-            if (!m_pastFirst) {
-                m_pastFirst = true;
-            }
-            else {
-                // note has passed through the Centering Wheels
-                // start rumbling
-                m_xbox.setRumble(RumbleType.kBothRumble, 1);
-                m_timer.restart();
-            }
+        // if (m_prevState && !currState) {
+        //     if (!m_pastFirst) {
+        //         m_pastFirst = true;
+        //     }
+        //     else {
+        //         // note has passed through the Centering Wheels
+        //         // start rumbling
+        //         m_xbox.setRumble(RumbleType.kBothRumble, 1);
+        //         m_timer.restart();
+        //     }
+        // }
+
+        boolean currState = m_intake.hasNote();
+        if (!m_prevState && currState) {
+            // Intake says it now has a Note
+            // start rumbling
+            m_xbox.setRumble(RumbleType.kBothRumble, 1);
+            m_timer.restart();
         }
 
         m_prevState = currState;

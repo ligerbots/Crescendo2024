@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,8 +18,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
     private final DriveTrain m_driveTrain;
 
     /** Creates a new PrepareSpeakerShot. */
-    public PrepareSpeakerShot(DriveTrain driveTrain, Shooter shooter, ShooterPivot shooterPivot,
-            XboxController xboxController, DoubleSupplier leftJoystickXSupplier, DoubleSupplier leftJoystickYSupplier, DoubleSupplier rightJoystickXSupplier) {
+    public PrepareSpeakerShot(DriveTrain driveTrain, Shooter shooter, ShooterPivot shooterPivot, XboxController xboxController) {
         m_driveTrain = driveTrain;
 
         addCommands(
@@ -29,7 +26,6 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 // this backs up the NOTE before turning on the shooter motors
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
-                // new ActiveTurnToHeadingWithDriving(driveTrain, driveTrain::headingToSpeaker, leftJoystickXSupplier, leftJoystickYSupplier, rightJoystickXSupplier),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );
