@@ -22,32 +22,32 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
-        private final CommandXboxController m_driverController = new CommandXboxController(0);
-        // private final CommandXboxController m_operatorController = new
-        // CommandXboxController(1);
-        private final Joystick m_farm = new Joystick(1);
+    private final CommandXboxController m_driverController = new CommandXboxController(0);
+    // private final CommandXboxController m_operatorController = new
+    // CommandXboxController(1);
+    private final Joystick m_farm = new Joystick(1);
 
-        private final NoteVision m_noteVision = new NoteVision();
-        private final AprilTagVision m_aprilTagVision = new AprilTagVision();
-        private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
-        private final Intake m_intake = new Intake();
-        private final Shooter m_shooter = new Shooter();
-        private final ShooterPivot m_shooterPivot = new ShooterPivot();
-        private final Elevator m_elevator = new Elevator();
+    private final NoteVision m_noteVision = new NoteVision();
+    private final AprilTagVision m_aprilTagVision = new AprilTagVision();
+    private final DriveTrain m_driveTrain = new DriveTrain(m_aprilTagVision, m_noteVision);
+    private final Intake m_intake = new Intake();
+    private final Shooter m_shooter = new Shooter();
+    private final ShooterPivot m_shooterPivot = new ShooterPivot();
+    private final Elevator m_elevator = new Elevator();
 
-        private final Climber m_climber = new Climber(m_driveTrain);
+    private final Climber m_climber = new Climber(m_driveTrain);
 
-        private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
-        private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
-        private Command m_prevAutoCommand = null;
-        private Pose2d m_prevInitialPose = new Pose2d();
+    private final SendableChooser<Command> m_chosenAuto = new SendableChooser<>();
+    private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
+    private Command m_prevAutoCommand = null;
+    private Pose2d m_prevInitialPose = new Pose2d();
 
-        public RobotContainer() {
-                configureBindings();
-                configureAutos();
+    public RobotContainer() {
+        configureBindings();
+        configureAutos();
 
-                m_driveTrain.setDefaultCommand(getDriveCommand());
-        }
+        m_driveTrain.setDefaultCommand(getDriveCommand());
+    }
 
     private void configureBindings() {
         // run the intake as long as the bumper is held.
@@ -60,15 +60,23 @@ public class RobotContainer {
 
         // m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
-        m_driverController.leftBumper().whileTrue(new InstantCommand(m_intake::intake).alongWith(new InstantCommand(()-> m_shooter.setShooterSpeeds(3000,3000))));
+        m_driverController.leftBumper()
+                .onTrue(new InstantCommand(m_intake::intake)
+                    .alongWith(
+                        new InstantCommand(() -> m_shooter.setSpeakerShootMode(true)),
+                        new InstantCommand(() -> m_shooterPivot.setAngle(ShooterPivot.STOW_ANGLE_RADIANS, false)),
+                        new InstantCommand(() -> m_shooter.setShooterSpeeds(3000,3000))))
+                .onFalse(new InstantCommand(m_intake::stop)
+                        .alongWith(new InstantCommand(m_shooter::turnOffShooter)));
 
         m_driverController.rightTrigger().onTrue(
             new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote))
-            .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)).onlyIf(() -> !m_driverController.leftBumper().getAsBoolean())
+            // .andThen(new Stow(m_shooter, m_shooterPivot, m_elevator)).unless(m_driverController.leftBumper())
             .alongWith(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule()))
         );
         
-        m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator));
+        m_driverController.y().onTrue(new Stow(m_shooter, m_shooterPivot, m_elevator)
+                            .alongWith(new InstantCommand(() -> m_driveTrain.getDefaultCommand().schedule())));
 
         // don't require the Drivetrain. Otherwise you cannot drive.
         m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
