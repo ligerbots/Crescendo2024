@@ -54,7 +54,8 @@ public class ActiveSetShooter extends Command {
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
         m_shooterPivot.setAngle(shootValues.shootAngle, true);
 
-        if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
+        if (m_state == State.WAIT_FOR_PIVOT && 
+            (m_timer.hasElapsed(PIVOT_WAIT_TIME) || m_shooterPivot.angleWithinTolerance())) {
             // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
 
             // start the feeder motor and timer to back the NOTE a bit

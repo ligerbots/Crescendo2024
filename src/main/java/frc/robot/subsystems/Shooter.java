@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase {
     public static final double FEEDER_RPM_TOLERANCE = 100; 
 
     // manually tuned kFF and guessed kP
-    static final double K_P_LEFT = 1e-4;
+    static final double K_P_LEFT = 2e-4;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
@@ -239,8 +239,8 @@ public class Shooter extends SubsystemBase {
 
     public boolean rpmWithinTolerance() {
         return m_leftGoalRPM > 1000.0
-                && Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
-                && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
+                && getLeftRpm() > m_leftGoalRPM - RPM_TOLERANCE
+                && getRightRpm() > m_rightGoalRPM - RPM_TOLERANCE;
     }
 
     public void startForIntake() {
