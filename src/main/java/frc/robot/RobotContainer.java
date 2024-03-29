@@ -56,11 +56,12 @@ public class RobotContainer {
 
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
+        // don't require shooter onFalse to allow PrepSpeakerShot to start simultaneously
         m_driverController.leftTrigger()
                 .onTrue(new RumbleOnIntake(m_intake, m_driverController.getHID())
                         .alongWith(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator)))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
-                        .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
+                        .alongWith(new InstantCommand(m_shooter::turnOffShooter)));
 
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 

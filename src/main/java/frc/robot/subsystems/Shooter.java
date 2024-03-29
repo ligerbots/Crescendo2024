@@ -77,7 +77,8 @@ public class Shooter extends SubsystemBase {
     private double m_rightGoalRPM;
 
     private boolean m_speakerShootMode = true;
-    
+    private boolean m_runningForIntake = false;
+
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
@@ -145,7 +146,7 @@ public class Shooter extends SubsystemBase {
             m_leftShooterMotor.burnFlash();
             m_rightShooterMotor.burnFlash();
         }
-        
+
         // RPMs for testing
         SmartDashboard.putNumber("shooter/testLeftRpm", 0);
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
@@ -206,6 +207,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
         SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
+        SmartDashboard.putBoolean("shooter/waitingForIntake", m_runningForIntake);
     }
 
     public double getLeftRpm() {
@@ -222,6 +224,10 @@ public class Shooter extends SubsystemBase {
 
     public double getFeederRotations() {
         return m_feederMotorEncoder.getPosition();
+    }
+
+    public boolean getRunningForIntake() {
+        return m_runningForIntake;
     }
 
     // set speeds -1 -> 1
@@ -252,6 +258,7 @@ public class Shooter extends SubsystemBase {
     public void startForIntake() {
         setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
         setFeederSpeed(FEEDER_SPEED);
+        m_runningForIntake = true;
     }
 
     public void speakerShot() {
@@ -265,6 +272,7 @@ public class Shooter extends SubsystemBase {
     public void turnOffShooter() {
         turnOffShooterWheels();
         turnOffFeeder();
+        m_runningForIntake = false;
     }
 
     public void setFeederSpeed(double speed) {

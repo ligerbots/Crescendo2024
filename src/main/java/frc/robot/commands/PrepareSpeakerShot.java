@@ -26,7 +26,7 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 // this backs up the NOTE before turning on the shooter motors
                 new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
-                new CheckPrepStatsAndRumble(shooterPivot, shooter, driveTrain, xboxController)
+                new CheckPrepStatsAndRumble(shooterPivot, shooter, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );
         

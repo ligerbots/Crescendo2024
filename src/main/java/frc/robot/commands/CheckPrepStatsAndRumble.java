@@ -7,14 +7,12 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.ShooterPivot;
 
 public class CheckPrepStatsAndRumble extends Command {
     private final ShooterPivot m_shooterPivot;
     private final Shooter m_shooter;
-    private final DriveTrain m_driveTrain;
     private final XboxController m_controller;
 
     // Value between 0-1. 0 is nothing 1 is a lot. 
@@ -22,10 +20,9 @@ public class CheckPrepStatsAndRumble extends Command {
     private static final double RUMBLE_INTENSITY = 0.8; 
 
     /** Creates a new CheckPrepStatsAndRumble. */
-    public CheckPrepStatsAndRumble(ShooterPivot shooterPivot, Shooter shooter, DriveTrain driveTrain, XboxController xboxController) {
+    public CheckPrepStatsAndRumble(ShooterPivot shooterPivot, Shooter shooter, XboxController xboxController) {
         m_shooterPivot = shooterPivot;
         m_shooter = shooter;
-        m_driveTrain = driveTrain;
         m_controller = xboxController;
     }
 
