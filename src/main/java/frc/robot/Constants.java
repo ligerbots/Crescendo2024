@@ -7,6 +7,9 @@ public class Constants {
     // Can turn this off for competition to save a tiny bit of speed
     public static final boolean SIMULATION_SUPPORT = true;
 
+    // if true, burn the settings into the controllers after init
+    public static final boolean SPARKMAX_BURN_FLASH = false;
+
     // Reminder: all CAN IDs of the same device/motor type need to be unique.
     // You don't actually need SparkMax IDs to be different from Falcon IDs
 

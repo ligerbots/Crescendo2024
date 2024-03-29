@@ -140,6 +140,12 @@ public class Shooter extends SubsystemBase {
         setPidController(m_rightPidController, K_P_RIGHT, K_FF_RIGHT);
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_feederMotor.burnFlash();
+            m_leftShooterMotor.burnFlash();
+            m_rightShooterMotor.burnFlash();
+        }
+        
         // RPMs for testing
         SmartDashboard.putNumber("shooter/testLeftRpm", 0);
         SmartDashboard.putNumber("shooter/testRightRpm", 0);

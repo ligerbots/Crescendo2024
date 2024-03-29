@@ -98,6 +98,10 @@ public class Elevator extends TrapezoidProfileSubsystem {
 
         // Create SD values needed during testing. Here so that they are visible in NetworkTables
         SmartDashboard.putNumber("elevator/testLength", 0);
+
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_motor.burnFlash();
+        }
     }
 
     @Override

@@ -98,6 +98,11 @@ public class Climber extends SubsystemBase {
         m_rightWinch.setIdleMode(IdleMode.kCoast);
         // Reset position to 0
         m_rightEncoder.setPosition(0.0);
+
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_leftWinch.burnFlash();
+            m_rightWinch.burnFlash();
+        }
     }
 
     @Override
