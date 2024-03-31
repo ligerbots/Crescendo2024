@@ -70,14 +70,13 @@ public class ActiveSetShooter extends Command {
 
         if (m_state == State.WAIT_FOR_PIVOT && 
             (m_timer.hasElapsed(PIVOT_WAIT_TIME) || m_shooterPivot.angleWithinTolerance())) {
-            // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
 
             // start the feeder motor and timer to back the NOTE a bit
+            m_initialRotations = m_shooter.getFeederRotations();
             m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
             m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
             m_state = State.BACKUP_NOTE;
             m_timer.restart();
-            m_initialRotations = m_shooter.getFeederRotations();
         }
 
         if (m_state == State.BACKUP_NOTE) {
