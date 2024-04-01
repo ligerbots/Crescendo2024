@@ -56,11 +56,12 @@ public class RobotContainer {
 
         // run the intake as long as the bumper is held.
         // When release, shut off the intake and feeder
+        // don't require shooter onFalse to allow PrepSpeakerShot to start simultaneously
         m_driverController.leftTrigger()
                 .onTrue(new RumbleOnIntake(m_intake, m_driverController.getHID())
                         .alongWith(new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator)))
                 .onFalse(new InstantCommand(m_intake::stop, m_intake)
-                        .alongWith(new InstantCommand(m_shooter::turnOffShooter, m_shooter)));
+                        .alongWith(new InstantCommand(m_shooter::turnOffShooter)));
 
         m_driverController.leftBumper().whileTrue(new StartEndCommand(m_intake::outtake, m_intake::stop, m_intake));
 
@@ -157,10 +158,10 @@ public class RobotContainer {
         farm23.onTrue(new SetPivotAngle(m_shooterPivot,
                 () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0)), false).withTimeout(5.0));
 
-        JoystickButton farm24 = new JoystickButton(m_farm, 24);
-        farm24.onTrue(new TestShoot(m_driveTrain, m_shooter,
-                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        // JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        // farm24.onTrue(new TestShoot(m_driveTrain, m_shooter,
+        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         // JoystickButton farm24 = new JoystickButton(m_farm, 24);
         // farm24.whileTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
@@ -168,10 +169,10 @@ public class RobotContainer {
         //                 () -> -modifyAxis(m_driverController.getLeftX()),
         //                 () -> -modifyAxis(m_driverController.getRightX())));
         
-        // JoystickButton farm15 = new JoystickButton(m_farm, 15);
-        // farm15.onTrue(new TestShootSpeed(m_shooter,
-        //         () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
-        //         () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+        JoystickButton farm24 = new JoystickButton(m_farm, 24);
+        farm24.onTrue(new TestShootSpeed(m_shooter,
+                () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
 
         // -----------------------------------------------
         // commands to run the characterization for the shooter

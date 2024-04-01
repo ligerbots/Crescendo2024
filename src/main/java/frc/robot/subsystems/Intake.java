@@ -43,6 +43,11 @@ public class Intake extends SubsystemBase {
         m_centeringMotor.setInverted(false);
         // increase update frequency of Status Frame 1 to get faster current updates
         m_centeringMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10);
+
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_intakeMotor.burnFlash();
+            m_centeringMotor.burnFlash();
+        }
     }
 
     @Override

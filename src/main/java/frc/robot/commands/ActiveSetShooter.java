@@ -22,8 +22,9 @@ public class ActiveSetShooter extends Command {
     private final double NUMBER_OF_ROTATIONS = 1.0;
 
     private static final double PIVOT_WAIT_TIME = 0.1; //0.2;
+    private static final double INTAKE_WAIT_TIME = 2;
 
-    enum State {START, WAIT_FOR_PIVOT, BACKUP_NOTE, SPEED_UP_SHOOTER};
+    enum State {WAITING_FOR_INTAKE, WAIT_FOR_PIVOT, BACKUP_NOTE, SPEED_UP_SHOOTER, ABORT};
     private State m_state;
     Timer m_timer = new Timer();
     double m_initialRotations;
@@ -41,23 +42,37 @@ public class ActiveSetShooter extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        m_initialRotations = m_shooter.getFeederRotations();
-
+        m_state = State.WAITING_FOR_INTAKE;
         m_timer.restart();
-        m_state = State.WAIT_FOR_PIVOT;
     }
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        if (m_state == State.WAITING_FOR_INTAKE) {
+            if (!m_shooter.getRunningForIntake()) {
+                m_state = State.WAIT_FOR_PIVOT;
+                m_timer.restart();
+            }
+            else {
+                if (m_timer.hasElapsed(INTAKE_WAIT_TIME)) {
+                    m_state = State.ABORT;
+                }
+                SmartDashboard.putString("shooter/mode", m_state.toString());
+                return;
+            }
+        }
+
+        SmartDashboard.putString("shooter/mode", m_state.toString());
         // always adjust the pivot
         Shooter.ShooterValues shootValues = m_valueSupplier.get();
         m_shooterPivot.setAngle(shootValues.shootAngle, true);
 
-        if (m_state == State.WAIT_FOR_PIVOT && m_timer.hasElapsed(PIVOT_WAIT_TIME)) {
-            // (m_shooterPivot.angleWithinTolerance() || m_timer.hasElapsed(PIVOT_WAIT_TIME))) {
+        if (m_state == State.WAIT_FOR_PIVOT && 
+            (m_timer.hasElapsed(PIVOT_WAIT_TIME) || m_shooterPivot.angleWithinTolerance())) {
 
             // start the feeder motor and timer to back the NOTE a bit
+            m_initialRotations = m_shooter.getFeederRotations();
             m_shooter.setFeederSpeed(Shooter.BACKUP_FEED_SPEED);
             m_shooter.setShooterSpeeds(Shooter.BACKUP_SHOOTER_SPEED, Shooter.BACKUP_SHOOTER_SPEED);
             m_state = State.BACKUP_NOTE;
@@ -99,6 +114,6 @@ public class ActiveSetShooter extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return false;
+        return m_state == State.ABORT;
     }
 }

@@ -112,6 +112,10 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
         setCoastMode();
 
         SmartDashboard.putNumber("shooterPivot/testAngle", 0);
+
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_motor.burnFlash();
+        }
     }
 
     @Override

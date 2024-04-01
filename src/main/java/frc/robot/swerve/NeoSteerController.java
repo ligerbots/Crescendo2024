@@ -84,6 +84,10 @@ public class NeoSteerController implements SteerController {
         checkNeoError(m_controller.setI(PID_INTEGRAL), "Failed to set NEO PID integral constant");
         checkNeoError(m_controller.setD(PID_DERIVATIVE), "Failed to set NEO PID derivative constant");
         checkNeoError(m_controller.setFeedbackDevice(m_motorEncoder), "Failed to set NEO PID feedback device");
+
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_motor.burnFlash();
+        }
     }
 
     // get the angle setpoint, in radians

@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase {
     public static final double FEEDER_RPM_TOLERANCE = 100; 
 
     // manually tuned kFF and guessed kP
-    static final double K_P_LEFT = 1e-4;
+    static final double K_P_LEFT = 2e-4;
     static final double K_P_RIGHT = K_P_LEFT;
     static final double K_I = 0.0;
     static final double K_D = 0.0;
@@ -77,7 +77,8 @@ public class Shooter extends SubsystemBase {
     private double m_rightGoalRPM;
 
     private boolean m_speakerShootMode = true;
-    
+    private boolean m_runningForIntake = false;
+
     // lookup table for upper hub speeds
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
@@ -140,6 +141,12 @@ public class Shooter extends SubsystemBase {
         setPidController(m_rightPidController, K_P_RIGHT, K_FF_RIGHT);
         m_rightEncoder = m_rightShooterMotor.getEncoder();
 
+        if (Constants.SPARKMAX_BURN_FLASH) {
+            m_feederMotor.burnFlash();
+            m_leftShooterMotor.burnFlash();
+            m_rightShooterMotor.burnFlash();
+        }
+
         // RPMs for testing
         SmartDashboard.putNumber("shooter/testLeftRpm", 0);
         SmartDashboard.putNumber("shooter/testRightRpm", 0);
@@ -200,6 +207,7 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("shooter/rightCurrent", m_rightShooterMotor.getOutputCurrent());
         SmartDashboard.putNumber("shooter/feederSpeed", m_feederMotor.get());
         SmartDashboard.putNumber("shooter/feederCurrent", m_feederMotor.getOutputCurrent());
+        SmartDashboard.putBoolean("shooter/waitingForIntake", m_runningForIntake);
     }
 
     public double getLeftRpm() {
@@ -216,6 +224,10 @@ public class Shooter extends SubsystemBase {
 
     public double getFeederRotations() {
         return m_feederMotorEncoder.getPosition();
+    }
+
+    public boolean getRunningForIntake() {
+        return m_runningForIntake;
     }
 
     // set speeds -1 -> 1
@@ -239,13 +251,14 @@ public class Shooter extends SubsystemBase {
 
     public boolean rpmWithinTolerance() {
         return m_leftGoalRPM > 1000.0
-                && Math.abs(m_leftGoalRPM - getLeftRpm()) < RPM_TOLERANCE
-                && Math.abs(m_rightGoalRPM - getRightRpm()) < RPM_TOLERANCE;
+                && getLeftRpm() > m_leftGoalRPM - RPM_TOLERANCE
+                && getRightRpm() > m_rightGoalRPM - RPM_TOLERANCE;
     }
 
     public void startForIntake() {
         setShooterSpeeds(BACKUP_SHOOTER_SPEED, BACKUP_SHOOTER_SPEED);
         setFeederSpeed(FEEDER_SPEED);
+        m_runningForIntake = true;
     }
 
     public void speakerShot() {
@@ -259,6 +272,7 @@ public class Shooter extends SubsystemBase {
     public void turnOffShooter() {
         turnOffShooterWheels();
         turnOffFeeder();
+        m_runningForIntake = false;
     }
 
     public void setFeederSpeed(double speed) {
