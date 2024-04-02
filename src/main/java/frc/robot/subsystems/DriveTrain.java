@@ -525,9 +525,17 @@ public class DriveTrain extends SubsystemBase {
 
     void flagTrapShotPosition(Pose2d currentPose) {
         Pose2d bluePose = FieldConstants.flipPose(currentPose);
-        boolean onHeading = false;
-        boolean onCenter = false;
-        boolean onDistance = false;
+
+        // some quick cuts to speed this up
+        double blueX = bluePose.getX();
+        double blueY = bluePose.getY();
+        if (blueX < FieldConstants.BLUE_WHITE_LINE_X_METERS || blueX > (FieldConstants.BLUE_WING_LINE_X_METERS + 0.5)
+                || blueY < 2.5 || blueY > (FieldConstants.FIELD_WIDTH - 2.5)) {
+            SmartDashboard.putBoolean("drivetrain/trapDistance", false);
+            SmartDashboard.putBoolean("drivetrain/trapCentered", false);
+            SmartDashboard.putBoolean("drivetrain/trapHeading", false);
+            return;
+        }
 
         Pose2d closestTrap = bluePose.nearest(FieldConstants.TRAP_POSES);
 
