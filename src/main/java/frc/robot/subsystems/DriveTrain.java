@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
+
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -13,6 +15,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI.Port;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -61,6 +64,12 @@ public class DriveTrain extends SubsystemBase {
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
     public static final double AMP_DRIVE_MAX_METERS = 1.5;
+
+    // Parameters for the Trap shot
+    private static final double TRAP_CENTER_TOLERANCE = Units.inchesToMeters(12);
+    private static final double TRAP_HEADING_TOLERANCE = Math.toRadians(5);
+    private static final double TRAP_MIN_DISTANCE = Units.inchesToMeters(26);
+    private static final double TRAP_MAX_DISTANCE = Units.inchesToMeters(32);
     
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
@@ -460,8 +469,13 @@ public class DriveTrain extends SubsystemBase {
         // need to add the pipeline result
         m_aprilTagVision.updateOdometry(m_odometry, m_field);
 
+        Pose2d currentPose = m_odometry.getEstimatedPosition();
+        
+        // Trap shot - flag good position in SmartDashboard
+        flagTrapShotPosition(currentPose);
+
         // log the pose into the Field2d object
-        m_field.setRobotPose(m_odometry.getEstimatedPosition());
+        m_field.setRobotPose(currentPose);
         // also get the gyro, just in case
         SmartDashboard.putNumber("drivetrain/gyro", getGyroscopeRotation().getDegrees());
 
@@ -507,5 +521,25 @@ public class DriveTrain extends SubsystemBase {
 
     public void setOnGoalForActiveTurn(boolean value) {
         m_onGoalForActiveTurn = value;
+    }
+
+    void flagTrapShotPosition(Pose2d currentPose) {
+        Pose2d bluePose = FieldConstants.flipPose(currentPose);
+        boolean onHeading = false;
+        boolean onCenter = false;
+        boolean onDistance = false;
+
+        Pose2d closestTrap = bluePose.nearest(FieldConstants.TRAP_POSES);
+
+        // vector from Trap to robot, in field coordinates
+        Translation2d posDiff = bluePose.getTranslation().minus(closestTrap.getTranslation());
+        // trap to robot, in *trap* coordinates. +X is in front of the trap, Y is side to side
+        Translation2d diffRot = posDiff.rotateBy(closestTrap.getRotation().times(-1));
+        double dist = diffRot.getX();
+        SmartDashboard.putBoolean("drivetrain/trapDistance", dist >= TRAP_MIN_DISTANCE && dist <= TRAP_MAX_DISTANCE);
+        SmartDashboard.putBoolean("drivetrain/trapCentered", Math.abs(diffRot.getY()) < TRAP_CENTER_TOLERANCE);
+
+        double headingDiff = MathUtil.angleModulus(closestTrap.getRotation().getRadians() - bluePose.getRotation().getRadians() - Math.PI);
+        SmartDashboard.putBoolean("drivetrain/trapHeading", Math.abs(headingDiff) < TRAP_HEADING_TOLERANCE);
     }
 }
