@@ -45,10 +45,11 @@ public class DriveTrain extends SubsystemBase {
     private static final double WHEELBASE_METERS = Units.inchesToMeters(17.75);
 
     public static final double ROBOT_SWERVE_OFFSET_X_INCHES = -3.0;
-    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0 );
+    private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(
+            Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0);
 
-    private static final double DRIVE_BASE_RADIUS_METERS = 
-            Math.sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
+    private static final double DRIVE_BASE_RADIUS_METERS = Math
+            .sqrt(TRACKWIDTH_METERS * TRACKWIDTH_METERS + WHEELBASE_METERS * WHEELBASE_METERS) / 2.0;
 
     // used in lots of places, so create a local constant
     private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
@@ -61,7 +62,7 @@ public class DriveTrain extends SubsystemBase {
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
     public static final double AMP_DRIVE_MAX_METERS = 1.5;
-    
+
     // P constants for controllin during trajectory following
     private static final double X_PID_CONTROLLER_P = 3.0;
     private static final double Y_PID_CONTROLLER_P = 3.0;
@@ -95,11 +96,11 @@ public class DriveTrain extends SubsystemBase {
      */
     // Here we calculate the theoretical maximum angular velocity. You can also
     // replace this with a measured amount.
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
-            MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND
+            / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
 
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = 
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0;
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+            / 6.0;
 
     private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
             // Front left
@@ -145,7 +146,7 @@ public class DriveTrain extends SubsystemBase {
     private final HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(X_PID_CONTROLLER_P), new PIDConstants(Y_PID_CONTROLLER_P), MAX_VELOCITY_METERS_PER_SECOND,
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
-            
+
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
@@ -170,7 +171,8 @@ public class DriveTrain extends SubsystemBase {
         // initialize the odometry class
         // needs to be done after the Modules are created and initialized
         // TODO add in the uncertainty matrices for encoders vs vision measurements
-        m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(), new Pose2d());
+        m_odometry = new SwerveDrivePoseEstimator(m_kinematics, getGyroscopeRotation(), getModulePositions(),
+                new Pose2d());
 
         m_aprilTagVision = apriltagVision;
         m_noteVision = noteVision;
@@ -254,6 +256,20 @@ public class DriveTrain extends SubsystemBase {
         return new Rotation2d(getNormalVector3d().getX(), getNormalVector3d().getY());
     }
 
+    public Rotation2d getHeadingCorrection(double rpm) {
+        final double SPEED_FUDGE = 2;
+
+        if (rpm < 1000) return new Rotation2d(0);
+
+        double noteSpeed = (9 * rpm) / 60 / 12 / SPEED_FUDGE;
+        Rotation2d robotHeading = getHeading();
+        double robotYVelocity = getYVelocity();
+        Translation2d noteVector = new Translation2d(noteSpeed, robotHeading);
+        Translation2d robotVector = new Translation2d(0, robotYVelocity);
+        Translation2d realVector = noteVector.plus(robotVector);
+        return realVector.getAngle().minus(robotHeading);
+    }
+
     public void joystickDrive(double inputX, double inputY, double inputRotation, boolean robotCentric) {
         SmartDashboard.putNumber("drivetrain/joystickX", inputX);
         SmartDashboard.putNumber("drivetrain/joystickY", inputY);
@@ -264,7 +280,7 @@ public class DriveTrain extends SubsystemBase {
         double newInputX = m_xLimiter.calculate(inputX);
         double newInputY = m_yLimiter.calculate(inputY);
         double newInputRotation = m_rotationLimiter.calculate(inputRotation);
-        
+
         // prevents a drive call with parameters of 0 0 0
         if (Math.abs(newInputX) < 0.01 && Math.abs(newInputY) < 0.01 && Math.abs(newInputRotation) < 0.01) {
             stop();
@@ -413,16 +429,32 @@ public class DriveTrain extends SubsystemBase {
         return m_simChassisSpeeds;
     }
 
+    public double getXVelocity() {
+        ChassisSpeeds chassisSpeeds = getChassisSpeeds();
+        Rotation2d heading = getPose().getRotation();
+        return chassisSpeeds.vxMetersPerSecond * heading.getCos()
+                - chassisSpeeds.vyMetersPerSecond * heading.getSin();
+    }
+
+    public double getYVelocity() {
+        ChassisSpeeds chassisSpeeds = getChassisSpeeds();
+        Rotation2d heading = getPose().getRotation();
+        return chassisSpeeds.vyMetersPerSecond * heading.getCos()
+                + chassisSpeeds.vxMetersPerSecond * heading.getSin();
+    }
+
     public double getSpeakerDistance() {
         return getPose().getTranslation().getDistance(FieldConstants.flipTranslation(FieldConstants.BLUE_SPEAKER));
     }
 
-    public Rotation2d headingToSpeaker() {
+    public Rotation2d headingToSpeaker(double rpm) {
         Translation2d robotTrans = getPose().getTranslation();
+        Rotation2d headingCorrection = getHeadingCorrection(rpm);
+        SmartDashboard.putNumber("driveTrain/motionCorrection", headingCorrection.getDegrees());
         double blueX = FieldConstants.flipTranslation(robotTrans).getX();
-        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? 
-                FieldConstants.BLUE_PASS_TARGET : FieldConstants.BLUE_SPEAKER;
-        return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle();
+        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? FieldConstants.BLUE_PASS_TARGET
+                : FieldConstants.BLUE_SPEAKER;
+        return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle().minus(headingCorrection);
     }
 
     public double getAmpDistance() {
@@ -435,11 +467,13 @@ public class DriveTrain extends SubsystemBase {
                 () -> FieldConstants.isRedAlliance(), this);
     }
 
-    // probably useless. This does not delay the choice of the path, since "path.get()" is called immediately
+    // probably useless. This does not delay the choice of the path, since
+    // "path.get()" is called immediately
     // public Command followPath(Supplier<PathPlannerPath> path) {
 
-    //     return new FollowPathHolonomic(path.get(), this::getPose, this::getChassisSpeeds, this::drive,
-    //             PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
+    // return new FollowPathHolonomic(path.get(), this::getPose,
+    // this::getChassisSpeeds, this::drive,
+    // PATH_FOLLOWER_CONFIG, () -> FieldConstants.isRedAlliance(), this);
     // }
 
     public static PathPlannerPath loadPath(String pathName) {
@@ -471,7 +505,7 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/headingAdjust", Math.toDegrees(m_headingAdjustment));
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
-        
+
         for (SwerveModule mod : m_swerveModules) {
             mod.updateSmartDashboard();
         }
