@@ -47,7 +47,7 @@ public class Climber extends SubsystemBase {
     private static final double IDLE_MOTOR_SPEED = -0.01;
     private static final double WINCH_EXTEND_MAX_SPEED = 1.0;
     private static final double WINCH_EXTEND_MIN_SPEED = 0.2;
-    private static final double WINCH_RETRACT_SPEED = 0.5;
+    private static final double WINCH_RETRACT_SPEED = 1.0;
     public static final double WINCH_MANUAL_SPEED = 0.3;
     private static final double WINCH_CLIMB_SPEED = 0.5;
 
