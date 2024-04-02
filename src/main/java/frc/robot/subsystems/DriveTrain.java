@@ -544,10 +544,16 @@ public class DriveTrain extends SubsystemBase {
         // trap to robot, in *trap* coordinates. +X is in front of the trap, Y is side to side
         Translation2d diffRot = posDiff.rotateBy(closestTrap.getRotation().times(-1));
         double dist = diffRot.getX();
-        SmartDashboard.putBoolean("drivetrain/trapDistance", dist >= TRAP_MIN_DISTANCE && dist <= TRAP_MAX_DISTANCE);
+        SmartDashboard.putBoolean("drivetrain/trapAtDistance", dist >= TRAP_MIN_DISTANCE && dist <= TRAP_MAX_DISTANCE);
         SmartDashboard.putBoolean("drivetrain/trapCentered", Math.abs(diffRot.getY()) < TRAP_CENTER_TOLERANCE);
 
         double headingDiff = MathUtil.angleModulus(closestTrap.getRotation().getRadians() - bluePose.getRotation().getRadians() - Math.PI);
-        SmartDashboard.putBoolean("drivetrain/trapHeading", Math.abs(headingDiff) < TRAP_HEADING_TOLERANCE);
+        SmartDashboard.putBoolean("drivetrain/trapAtHeading", Math.abs(headingDiff) < TRAP_HEADING_TOLERANCE);
+
+        // For tuning. Comment out when done
+        SmartDashboard.putNumber("drivetrain/trapDist", Units.metersToInches(dist));
+        SmartDashboard.putNumber("drivetrain/trapCenterD", Units.metersToInches(diffRot.getY()));
+        SmartDashboard.putNumber("drivetrain/trapHead", Math.toDegrees(headingDiff));
+
     }
 }
