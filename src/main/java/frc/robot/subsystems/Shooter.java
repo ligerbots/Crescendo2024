@@ -49,6 +49,8 @@ public class Shooter extends SubsystemBase {
     public static final double RPM_TOLERANCE = 200;
     public static final double FEEDER_RPM_TOLERANCE = 100; 
 
+    public static final double TRAP_RPM = 2400;
+
     // manually tuned kFF and guessed kP
     static final double K_P_LEFT = 2e-4;
     static final double K_P_RIGHT = K_P_LEFT;

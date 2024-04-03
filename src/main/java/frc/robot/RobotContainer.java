@@ -118,6 +118,9 @@ public class RobotContainer {
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
+        JoystickButton farm13 = new JoystickButton(m_farm, 13);
+        farm13.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
+
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
         farm4.onTrue(new InstantCommand(() -> m_elevator.adjustLength(true)));
