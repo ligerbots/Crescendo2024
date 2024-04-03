@@ -63,7 +63,7 @@ public class FieldConstants {
     public static final Pose2d ROBOT_START_2 = new Pose2d(1.3, 5.53, Rotation2d.fromDegrees(180));
     public static final Pose2d ROBOT_START_3 = new Pose2d(1.25,6.95, Rotation2d.fromDegrees(-131.6));  // same as 228.4
 
-    public static final List<Pose2d> TRAP_POSES = new ArrayList<Pose2d>() {
+    public static final List<Pose2d> BLUE_TRAP_POSES = new ArrayList<Pose2d>() {
         { 
             add(new Pose2d(Units.inchesToMeters(209.48), Units.inchesToMeters(161.62), Rotation2d.fromDegrees(0)));   // tag 14
             add(new Pose2d(Units.inchesToMeters(182.73), Units.inchesToMeters(177.10), Rotation2d.fromDegrees(120)));   // tag 15

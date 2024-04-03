@@ -537,7 +537,7 @@ public class DriveTrain extends SubsystemBase {
             return;
         }
 
-        Pose2d closestTrap = bluePose.nearest(FieldConstants.TRAP_POSES);
+        Pose2d closestTrap = bluePose.nearest(FieldConstants.BLUE_TRAP_POSES);
 
         // vector from Trap to robot, in field coordinates
         Translation2d posDiff = bluePose.getTranslation().minus(closestTrap.getTranslation());
