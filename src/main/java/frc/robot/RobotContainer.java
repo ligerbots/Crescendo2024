@@ -118,8 +118,8 @@ public class RobotContainer {
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        JoystickButton farm13 = new JoystickButton(m_farm, 13);
-        farm13.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
+        JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        farm16.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
 
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
@@ -147,9 +147,9 @@ public class RobotContainer {
         JoystickButton farm15 = new JoystickButton(m_farm, 15);
         farm15.onTrue(new InstantCommand(m_elevator::zeroElevator));
 
-        // fix camera mode
-        JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        farm16.onTrue(new CameraMode(m_noteVision, m_aprilTagVision));
+        // // fix camera mode
+        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        // farm16.onTrue(new CameraMode(m_noteVision, m_aprilTagVision));
 
         // Test commands
 
