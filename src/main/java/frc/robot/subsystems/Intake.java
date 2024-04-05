@@ -65,7 +65,8 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putString("intake/intakeState", m_noteIntakeState.toString());
 
         if (m_noteIntakeState == IntakeState.WAITING_FOR_NOTE) {
-            if (m_prevState && !currState) {
+            // if (m_prevState && !currState) {
+            if (!m_prevState && currState) {
                 if (!m_pastFirst) {
                     m_pastFirst = true;
                 } else {
