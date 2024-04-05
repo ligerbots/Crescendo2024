@@ -57,8 +57,8 @@ public class GetMultiNoteGeneric extends SequentialCommandGroup {
                 addCommands(new PrintCommand("Auto Wait"),  // TODO remove print when ready
                             new WaitCommand(WAIT_INTERVAL_SECONDS));
             } else if (FieldConstants.isCenterNote(note)) {
-                boolean alwaysDriveBack = (i+1 < noteLocations.length) && ! FieldConstants.isCenterNote(noteLocations[i+1]);
-                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator, alwaysDriveBack));
+                // boolean alwaysDriveBack = (i+1 < noteLocations.length) && ! FieldConstants.isCenterNote(noteLocations[i+1]);
+                addCommands(new GetCenterNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             } else {
                 addCommands(new GetStageNoteX(note, driveTrain, noteVision, shooter, shooterPivot, intake, elevator));
             }
