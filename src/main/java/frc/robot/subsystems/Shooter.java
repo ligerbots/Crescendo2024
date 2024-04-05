@@ -110,9 +110,9 @@ public class Shooter extends SubsystemBase {
 
             // Pass shots from Center zone
             // close to Stage
-            Map.entry(6.0, new ShooterValues(2000.0, 2000.0, Math.toRadians(50))),
+            Map.entry(6.0, new ShooterValues(1500.0, 1500.0, Math.toRadians(50))),
             // more in center area
-            Map.entry(FieldConstants.FIELD_LENGTH/2, new ShooterValues(2000.0, 2000.0, Math.toRadians(40)))
+            Map.entry(FieldConstants.FIELD_LENGTH/2, new ShooterValues(1500.0, 1500.0, Math.toRadians(40)))
             ));
 
     // Shooter class constructor, initialize arrays for motors controllers,
