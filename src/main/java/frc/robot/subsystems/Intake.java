@@ -66,6 +66,7 @@ public class Intake extends SubsystemBase {
 
         if (m_noteIntakeState == IntakeState.WAITING_FOR_NOTE) {
             // if (m_prevState && !currState) {
+            // trigger on the 2nd rising edge
             if (!m_prevState && currState) {
                 if (!m_pastFirst) {
                     m_pastFirst = true;

@@ -54,7 +54,7 @@ public class GetCenterNoteX extends GetNoteX {
                     new StartIntake(intake, shooter, shooterPivot, elevator)
                 ),
 
-            // wait up to 1 second to suck the Note in all the way
+            // wait up to 0.5 second to suck the Note in all the way
             // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 

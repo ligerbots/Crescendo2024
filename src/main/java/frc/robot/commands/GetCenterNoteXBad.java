@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.FieldConstants;
 import frc.robot.subsystems.*;
 
+// Center Note auto, but don't drive back if we don't detect Note pickup
+// Seemed too unreliable, so don't use
+
 public class GetCenterNoteXBad extends GetNoteX {
 
     private PathPlannerPath m_returnPath;
