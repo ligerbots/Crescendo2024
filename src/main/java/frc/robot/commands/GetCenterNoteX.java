@@ -50,7 +50,7 @@ public class GetCenterNoteX extends GetNoteX {
                 .deadlineWith(
                     // safety: dump the note, in case it did not properly shoot
                     // make it a little stronger than normal in hopes of shooting it off the path
-                    new DropNote(shooter, 1500)
+                    new DropNote(shooter, 1500).alongWith(new InstantCommand(intake::intake))
                         // need to let it run for a little
                         .andThen(new WaitCommand(0.5))
                         .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
