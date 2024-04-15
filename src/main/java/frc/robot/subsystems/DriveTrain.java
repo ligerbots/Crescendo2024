@@ -429,8 +429,11 @@ public class DriveTrain extends SubsystemBase {
     public Rotation2d headingToSpeaker() {
         Translation2d robotTrans = getPose().getTranslation();
         double blueX = FieldConstants.flipTranslation(robotTrans).getX();
-        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? 
+        Translation2d targetTrans = blueX > FieldConstants.BLUE_PASS_SHOT_X_LIMIT ? 
                 FieldConstants.BLUE_PASS_TARGET : FieldConstants.BLUE_SPEAKER;
+
+        // Note: the choice of which to flip is important; we want the heading in
+        //  real field coordinates, not in Blue coordinates
         return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle();
     }
 

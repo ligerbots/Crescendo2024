@@ -110,8 +110,6 @@ public class Shooter extends SubsystemBase {
             ));
 
     // Pass shot info
-    // 1/2 of robot length beyond the Wing line
-    static final double BLUE_PASS_SHOT_X_LIMIT = FieldConstants.BLUE_WING_LINE_X_METERS + Units.inchesToMeters(15);
     static final ShooterValues PASS_SHOT_VALUES = new ShooterValues(2250.0, 2250.0, Math.toRadians(40));
 
     // Shooter class constructor, initialize arrays for motors controllers,
@@ -169,7 +167,7 @@ public class Shooter extends SubsystemBase {
 
     public ShooterValues getShootValues(DriveTrain driveTrain) {
         Pose2d bluePose = FieldConstants.flipPose(driveTrain.getPose());
-        if (bluePose.getX() > BLUE_PASS_SHOT_X_LIMIT) {
+        if (bluePose.getX() > FieldConstants.BLUE_PASS_SHOT_X_LIMIT) {
             return PASS_SHOT_VALUES;
         }
 
