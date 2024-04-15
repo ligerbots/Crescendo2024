@@ -74,7 +74,7 @@ public class GetCenterNoteXBad extends GetNoteX {
                             // skip the rest if no Note
                             new ConditionalCommand(
                                 // we have a Note, so keep going
-                                new WaitCommand(0.5).andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)),
+                                new WaitCommand(0.5).andThen(new ActiveSetShooter(shooter, shooterPivot, () -> shooter.getShootValues(m_driveTrain))),
                                 // no Note, skip
                                 Commands.print("** SKIPPING DRIVE TO SHOOT **"), () -> (alwaysDriveBack || intake.hasNote()))
                         )
@@ -113,9 +113,5 @@ public class GetCenterNoteXBad extends GetNoteX {
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         // System.out.println("Center: getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
-    }
-
-    private Shooter.ShooterValues getShootValues() {
-        return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance());
     }
 }

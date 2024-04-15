@@ -70,7 +70,7 @@ public class GetCenterNoteX extends GetNoteX {
                             new InstantCommand(intake::stop),
                             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                             new WaitCommand(0.5)
-                                .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)))
+                                .andThen(new ActiveSetShooter(shooter, shooterPivot, () -> shooter.getShootValues(m_driveTrain))))
                 ),
             // Shoot
             new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
@@ -105,9 +105,5 @@ public class GetCenterNoteX extends GetNoteX {
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         // System.out.println("getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
-    }
-
-    private Shooter.ShooterValues getShootValues() {
-        return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance());
     }
 }

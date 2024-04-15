@@ -15,6 +15,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -81,7 +82,7 @@ public class Shooter extends SubsystemBase {
     private boolean m_speakerShootMode = true;
     private boolean m_runningForIntake = false;
 
-    // lookup table for upper hub speeds
+    // lookup table for shooter speeds and angle
     public static class ShooterValues {
         public double leftRPM, rightRPM, shootAngle;
         
@@ -105,15 +106,13 @@ public class Shooter extends SubsystemBase {
             Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(30.5))),
             Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3400.0, 3300.0, Math.toRadians(29.5))),
             Map.entry(Units.inchesToMeters(168.0), new ShooterValues(3850.0, 3700.0, Math.toRadians(26.0))),
-            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(22.25))),
-            Map.entry(5.8, new ShooterValues(4600.0, 4500.0, Math.toRadians(22.25))),
-
-            // Pass shots from Center zone
-            // close to Stage
-            Map.entry(6.0, new ShooterValues(2250.0, 2250.0, Math.toRadians(50))),
-            // more in center area
-            Map.entry(FieldConstants.FIELD_LENGTH/2, new ShooterValues(2250.0, 2250.0, Math.toRadians(40)))
+            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(22.25)))
             ));
+
+    // Pass shot info
+    // 1/2 of robot length beyond the Wing line
+    static final double BLUE_PASS_SHOT_X_LIMIT = FieldConstants.BLUE_WING_LINE_X_METERS + Units.inchesToMeters(15);
+    static final ShooterValues PASS_SHOT_VALUES = new ShooterValues(2250.0, 2250.0, Math.toRadians(40));
 
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
@@ -168,9 +167,18 @@ public class Shooter extends SubsystemBase {
         pidController.setOutputRange(-1.0, 1.0);
     }
 
-    public static ShooterValues calculateShooterSpeeds(double distance) {
+    public ShooterValues getShootValues(DriveTrain driveTrain) {
+        Pose2d bluePose = FieldConstants.flipPose(driveTrain.getPose());
+        if (bluePose.getX() > BLUE_PASS_SHOT_X_LIMIT) {
+            return PASS_SHOT_VALUES;
+        }
+
+        double distance = driveTrain.getSpeakerDistance();
+        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
+
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
+
         if (before == null) {
             if (after == null) {
                 return null; // this should never happen b/c shooterSpeeds should have at least 1 element
@@ -190,7 +198,6 @@ public class Shooter extends SubsystemBase {
         ShooterValues res = before.getValue().interpolate(after.getValue(), ratio);
 
         // for tuning. Leave in for diagnostics??
-        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
         SmartDashboard.putNumber("shooter/shotLeftRPM", res.leftRPM);
         SmartDashboard.putNumber("shooter/shotRightRPM", res.rightRPM);
         SmartDashboard.putNumber("shooter/shotAngle", Math.toDegrees(res.shootAngle));
