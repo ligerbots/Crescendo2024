@@ -28,7 +28,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // Note: Current values for limits are refrenced with the shooter being flat
     // facing fowards as zero.
     // As of writing the above note we still may want to change the limits
-    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(1.5);
+    public static final double ANGLE_TOLERANCE_RADIAN = Math.toRadians(1);
 
     private static final int CURRENT_LIMIT = 30;
 
@@ -43,8 +43,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
-    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40);
-    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40);
+    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(180);
+    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(180);
 
     private static final double POSITION_OFFSET = 238.8/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
@@ -53,7 +53,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 5.0;
+    private static final double K_P = 4.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
