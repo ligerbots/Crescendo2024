@@ -71,7 +71,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private double m_goalRadians = 0;
 
     // adjustment offset. Starts at 0, but retained throughout a match
-    private double m_angleAdjustment = Math.toRadians(0.5);
+    private double m_angleAdjustment = Math.toRadians(0.0);
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot() {
