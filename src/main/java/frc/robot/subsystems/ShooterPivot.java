@@ -38,7 +38,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     
     public static final double CLIMB_ANGLE_RADIANS = Math.toRadians(24);
     
-    private static final double ADJUSTMENT_STEP = Math.toRadians(2.0);
+    private static final double ADJUSTMENT_STEP = Math.toRadians(1.0);
     
     // All units are MKS with angles in Radians
       
@@ -71,7 +71,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private double m_goalRadians = 0;
 
     // adjustment offset. Starts at 0, but retained throughout a match
-    private double m_angleAdjustment = 0.0;
+    private double m_angleAdjustment = Math.toRadians(0.5);
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot() {

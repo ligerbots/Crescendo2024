@@ -106,7 +106,7 @@ public class Shooter extends SubsystemBase {
             Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(30.5))),
             Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3400.0, 3300.0, Math.toRadians(29.5))),
             Map.entry(Units.inchesToMeters(168.0), new ShooterValues(3850.0, 3700.0, Math.toRadians(26.0))),
-            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(22.25)))
+            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(21.75)))
             ));
 
     // Pass shot info
