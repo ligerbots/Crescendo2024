@@ -43,8 +43,8 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
-    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(180);
-    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(180);
+    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(80);
+    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(80);
 
     private static final double POSITION_OFFSET = 238.8/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;

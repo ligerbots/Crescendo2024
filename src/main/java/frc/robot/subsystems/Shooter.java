@@ -101,12 +101,12 @@ public class Shooter extends SubsystemBase {
     }
 
     static final TreeMap<Double, ShooterValues> shooterSpeeds = new TreeMap<>(Map.ofEntries(
-            Map.entry(Units.inchesToMeters(52), new ShooterValues(3000.0, 3000.0, Math.toRadians(55.0))),
-            Map.entry(Units.inchesToMeters(104.3), new ShooterValues(3000.0, 3000.0, Math.toRadians(37.0))),
-            Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(30.5))),
-            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3400.0, 3300.0, Math.toRadians(29.5))),
-            Map.entry(Units.inchesToMeters(168.0), new ShooterValues(3850.0, 3700.0, Math.toRadians(26.0))),
-            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(21.75)))
+            Map.entry(Units.inchesToMeters(52), new ShooterValues(3000.0, 3000.0, Math.toRadians(55.0 + 3))),
+            Map.entry(Units.inchesToMeters(104.3), new ShooterValues(3000.0, 3000.0, Math.toRadians(37.0 + 3))),
+            Map.entry(Units.inchesToMeters(137.4), new ShooterValues(3100.0, 3100.0, Math.toRadians(30.5 + 3))),
+            Map.entry(Units.inchesToMeters(146.5), new ShooterValues(3400.0, 3300.0, Math.toRadians(29.5 + 3))),
+            Map.entry(Units.inchesToMeters(168.0), new ShooterValues(3850.0, 3700.0, Math.toRadians(26.0 + 3))),
+            Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(21.75 + 3)))
             ));
 
     // Pass shot info
