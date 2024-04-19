@@ -146,7 +146,7 @@ public class DriveTrain extends SubsystemBase {
     // persists throughout the match
     private final static double HEADING_ADJUSTMENT_STEP = Math.toRadians(1);
     // Angle offset from directly at Speaker
-    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
+    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-5.0);
 
     private double m_headingAdjustment = SHOOT_OFFSET_RADIANS;
 
