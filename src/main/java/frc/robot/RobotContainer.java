@@ -34,6 +34,7 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
+    private final PowerSystem m_powerSystem = new PowerSystem();
 
     private final Climber m_climber = new Climber(m_driveTrain);
 
