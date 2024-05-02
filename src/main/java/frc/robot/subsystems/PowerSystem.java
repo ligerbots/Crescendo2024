@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class PowerSystem extends SubsystemBase {
     private final PowerDistribution m_powerDist;
 
+    private final static double K_T = 1.0 / 11.0;
+    private final static double K_I = 0.14;
+
     /** Creates a new PowerDistribution. */
     public PowerSystem() {
         m_powerDist = new PowerDistribution();
@@ -19,5 +22,11 @@ public class PowerSystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("powerDist/totalCurrent", m_powerDist.getTotalCurrent());
+    }
+
+    private double breakerTemp(double oldTemp, double current, double deltaTime)
+    {
+        double dT_dt = -K_T * oldTemp + K_I * current;
+        return oldTemp + dT_dt * deltaTime;
     }
 }
