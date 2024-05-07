@@ -121,7 +121,7 @@ public class RobotContainer {
 
         // For Trap shot
         JoystickButton farm14 = new JoystickButton(m_farm, 14);
-        farm14.onTrue(new InstantCommand(m_shooter::ampShot));
+        farm14.onTrue(new InstantCommand(m_shooter::ampShot).withTimeout(3));
 
         // JoystickButton farm16 = new JoystickButton(m_farm, 16);
         // farm16.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
