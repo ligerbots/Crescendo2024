@@ -77,9 +77,11 @@ public class RobotContainer {
         m_driverController.b().whileTrue(new StartEndCommand(() -> m_driveTrain.setPrecisionMode(true),
                 () -> m_driveTrain.setPrecisionMode(false)));
 
-        m_driverController.a().onTrue(new PrepareAmpShot(m_driveTrain, m_elevator, m_shooterPivot, m_shooter));
-                // .onlyIf(() -> m_driveTrain.getAmpDistance() < DriveTrain.AMP_DRIVE_MAX_METERS));
-
+        if (!Constants.OUTREACH_MODE) {
+                m_driverController.a().onTrue(new PrepareAmpShot(m_driveTrain, m_elevator, m_shooterPivot, m_shooter));
+                        // .onlyIf(() -> m_driveTrain.getAmpDistance() < DriveTrain.AMP_DRIVE_MAX_METERS));
+        }
+        
         m_driverController.x()
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID()));
         // Bind the header control separately from the other parts of PrepSpeakerShot
