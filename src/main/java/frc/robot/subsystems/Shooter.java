@@ -115,6 +115,8 @@ public class Shooter extends SubsystemBase {
             Map.entry(FieldConstants.FIELD_LENGTH/2, new ShooterValues(2250.0, 2250.0, Math.toRadians(40)))
             ));
 
+    static final ShooterValues OUTREACH_SHOT = new ShooterValues(1700.0, 1700.0, Math.toRadians(40));
+
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
     public Shooter() {
@@ -169,6 +171,10 @@ public class Shooter extends SubsystemBase {
     }
 
     public static ShooterValues calculateShooterSpeeds(double distance) {
+        if (Constants.OUTREACH_MODE) {
+            return OUTREACH_SHOT;
+        }
+        
         Map.Entry<Double, ShooterValues> before = shooterSpeeds.floorEntry(distance);
         Map.Entry<Double, ShooterValues> after = shooterSpeeds.ceilingEntry(distance);
         if (before == null) {
