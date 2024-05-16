@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
-
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -56,6 +54,25 @@ public class DriveTrain extends SubsystemBase {
     // used in lots of places, so create a local constant
     private static final double MAX_VELOCITY_METERS_PER_SECOND = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND;
 
+    private static final double MAX_VELOCITY_OUTREACH_MODE = FalconDriveController.MAX_VELOCITY_METERS_PER_SECOND/2;
+
+    private static final double MAX_VELOCITY_PRECISION_MODE = MAX_VELOCITY_METERS_PER_SECOND / 6.0;
+
+    /**
+     * The maximum angular velocity of the robot in radians per second.
+     * <p>
+     * This is a measure of how fast the robot can rotate in place.
+     */
+    // Here we calculate the theoretical maximum angular velocity. You can also
+    // replace this with a measured amount.
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
+            MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
+
+    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = 
+            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0;
+
+    private static final double MAX_ANGULAR_VELOCITY_OUTREACH_MODE = MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 2.0;
+
     public static final double PATH_PLANNER_MAX_VELOCITY = 4.5;
     public static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
     public static final double PATH_PLANNER_MAX_ANGULAR_VELOCITY = 4.5;
@@ -94,21 +111,6 @@ public class DriveTrain extends SubsystemBase {
     private SlewRateLimiter m_xLimiter = new SlewRateLimiter(10);
     private SlewRateLimiter m_yLimiter = new SlewRateLimiter(10);
     private SlewRateLimiter m_rotationLimiter = new SlewRateLimiter(10);
-
-    private static final double MAX_VELOCITY_PRECISION_MODE = MAX_VELOCITY_METERS_PER_SECOND / 6.0;
-
-    /**
-     * The maximum angular velocity of the robot in radians per second.
-     * <p>
-     * This is a measure of how fast the robot can rotate in place.
-     */
-    // Here we calculate the theoretical maximum angular velocity. You can also
-    // replace this with a measured amount.
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = 
-            MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
-
-    private static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE = 
-            MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND / 6.0;
 
     private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
             // Front left
@@ -156,6 +158,11 @@ public class DriveTrain extends SubsystemBase {
             DRIVE_BASE_RADIUS_METERS, new ReplanningConfig());
             
     public DriveTrain(AprilTagVision apriltagVision, NoteVision noteVision) {
+        if (Constants.OUTREACH_MODE) {
+            // force the update of the max speeds
+            setPrecisionMode(false);
+        }
+
         m_swerveModules[0] = new SwerveModule("frontLeft",
                 new FalconDriveController(Constants.FRONT_LEFT_MODULE_DRIVE_MOTOR),
                 new NeoSteerController(Constants.FRONT_LEFT_MODULE_STEER_MOTOR,
@@ -368,6 +375,11 @@ public class DriveTrain extends SubsystemBase {
         m_maxVelocity = m_precisionMode ? MAX_VELOCITY_PRECISION_MODE : MAX_VELOCITY_METERS_PER_SECOND;
         m_maxAngularVelocity = m_precisionMode ? MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND_PRECISION_MODE
                 : MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND;
+
+        if (Constants.OUTREACH_MODE) {
+            m_maxVelocity = Math.min(m_maxVelocity, MAX_VELOCITY_OUTREACH_MODE);
+            m_maxAngularVelocity = Math.min(m_maxAngularVelocity, MAX_ANGULAR_VELOCITY_OUTREACH_MODE);
+        }
     }
 
     // lock wheels in x position to resist pushing
