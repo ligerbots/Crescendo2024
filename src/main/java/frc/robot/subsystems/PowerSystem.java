@@ -22,6 +22,9 @@ public class PowerSystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("powerDist/totalCurrent", m_powerDist.getTotalCurrent());
+        SmartDashboard.putNumber("powerDist/totalDriveCurrent", 
+                m_powerDist.getCurrent(11) + m_powerDist.getCurrent(13) + 
+                m_powerDist.getCurrent(15) + m_powerDist.getCurrent(15));
     }
 
     private double breakerTemp(double oldTemp, double current, double deltaTime)
