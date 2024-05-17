@@ -86,11 +86,14 @@ public class RobotContainer {
                 .onTrue(new PrepareSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot, m_driverController.getHID()));
         // Bind the header control separately from the other parts of PrepSpeakerShot
         // This allows us to kill the heading command without killing the rest of it.
-        m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
-                        () -> -modifyAxis(m_driverController.getLeftY()),
-                        () -> -modifyAxis(m_driverController.getLeftX()),
-                        () -> -modifyAxis(m_driverController.getRightX())));
-                        
+        if (!Constants.OUTREACH_MODE) {
+                m_driverController.x()
+                                .onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+                                                () -> -modifyAxis(m_driverController.getLeftY()),
+                                                () -> -modifyAxis(m_driverController.getLeftX()),
+                                                () -> -modifyAxis(m_driverController.getRightX())));
+        }
+        
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
 

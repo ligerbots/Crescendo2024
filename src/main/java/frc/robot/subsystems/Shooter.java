@@ -115,7 +115,7 @@ public class Shooter extends SubsystemBase {
             Map.entry(FieldConstants.FIELD_LENGTH/2, new ShooterValues(2250.0, 2250.0, Math.toRadians(40)))
             ));
 
-    static final ShooterValues OUTREACH_SHOT = new ShooterValues(1700.0, 1700.0, Math.toRadians(40));
+    static final ShooterValues OUTREACH_SHOT = new ShooterValues(1900.0, 1900.0, Math.toRadians(50));
 
     // Shooter class constructor, initialize arrays for motors controllers,
     // encoders, and SmartDashboard data
