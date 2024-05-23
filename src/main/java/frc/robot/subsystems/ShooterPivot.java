@@ -33,18 +33,18 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private static final int CURRENT_LIMIT = 30;
 
     // position constants for commands
-    public static final double STOW_ANGLE_RADIANS = Math.toRadians(55.0);
+    public static final double STOW_ANGLE_RADIANS = Math.toRadians(59.0);
     public static final double AMP_SCORE_ANGLE_RADIANS = Math.toRadians(45.0);
     
     public static final double CLIMB_ANGLE_RADIANS = Math.toRadians(24);
     
-    private static final double ADJUSTMENT_STEP = Math.toRadians(2.0);
+    private static final double ADJUSTMENT_STEP = Math.toRadians(1.0);
     
     // All units are MKS with angles in Radians
       
     // Constants to limit the shooterPivot rotation speed
-    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(40);
-    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(40);
+    private static final double MAX_VEL_RADIAN_PER_SEC = Units.degreesToRadians(80);
+    private static final double MAX_ACC_RADIAN_PER_SEC_SQ = Units.degreesToRadians(80);
 
     private static final double POSITION_OFFSET = 238.8/360.0; 
     // private static final double OFFSET_RADIAN = POSITION_OFFSET * 2 * Math.PI;
@@ -53,7 +53,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     // private static final double GEAR_RATIO = (1.0 / 15.0) * (32.0 / 48.0);
 
     // Constants for the shooterPivot PID controller
-    private static final double K_P = 5.0;
+    private static final double K_P = 4.0;
     private static final double K_I = 0.0;
     private static final double K_D = 0.0;
     private static final double K_FF = 0.0;
@@ -71,7 +71,7 @@ public class ShooterPivot extends TrapezoidProfileSubsystem {
     private double m_goalRadians = 0;
 
     // adjustment offset. Starts at 0, but retained throughout a match
-    private double m_angleAdjustment = 0.0;
+    private double m_angleAdjustment = Math.toRadians(0.0);
 
     // Construct a new shooterPivot subsystem
     public ShooterPivot() {

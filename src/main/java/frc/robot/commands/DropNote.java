@@ -12,8 +12,13 @@ import frc.robot.subsystems.Shooter;
 public class DropNote extends ParallelCommandGroup {
     /** Creates a new DropNote. */
     public DropNote(Shooter shooter) {
+        this(shooter, 1000.0);
+    }
+     
+    public DropNote(Shooter shooter, double rpm) {
         addCommands(
-                new InstantCommand(() -> shooter.setShooterRpms(1000, 1000)),
-                new InstantCommand(shooter::speakerShot));
+                new InstantCommand(() -> shooter.setShooterRpms(rpm, rpm)),
+                new InstantCommand(shooter::speakerShot)
+        );
     }
 }

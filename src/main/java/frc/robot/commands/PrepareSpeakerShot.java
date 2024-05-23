@@ -25,16 +25,10 @@ public class PrepareSpeakerShot extends ParallelCommandGroup {
                 // set shoot mode, so that TriggerShot can be a single command/button
                 new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
                 // this backs up the NOTE before turning on the shooter motors
-                new ActiveSetShooter(shooter, shooterPivot, this::getShootValues),
+                new ActiveSetShooter(shooter, shooterPivot, () -> shooter.getShootValues(m_driveTrain)),
                 new CheckPrepStatsAndRumble(shooterPivot, shooter, xboxController)
                 // NOTE do NOT turn off the shooter wheels
         );
         
-    }
-
-    private Shooter.ShooterValues getShootValues() {
-        double distance = m_driveTrain.getSpeakerDistance();
-        SmartDashboard.putNumber("shooter/shotDistanceInches", Units.metersToInches(distance));
-        return Shooter.calculateShooterSpeeds(distance); 
     }
 }

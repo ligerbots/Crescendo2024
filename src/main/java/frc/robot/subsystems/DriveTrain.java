@@ -146,7 +146,7 @@ public class DriveTrain extends SubsystemBase {
     // persists throughout the match
     private final static double HEADING_ADJUSTMENT_STEP = Math.toRadians(1);
     // Angle offset from directly at Speaker
-    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
+    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-5.0);
 
     private double m_headingAdjustment = SHOOT_OFFSET_RADIANS;
 
@@ -429,8 +429,11 @@ public class DriveTrain extends SubsystemBase {
     public Rotation2d headingToSpeaker() {
         Translation2d robotTrans = getPose().getTranslation();
         double blueX = FieldConstants.flipTranslation(robotTrans).getX();
-        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? 
+        Translation2d targetTrans = blueX > FieldConstants.BLUE_PASS_SHOT_X_LIMIT ? 
                 FieldConstants.BLUE_PASS_TARGET : FieldConstants.BLUE_SPEAKER;
+
+        // Note: the choice of which to flip is important; we want the heading in
+        //  real field coordinates, not in Blue coordinates
         return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle();
     }
 

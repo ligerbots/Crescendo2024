@@ -84,7 +84,7 @@ public class ActiveSetShooter extends Command {
             SmartDashboard.putNumber("shooter/pullback", pullback);
 
             boolean doneBackup = pullback >= NUMBER_OF_ROTATIONS;
-            if (m_timer.hasElapsed(1)) {
+            if (m_timer.hasElapsed(.2)) {
                 // test timer separately so we can log a problem
                 DriverStation.reportError("Note pullback timed out", false);
                 doneBackup = true;

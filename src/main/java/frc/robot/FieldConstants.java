@@ -46,7 +46,10 @@ public class FieldConstants {
    
     public static final Translation2d BLUE_SPEAKER = new Translation2d(0, 5.54);
     public static final Translation2d BLUE_AMP = new Translation2d(Units.inchesToMeters(72.5), FIELD_WIDTH);
-    // target location for Pass shots
+    
+    // Pass shot info: field location cutoff and aiming target
+    // 1/2 of robot length beyond the Wing line
+    public static final double BLUE_PASS_SHOT_X_LIMIT = BLUE_WING_LINE_X_METERS + Units.inchesToMeters(15);
     public static final Translation2d BLUE_PASS_TARGET = new Translation2d(1.0, FIELD_WIDTH - 1.0);
 
     public static final Pose2d ROBOT_NOTE_C_1 = new Pose2d(7.85, 0.78, Rotation2d.fromDegrees(0));
