@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class PowerSystem extends SubsystemBase {
     private final PowerDistribution m_powerDist;
 
-    private final static double K_T = 1.0 / 11.0;
-    private final static double K_I = 0.14;
+    // private final static double K_T = 1.0 / 11.0;
+    // private final static double K_I = 0.14;
 
     /** Creates a new PowerDistribution. */
     public PowerSystem() {
@@ -25,11 +25,14 @@ public class PowerSystem extends SubsystemBase {
         SmartDashboard.putNumber("powerDist/totalDriveCurrent", 
                 m_powerDist.getCurrent(11) + m_powerDist.getCurrent(13) + 
                 m_powerDist.getCurrent(15) + m_powerDist.getCurrent(16));
+        SmartDashboard.putNumber("powerDist/totalSteerCurrent", 
+                m_powerDist.getCurrent(10) + m_powerDist.getCurrent(12) + 
+                m_powerDist.getCurrent(14) + m_powerDist.getCurrent(17));
     }
 
-    private double breakerTemp(double oldTemp, double current, double deltaTime)
-    {
-        double dT_dt = -K_T * oldTemp + K_I * current;
-        return oldTemp + dT_dt * deltaTime;
-    }
+    // private double breakerTemp(double oldTemp, double current, double deltaTime)
+    // {
+    //     double dT_dt = -K_T * oldTemp + K_I * current;
+    //     return oldTemp + dT_dt * deltaTime;
+    // }
 }

@@ -119,13 +119,13 @@ public class RobotContainer {
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        // For Trap shot
-        JoystickButton farm14 = new JoystickButton(m_farm, 14);
-        farm14.onTrue(new InstantCommand(m_shooter::ampShot).withTimeout(3));
+        // // For Trap shot
+        // JoystickButton farm14 = new JoystickButton(m_farm, 14);
+        // Careful: does not turn off. Fix before re-implementing
+        // farm14.onTrue(new InstantCommand(m_shooter::ampShot).withTimeout(3));
 
         // JoystickButton farm16 = new JoystickButton(m_farm, 16);
         // farm16.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
-
 
 
         // Elevator adjust up/down
