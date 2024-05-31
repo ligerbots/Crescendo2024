@@ -36,7 +36,7 @@ public class Climber extends SubsystemBase {
     private static final double CLIMB_ROTATIONS_AFTER_ENGAGE = 60.0;
 
     // Protection values
-    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 350.0;
+    private static final double MAX_WINCH_ROTATIONS_ALLOWED = 365.0;
     private static final double MAX_WINCH_CURRENT = 100.0;
     // Current limit in the SparkMax
     private static final int WINCH_CURRENT_LIMIT = 40;
