@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
-
 import com.kauailabs.navx.frc.AHRS;
 import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -260,7 +258,8 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public Rotation2d getTiltDirection() {
-        return new Rotation2d(getNormalVector3d().getX(), getNormalVector3d().getY());
+        Translation3d norm3d = getNormalVector3d();
+        return new Rotation2d(norm3d.getX(), norm3d.getY());
     }
 
     public void joystickDrive(double inputX, double inputY, double inputRotation, boolean robotCentric) {

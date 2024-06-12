@@ -21,9 +21,9 @@ public class FalconDriveController implements DriveController {
     private static final double THRESHOLD_CURRENT_LIMIT = 80.0; // Amps 
     private static final double CURRENT_LIMIT = 40.0;  // Amps
     private static final double CURRENT_LIMIT_TIME = 5;  // seconds. taken from the data sheet 
+    private static final double STATOR_CURRENT_LIMIT = 60.0;  // Amps
     
     private static final boolean MOTOR_INVERTED = true;
-
 
     private final TalonFX m_motor;
 
@@ -37,7 +37,10 @@ public class FalconDriveController implements DriveController {
         motorCurrentConfigs.withSupplyTimeThreshold(CURRENT_LIMIT_TIME);// if the peak current is held for this long it drops to the current limit 
         motorCurrentConfigs.withSupplyCurrentLimit(CURRENT_LIMIT);// regular current limit 
         motorCurrentConfigs.withSupplyCurrentLimitEnable(true);
-        motorCurrentConfigs.withStatorCurrentLimitEnable(false);
+
+        motorCurrentConfigs.withStatorCurrentLimit(STATOR_CURRENT_LIMIT);
+        motorCurrentConfigs.withStatorCurrentLimitEnable(true);
+
         m_motor.getConfigurator().apply(motorCurrentConfigs);
         
         m_motor.setNeutralMode(NeutralModeValue.Brake);
@@ -62,6 +65,7 @@ public class FalconDriveController implements DriveController {
     public void updateSmartDashboard(String sdPrefix) {
         SmartDashboard.putNumber(sdPrefix + "/speed", getStateVelocity());
         SmartDashboard.putNumber(sdPrefix + "/position", getWheelDistance());
-        SmartDashboard.putNumber(sdPrefix + "/current", m_motor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber(sdPrefix + "/supplyCurrent", m_motor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber(sdPrefix + "/statorCurrent", m_motor.getStatorCurrent().getValueAsDouble());
     }
 }

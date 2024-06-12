@@ -161,6 +161,8 @@ public class NeoSteerController implements SteerController {
 
     @Override
     public void updateSmartDashboard(String sdPrefix) {
+        SmartDashboard.putNumber(sdPrefix + "/supplyCurrent", m_motor.getOutputCurrent());
+
         Rotation2d stateAngle = getStateAngle();
         SmartDashboard.putNumber(sdPrefix + "/angle", stateAngle.getDegrees());
         double cancoderRadians = m_absoluteEncoder.getAbsoluteAngleRadians();

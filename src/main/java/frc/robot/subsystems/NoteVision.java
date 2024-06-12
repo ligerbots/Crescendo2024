@@ -159,6 +159,8 @@ public class NoteVision extends SubsystemBase {
         // set the driver mode to false
         setDriverMode(false);
 
+        SmartDashboard.putBoolean("noteVision/camera", m_noteCamera.isConnected());
+
         // // DEBUG
         // List<Translation2d> notes = getNotes();
         // SmartDashboard.putNumber("noteVision/nFound", notes.size());
