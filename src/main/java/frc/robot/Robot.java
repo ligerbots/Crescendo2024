@@ -20,6 +20,16 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
+        // // If you are trying to work with a real PV and simulation, enable this code.
+        // // Otherwise it is not needed, even when running a simulation
+        // if (isSimulation()) {
+        //   // At-Home Network Debug Only - host the NT server on photonvision and connect to it.
+        //   var ntinst = edu.wpi.first.networktables.NetworkTableInstance.getDefault();
+        //   ntinst.stopServer();
+        //   ntinst.setServer("photonvision.local");
+        //   ntinst.startClient4("MainRobotProgram");
+        // }
+
         // Disable the LiveWindow telemetry to lower the network load
         LiveWindow.disableAllTelemetry();
 
