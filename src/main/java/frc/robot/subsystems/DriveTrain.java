@@ -495,6 +495,8 @@ public class DriveTrain extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+        if (!Constants.SIMULATION_SUPPORT) return;
+        
         Rotation2d head = m_simPose.getRotation();
         double newX = m_simPose.getX() + SIM_LOOP_TIME * (head.getCos() * m_simChassisSpeeds.vxMetersPerSecond
                 - head.getSin() * m_simChassisSpeeds.vyMetersPerSecond);
