@@ -148,7 +148,7 @@ public class DriveTrain extends SubsystemBase {
     // persists throughout the match
     private final static double HEADING_ADJUSTMENT_STEP = Math.toRadians(1);
     // Angle offset from directly at Speaker
-    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-2.0);
+    private final static double SHOOT_OFFSET_RADIANS = Math.toRadians(-5.0);
 
     private double m_headingAdjustment = SHOOT_OFFSET_RADIANS;
 
@@ -267,7 +267,8 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public Rotation2d getTiltDirection() {
-        return new Rotation2d(getNormalVector3d().getX(), getNormalVector3d().getY());
+        Translation3d norm3d = getNormalVector3d();
+        return new Rotation2d(norm3d.getX(), norm3d.getY());
     }
 
     public void joystickDrive(double inputX, double inputY, double inputRotation, boolean robotCentric) {
@@ -441,8 +442,11 @@ public class DriveTrain extends SubsystemBase {
     public Rotation2d headingToSpeaker() {
         Translation2d robotTrans = getPose().getTranslation();
         double blueX = FieldConstants.flipTranslation(robotTrans).getX();
-        Translation2d targetTrans = blueX > FieldConstants.BLUE_WING_LINE_X_METERS ? 
+        Translation2d targetTrans = blueX > FieldConstants.BLUE_PASS_SHOT_X_LIMIT ? 
                 FieldConstants.BLUE_PASS_TARGET : FieldConstants.BLUE_SPEAKER;
+
+        // Note: the choice of which to flip is important; we want the heading in
+        //  real field coordinates, not in Blue coordinates
         return FieldConstants.flipTranslation(targetTrans).minus(robotTrans).getAngle();
     }
 
@@ -505,6 +509,8 @@ public class DriveTrain extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
+        if (!Constants.SIMULATION_SUPPORT) return;
+        
         Rotation2d head = m_simPose.getRotation();
         double newX = m_simPose.getX() + SIM_LOOP_TIME * (head.getCos() * m_simChassisSpeeds.vxMetersPerSecond
                 - head.getSin() * m_simChassisSpeeds.vyMetersPerSecond);

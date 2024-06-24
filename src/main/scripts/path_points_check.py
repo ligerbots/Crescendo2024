@@ -13,7 +13,12 @@ from pathlib import Path
 def calc_shoot_angle(x, y):
 
 #    TARGET_X = 0  ## currently unused, assuming target is ON the speaker wall
+    # 5.54 is speaker center point in meters
     TARGET_Y = 5.54
+
+    speaker_width_in_meters = 1.050925
+
+#    TARGET_Y -= speaker_width_in_meters / 2.0
 
     if y == TARGET_Y:
         ret_val = 180

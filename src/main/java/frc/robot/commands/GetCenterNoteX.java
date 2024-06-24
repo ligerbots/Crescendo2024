@@ -42,15 +42,18 @@ public class GetCenterNoteX extends GetNoteX {
         // return paths are for center notes only
         setReturnPath(targetNote);
 
-        // Use note "monitoring" for center notes only
         addCommands(
             // Drive out to the Note
             // Monitor for the Note and maybe abort
             // Turn on the Intake when we cross into the Center zone
             new DeferredCommand(() -> m_driveTrain.followPath(getInitialPath()), Set.of(m_driveTrain))
                 .deadlineWith(
-                    // new MonitorForNote(noteVision, () -> m_driveTrain.getPose(), m_targetNote, this),
-                    new StartIntake(intake, shooter, shooterPivot, elevator)
+                    // safety: dump the note, in case it did not properly shoot
+                    // make it a little stronger than normal in hopes of shooting it off the path
+                    new DropNote(shooter, 1500).alongWith(new InstantCommand(intake::intake))
+                        // need to let it run for a little
+                        .andThen(new WaitCommand(0.5))
+                        .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
                 ),
 
             // wait up to 0.5 second to suck the Note in all the way
@@ -66,9 +69,8 @@ public class GetCenterNoteX extends GetNoteX {
                             new InstantCommand(shooter::turnOffShooter),
                             new InstantCommand(intake::stop),
                             new InstantCommand(() -> shooter.setSpeakerShootMode(true)),
-                            // new WaitUntilCommand(() -> (shooter.getFeederRpm() < Shooter.FEEDER_RPM_TOLERANCE)).withTimeout(1.0)
                             new WaitCommand(0.5)
-                                .andThen(new ActiveSetShooter(shooter, shooterPivot, this::getShootValues)))
+                                .andThen(new ActiveSetShooter(shooter, shooterPivot, () -> shooter.getShootValues(m_driveTrain))))
                 ),
             // Shoot
             new TriggerShot(shooter).alongWith(new InstantCommand(intake::clearHasNote))
@@ -103,9 +105,5 @@ public class GetCenterNoteX extends GetNoteX {
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
         // System.out.println("getInitialPath nearest = " + closestPathStart);
         return m_candidateStartPaths.get(closestPathStart);       
-    }
-
-    private Shooter.ShooterValues getShootValues() {
-        return Shooter.calculateShooterSpeeds(m_driveTrain.getSpeakerDistance());
     }
 }

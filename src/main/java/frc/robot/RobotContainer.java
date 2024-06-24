@@ -34,6 +34,7 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     private final ShooterPivot m_shooterPivot = new ShooterPivot();
     private final Elevator m_elevator = new Elevator();
+    private final PowerSystem m_powerSystem = new PowerSystem();
 
     private final Climber m_climber = new Climber(m_driveTrain);
 
@@ -123,8 +124,14 @@ public class RobotContainer {
         JoystickButton farm11 = new JoystickButton(m_farm, 11);
         farm11.onTrue(new DropNote(m_shooter)).onFalse(new Stow(m_shooter, m_shooterPivot, m_elevator));
 
-        JoystickButton farm16 = new JoystickButton(m_farm, 16);
-        farm16.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
+        // // For Trap shot
+        // JoystickButton farm14 = new JoystickButton(m_farm, 14);
+        // Careful: does not turn off. Fix before re-implementing
+        // farm14.onTrue(new InstantCommand(m_shooter::ampShot).withTimeout(3));
+
+        // JoystickButton farm16 = new JoystickButton(m_farm, 16);
+        // farm16.onTrue(new PrepareTrapShot(m_shooter, m_shooterPivot, m_driverController.getHID()));
+
 
         // Elevator adjust up/down
         JoystickButton farm4 = new JoystickButton(m_farm, 4);
@@ -280,6 +287,11 @@ public class RobotContainer {
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                
+        autoName = "C4-C5-S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_5, FieldConstants.BLUE_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
         
         autoName = "C3-C4-C5";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
@@ -290,7 +302,12 @@ public class RobotContainer {
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4 }, 
                 m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
-        
+
+        autoName = "C5-C4-S3";
+        m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
+                new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4, FieldConstants.BLUE_NOTE_S_3 }, 
+                m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator));
+                
         autoName = "C5-C4-C3";
         m_chosenAuto.addOption(autoName, new GetMultiNoteGeneric(
                 new Translation2d[] { FieldConstants.NOTE_C_5, FieldConstants.NOTE_C_4, FieldConstants.NOTE_C_3 }, 
