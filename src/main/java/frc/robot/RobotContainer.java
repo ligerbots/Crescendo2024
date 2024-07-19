@@ -86,12 +86,12 @@ public class RobotContainer {
         // Bind the header control separately from the other parts of PrepSpeakerShot
         // This allows us to kill the heading command without killing the rest of it.
         m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
-                        () -> -modifyAxis(m_driverController.getLeftY()),
-                        () -> -modifyAxis(m_driverController.getLeftX()),
-                        () -> -modifyAxis(m_driverController.getRightX())));
+                        () -> -m_driverController.getLeftY(),
+                        () -> -m_driverController.getLeftX(),
+                        () -> -m_driverController.getRightX()));
                         
-        m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lockWheels, m_driveTrain));
-        m_driverController.back().onTrue(new InstantCommand(m_driveTrain::resetHeading, m_driveTrain));
+        m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lock, m_driveTrain));
+        m_driverController.back().onTrue(new InstantCommand(m_driveTrain::zeroHeading, m_driveTrain));
 
         // Climber Commands
         JoystickButton farm1 = new JoystickButton(m_farm, 1);
@@ -371,34 +371,13 @@ public class RobotContainer {
         // Left stick X axis -> left and right movement
         // Right stick X axis -> rotation
         // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
-        return new Drive(
-                m_driveTrain,
-                () -> -modifyAxis(m_driverController.getLeftY()),
-                () -> -modifyAxis(m_driverController.getLeftX()),
-                () -> -modifyAxis(m_driverController.getRightX()),
+        return m_driveTrain.driveCommand( 
+                () -> -m_driverController.getLeftY(),
+                () -> -m_driverController.getLeftX(),
+                // TEMP: Paul has a Logitech controller
+                // () -> -m_driverController.getRightX(),
+                () -> -m_driverController.getRawAxis(2),
                 m_driverController.rightBumper());
-    }
-
-    private static double deadband(double value, double deadband) {
-        if (Math.abs(value) > deadband) {
-            if (value > 0.0) {
-                return (value - deadband) / (1.0 - deadband);
-            } else {
-                return (value + deadband) / (1.0 - deadband);
-            }
-        } else {
-            return 0.0;
-        }
-    }
-
-    private static double modifyAxis(double value) {
-        // Deadband
-        value = deadband(value, 0.05);
-
-        // Square the axis
-        value = Math.copySign(value * value, value);
-
-        return value;
     }
 
     public DriveTrain getDriveTrain() {
