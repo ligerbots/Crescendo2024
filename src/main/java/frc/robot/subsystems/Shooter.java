@@ -109,6 +109,8 @@ public class Shooter extends SubsystemBase {
             Map.entry(Units.inchesToMeters(224.0), new ShooterValues(4600.0, 4500.0, Math.toRadians(21.75 + 1)))
             ));
 
+    static final ShooterValues OUTREACH_SHOT = new ShooterValues(1900.0, 1900.0, Math.toRadians(50));
+
     // Pass shot info
     static final ShooterValues PASS_SHOT_VALUES = new ShooterValues(2250.0, 2250.0, Math.toRadians(40));
 
@@ -166,6 +168,10 @@ public class Shooter extends SubsystemBase {
     }
 
     public ShooterValues getShootValues(DriveTrain driveTrain) {
+        if (Constants.OUTREACH_MODE) {
+            return OUTREACH_SHOT;
+        }
+
         Pose2d bluePose = FieldConstants.flipPose(driveTrain.getPose());
         if (bluePose.getX() > FieldConstants.BLUE_PASS_SHOT_X_LIMIT) {
             return PASS_SHOT_VALUES;

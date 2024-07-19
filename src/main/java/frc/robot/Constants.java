@@ -10,6 +10,9 @@ public class Constants {
     // if true, burn the settings into the controllers after init
     public static final boolean SPARKMAX_BURN_FLASH = false;
 
+    // outreach mode
+    public static final boolean OUTREACH_MODE = true;
+
     // Reminder: all CAN IDs of the same device/motor type need to be unique.
     // You don't actually need SparkMax IDs to be different from Falcon IDs
 
