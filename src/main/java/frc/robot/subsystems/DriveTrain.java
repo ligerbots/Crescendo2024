@@ -36,8 +36,6 @@ public class DriveTrain extends SubsystemBase {
 
     private static final double MAX_SPEED = Units.feetToMeters(14.5);
     
-    private static final double JOYSTICK_DEADBAND = 0.05;
-
     public static final double ANGLE_TOLERANCE_RADIANS = Math.toRadians(2.0);
 
     private static final double STEER_GEAR_RATIO = (50.0 / 14.0) * (60.0 / 10.0);
@@ -131,37 +129,61 @@ public class DriveTrain extends SubsystemBase {
      * Command to drive the robot using translative values and heading as angular velocity.
      * Inputs are deadbanded and squared.
      *
-     * @param translationX     Translation in the X direction. 
-     * @param translationY     Translation in the Y direction. 
-     * @param angularRotationX Angular velocity of the robot to set. 
+     * @param translationX     Translation [-1, 1] in the X direction. 
+     * @param translationY     Translation [-1, 1] in the Y direction. 
+     * @param angularRotation  Angular velocity [-1, 1] of the robot to set. 
      * @param robotCentric     Robot centric drive if true.
      * @return Drive command.
      */
     public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotation, BooleanSupplier robotCentric) {
         return run(() -> {
-            joystickDrive(translationX.getAsDouble(), translationY.getAsDouble(), angularRotation.getAsDouble(), robotCentric.getAsBoolean());
+            drive(translationX.getAsDouble(), translationY.getAsDouble(), angularRotation.getAsDouble(), robotCentric.getAsBoolean());
         });
     }
 
-    public void joystickDrive(double translationX, double translationY, double angularRotation, boolean robotCentric) {
+    /**
+     * Drive the robot using translative values and heading as angular velocity.
+     * Inputs are deadbanded and squared.
+     *
+     * @param translationX     Translation [-1, 1] in the X direction. 
+     * @param translationY     Translation [-1, 1] in the Y direction. 
+     * @param angularRotation  Angular velocity [-1, 1] of the robot to set. 
+     * @param robotCentric     Robot centric drive if true.
+     * @return Drive command.
+     */
+    public void drive(double translationX, double translationY, double angularRotation, boolean robotCentric) {
         // field centric: flip direction if we are Red
         // robot centric (for 2024): input is on the BACK of the robot, so flip to match the camera
         double flipDirection = (robotCentric || isRedAlliance()) ? -1.0 : 1.0;
 
         m_swerveDrive.drive(
                 new Translation2d(
-                        flipDirection * modifyAxis(translationX) * m_swerveDrive.getMaximumVelocity(),
-                        flipDirection * modifyAxis(translationY) * m_swerveDrive.getMaximumVelocity()),
-                modifyAxis(angularRotation) * m_swerveDrive.getMaximumAngularVelocity(),
+                        flipDirection * translationX * m_swerveDrive.getMaximumVelocity(),
+                        flipDirection * translationY * m_swerveDrive.getMaximumVelocity()),
+                angularRotation * m_swerveDrive.getMaximumAngularVelocity(),
                 !robotCentric,
                 false);
     }
 
-    private double modifyAxis(double value) {
-        value = MathUtil.applyDeadband(value, JOYSTICK_DEADBAND);
-        // Square the axis
-        return Math.copySign(value * value, value);
+    /**
+     * Drive the robot using translative values and heading as a setpoint.
+     *
+     * @param translationX Translation [-1, 1] in the X direction.
+     * @param translationY Translation [-1, 1] in the Y direction.
+     * @param heading      Target heading in radians.
+     * @return Drive command.
+     */
+    public void driveWithHeading(double translationX, double translationY, double heading) {
+        // swerveDrive.setHeadingCorrection(true); // Normally you would want heading
+        // correction for this kind of control.
+        // Make the robot move
+        driveFieldOriented(
+            m_swerveDrive.swerveController.getTargetSpeeds(
+                translationX, translationY,
+                heading, m_swerveDrive.getOdometryHeading().getRadians(),
+                m_swerveDrive.getMaximumVelocity()));
     }
+
 
     /**
      * The primary method for controlling the drivebase. Takes a
@@ -171,7 +193,7 @@ public class DriveTrain extends SubsystemBase {
      * the wheel velocities. Also has field- and robot-relative modes, which affect
      * how the translation vector is used.
      *
-     * @param translation   {@link Translation2d} that is the commanded linear
+     * @param translationVelocity   {@link Translation2d} that is the commanded linear
      *                      velocity of the robot, in meters per
      *                      second. In robot-relative mode, positive x is torwards
      *                      the bow (front) and positive y is
@@ -180,21 +202,21 @@ public class DriveTrain extends SubsystemBase {
      *                      (field North) and positive y is torwards the left wall
      *                      when looking through the driver station
      *                      glass (field West).
-     * @param rotation      Robot angular rate, in radians per second. CCW positive.
+     * @param rotationSpeed      Robot angular rate, in radians per second. CCW positive.
      *                      Unaffected by field/robot
      *                      relativity.
      * @param fieldRelative Drive mode. True for field-relative, false for
      *                      robot-relative.
      */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
-        m_swerveDrive.drive(translation,
-                rotation,
+    public void drive(Translation2d translationVelocity, double rotationSpeed, boolean fieldRelative) {
+        m_swerveDrive.drive(translationVelocity,
+                rotationSpeed,
                 fieldRelative,
                 false); // Open loop is disabled since it shouldn't be used most of the time.
     }
 
     /**
-     * Drive the robot given a chassis field oriented velocity.
+     * Drive the robot given a field-oriented chassis velocity.
      *
      * @param velocity Velocity according to the field.
      */
@@ -203,7 +225,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     /**
-     * Drive according to the chassis robot oriented velocity.
+     * Drive according to the robot-oriented chassis velocity.
      *
      * @param velocity Robot oriented {@link ChassisSpeeds}
      */

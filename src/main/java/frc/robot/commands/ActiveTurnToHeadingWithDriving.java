@@ -70,7 +70,7 @@ public class ActiveTurnToHeadingWithDriving extends Command {
 
         // last param "false" is robotCentric driving. Only used in "precision mode".
     
-        m_driveTrain.joystickDrive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), speed, false);
+        m_driveTrain.drive(m_joystickXSupplier.getAsDouble(), m_joystickYSupplier.getAsDouble(), speed, false);
 
         // Record whether at the right heading, so that other commands can check
         m_driveTrain.setOnGoalForActiveTurn(Math.abs(headingRadians - wantedRadians) < DriveTrain.ANGLE_TOLERANCE_RADIANS);

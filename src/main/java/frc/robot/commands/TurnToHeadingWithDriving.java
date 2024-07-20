@@ -61,7 +61,7 @@ public class TurnToHeadingWithDriving extends Command {
         double currentRadians = MathUtil.angleModulus(m_driveTrain.getHeading().getRadians());
         double speed = MathUtil.clamp(m_turnHeadingPID.calculate(currentRadians, m_wantedRadians), -1.0, 1.0);
 
-        m_driveTrain.joystickDrive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), speed, false);
+        m_driveTrain.drive(m_translationXSupplier.getAsDouble(), m_translationYSupplier.getAsDouble(), speed, false);
     }
 
     // Called once the command ends or is interrupted.

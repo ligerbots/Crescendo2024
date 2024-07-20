@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -11,7 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -23,6 +23,8 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
+    private static final double JOYSTICK_DEADBAND = 0.05;
+
     private final CommandXboxController m_driverController = new CommandXboxController(0);
     // private final CommandXboxController m_operatorController = new CommandXboxController(1);
     private final Joystick m_farm = new Joystick(1);
@@ -86,9 +88,9 @@ public class RobotContainer {
         // Bind the header control separately from the other parts of PrepSpeakerShot
         // This allows us to kill the heading command without killing the rest of it.
         m_driverController.x().onTrue(new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
-                        () -> -m_driverController.getLeftY(),
-                        () -> -m_driverController.getLeftX(),
-                        () -> -m_driverController.getRightX()));
+                        () -> -conditionAxis(m_driverController.getLeftY()),
+                        () -> -conditionAxis(m_driverController.getLeftX()),
+                        () -> -conditionAxis(m_driverController.getRightX())));
                         
         m_driverController.start().onTrue(new InstantCommand(m_driveTrain::lock, m_driveTrain));
         m_driverController.back().onTrue(new InstantCommand(m_driveTrain::zeroHeading, m_driveTrain));
@@ -372,12 +374,18 @@ public class RobotContainer {
         // Right stick X axis -> rotation
         // note: "rightBumper()"" is a Trigger which is a BooleanSupplier
         return m_driveTrain.driveCommand( 
-                () -> -m_driverController.getLeftY(),
-                () -> -m_driverController.getLeftX(),
+                () -> -conditionAxis(m_driverController.getLeftY()),
+                () -> -conditionAxis(m_driverController.getLeftX()),
                 // TEMP: Paul has a Logitech controller
-                // () -> -m_driverController.getRightX(),
-                () -> -m_driverController.getRawAxis(2),
+                // () -> -conditionAxis(m_driverController.getRightX()),
+                () -> -conditionAxis(m_driverController.getRawAxis(2)),
                 m_driverController.rightBumper());
+    }
+
+    private double conditionAxis(double value) {
+        value = MathUtil.applyDeadband(value, JOYSTICK_DEADBAND);
+        // Square the axis
+        return Math.copySign(value * value, value);
     }
 
     public DriveTrain getDriveTrain() {
