@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,6 +21,12 @@ import frc.robot.FieldConstants;
 import java.io.File;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -47,6 +52,10 @@ public class DriveTrain extends SubsystemBase {
     public static final double ROBOT_SWERVE_OFFSET_X_INCHES = -3.0;
     private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0 );
     // TODO: need to set the rotation center in YAGSL
+
+    // TODO: determine values, these were defaults from YAGSL example
+    private static final PIDConstants PATH_TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
+    private static final PIDConstants PATH_ANGLE_PID       = new PIDConstants(0.4, 0, 0.01);
 
     // if true, then robot is in field centric mode
     private boolean m_fieldCentric = true;
@@ -123,6 +132,27 @@ public class DriveTrain extends SubsystemBase {
 
         m_aprilTagVision = apriltagVision;
         m_noteVision = noteVision;                                        
+    }
+
+    /**
+     * Setup AutoBuilder for PathPlanner.
+     */
+    public void setupPathPlanner() {
+        AutoBuilder.configureHolonomic(
+                this::getPose, 
+                this::setPose, 
+                this::getRobotVelocity,
+                this::setChassisSpeeds, 
+                new HolonomicPathFollowerConfig( 
+                        PATH_TRANSLATION_PID,                        
+                        PATH_ANGLE_PID,
+                        4.5, // Max module speed, in m/s
+                        m_swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters(),
+                        new ReplanningConfig() // Default path replanning config. See the API for the options here
+                ),
+                () -> FieldConstants.isRedAlliance(),
+                this // Reference to this subsystem to set requirements
+        );
     }
 
     /**
@@ -213,6 +243,28 @@ public class DriveTrain extends SubsystemBase {
                 rotationSpeed,
                 fieldRelative,
                 false); // Open loop is disabled since it shouldn't be used most of the time.
+    }
+
+    /**
+     * Use PathPlanner Path finding to go to a point on the field.
+     *
+     * @param pose Target {@link Pose2d} to go to.
+     * @return PathFinding command
+     */
+    public Command driveToPose(Pose2d pose) {
+        // Create the constraints to use while pathfinding
+        PathConstraints constraints = new PathConstraints(
+                m_swerveDrive.getMaximumVelocity(), 4.0,
+                m_swerveDrive.getMaximumAngularVelocity(), Units.degreesToRadians(720));
+
+        // Since AutoBuilder is configured, we can use it to build pathfinding commands
+        return AutoBuilder.pathfindToPose(
+                pose,
+                constraints,
+                0.0, // Goal end velocity in meters/sec
+                0.0 // Rotation delay distance in meters. This is how far the robot should travel
+                    // before attempting to rotate.
+        );
     }
 
     /**
