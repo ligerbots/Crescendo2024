@@ -23,7 +23,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -131,7 +133,9 @@ public class DriveTrain extends SubsystemBase {
                                                 // for simulations since it causes discrepancies not seen in real life.
 
         m_aprilTagVision = apriltagVision;
-        m_noteVision = noteVision;                                        
+        m_noteVision = noteVision;
+        
+        setupPathPlanner();
     }
 
     /**
@@ -246,6 +250,17 @@ public class DriveTrain extends SubsystemBase {
     }
 
     /**
+     * Get the path follower with events.
+     *
+     * @param pathName PathPlanner path name.
+     * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
+     */
+    public Command followPath(PathPlannerPath path) {
+        // Create a path following command using AutoBuilder. This will also trigger event markers.
+        return AutoBuilder.followPath(path);
+    }
+
+    /**
      * Use PathPlanner Path finding to go to a point on the field.
      *
      * @param pose Target {@link Pose2d} to go to.
@@ -265,6 +280,16 @@ public class DriveTrain extends SubsystemBase {
                 0.0 // Rotation delay distance in meters. This is how far the robot should travel
                     // before attempting to rotate.
         );
+    }
+
+    public static PathPlannerPath loadPath(String pathName) {
+        try {
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+            return path;
+        } catch (Exception e) {
+            DriverStation.reportError(String.format("Unable to load PP path %s", pathName), true);
+        }
+        return null;
     }
 
     /**
