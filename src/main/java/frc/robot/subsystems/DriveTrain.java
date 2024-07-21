@@ -23,6 +23,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathHolonomic;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -58,6 +59,9 @@ public class DriveTrain extends SubsystemBase {
     // TODO: determine values, these were defaults from YAGSL example
     private static final PIDConstants PATH_TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
     private static final PIDConstants PATH_ANGLE_PID       = new PIDConstants(0.4, 0, 0.01);
+
+    // Module Speed per module is appropriate
+    private HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG;
 
     // if true, then robot is in field centric mode
     private boolean m_fieldCentric = true;
@@ -142,18 +146,20 @@ public class DriveTrain extends SubsystemBase {
      * Setup AutoBuilder for PathPlanner.
      */
     public void setupPathPlanner() {
+        PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+                PATH_TRANSLATION_PID,
+                PATH_ANGLE_PID,
+                4.5, // Max module speed, in m/s
+                m_swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters(),
+                new ReplanningConfig() // Default path replanning config. See the API for the options here
+        );
+
         AutoBuilder.configureHolonomic(
                 this::getPose, 
                 this::setPose, 
                 this::getRobotVelocity,
                 this::setChassisSpeeds, 
-                new HolonomicPathFollowerConfig( 
-                        PATH_TRANSLATION_PID,                        
-                        PATH_ANGLE_PID,
-                        4.5, // Max module speed, in m/s
-                        m_swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters(),
-                        new ReplanningConfig() // Default path replanning config. See the API for the options here
-                ),
+                PATH_FOLLOWER_CONFIG,
                 () -> FieldConstants.isRedAlliance(),
                 this // Reference to this subsystem to set requirements
         );
@@ -255,10 +261,17 @@ public class DriveTrain extends SubsystemBase {
      * @param pathName PathPlanner path name.
      * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
      */
+    // public Command followPath(PathPlannerPath path) {
+    //     // Create a path following command using AutoBuilder. This will also trigger event markers.
+    //     return AutoBuilder.followPath(path);
+    // }
+
     public Command followPath(PathPlannerPath path) {
-        // Create a path following command using AutoBuilder. This will also trigger event markers.
-        return AutoBuilder.followPath(path);
+        return new FollowPathHolonomic(path, this::getPose, this::getRobotVelocity, this::setChassisSpeeds, 
+                PATH_FOLLOWER_CONFIG,
+                () -> FieldConstants.isRedAlliance(), this);
     }
+
 
     /**
      * Use PathPlanner Path finding to go to a point on the field.
@@ -349,7 +362,7 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         // Have the vision system update based on the Apriltags, if seen
         // need to add the pipeline result
-        m_aprilTagVision.updateOdometry(m_swerveDrive.swerveDrivePoseEstimator, m_swerveDrive.field);
+        // m_aprilTagVision.updateOdometry(m_swerveDrive.swerveDrivePoseEstimator, m_swerveDrive.field);
     }
 
     @Override
@@ -378,6 +391,7 @@ public class DriveTrain extends SubsystemBase {
      * @param pose The pose to set the odometry to
      */
     public void setPose(Pose2d pose) {
+        System.out.println("Drivetrain.setPose " + pose);
         m_swerveDrive.resetOdometry(pose);
     }
 

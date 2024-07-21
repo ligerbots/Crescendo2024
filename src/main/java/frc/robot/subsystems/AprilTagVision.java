@@ -255,7 +255,7 @@ public class AprilTagVision extends SubsystemBase {
             }
             return;
         } catch (Exception e) {
-            DriverStation.reportError("Error updating odometry from AprilTags" + e.getLocalizedMessage(), false);
+            DriverStation.reportError("Error updating odometry from AprilTags " + e.getLocalizedMessage(), false);
         }
     }
 

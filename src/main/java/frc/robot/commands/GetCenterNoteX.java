@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import frc.robot.FieldConstants;
@@ -44,6 +45,7 @@ public class GetCenterNoteX extends GetNoteX {
         setReturnPath(targetNote);
 
         addCommands(
+            new PrintCommand("starting CenterNote"),
             // Drive out to the Note
             // Turn on the Intake when we cross into the Center zone
             new DeferredCommand(this::getInitialCommand, Set.of(m_driveTrain))
@@ -56,12 +58,14 @@ public class GetCenterNoteX extends GetNoteX {
                         .andThen(new StartIntake(intake, shooter, shooterPivot, elevator))
                 ),
 
+            new PrintCommand("CenterNote: drive back done"),
             // wait up to 0.5 second to suck the Note in all the way
             // new WaitUntilCommand(intake::hasNote).withTimeout(INTAKE_EXTRA_WAIT_TIME),
             new WaitCommand(INTAKE_EXTRA_WAIT_TIME),
 
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
-            m_driveTrain.followPath(m_returnPath)
+            new PrintCommand("CenterNote: starting drivein"),
+            new DeferredCommand(() -> m_driveTrain.followPath(m_returnPath), Set.of(m_driveTrain))
                 .deadlineWith(
                     new WaitCommand(0.5)
                         .andThen(
@@ -80,7 +84,7 @@ public class GetCenterNoteX extends GetNoteX {
     private Command getInitialCommand() {
         Pose2d pose = m_driveTrain.getPose();
         Pose2d poseBlue = FieldConstants.flipPose(pose);
-        // System.out.println("Starting getInitialPath " + poseBlue);
+        System.out.println("Starting getInitialPath " + poseBlue);
 
         // this part is used when in center note area, if intended center note is not found
         if (poseBlue.getX() > FieldConstants.BLUE_WING_LINE_X_METERS) {
@@ -104,7 +108,7 @@ public class GetCenterNoteX extends GetNoteX {
         }
 
         Pose2d closestPathStart = poseBlue.nearest(new ArrayList<>(m_candidateStartPaths.keySet()));
-        // System.out.println("getInitialPath nearest = " + closestPathStart);
+        System.out.println("getInitialPath nearest = " + closestPathStart);
         return m_driveTrain.followPath(m_candidateStartPaths.get(closestPathStart));
     }
 }
