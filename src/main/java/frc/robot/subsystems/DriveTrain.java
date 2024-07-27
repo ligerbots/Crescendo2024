@@ -135,7 +135,7 @@ public class DriveTrain extends SubsystemBase {
         
         m_swerveDrive.setCosineCompensator(false);// !SwerveDriveTelemetry.isSimulation); // Disables cosine compensation
                                                 // for simulations since it causes discrepancies not seen in real life.
-
+        
         m_aprilTagVision = apriltagVision;
         m_noteVision = noteVision;
         
@@ -194,7 +194,7 @@ public class DriveTrain extends SubsystemBase {
     public void drive(double translationX, double translationY, double angularRotation, boolean robotCentric) {
         // field centric: flip direction if we are Red
         // robot centric (for 2024): input is on the BACK of the robot, so flip to match the camera
-        double flipDirection = (robotCentric || isRedAlliance()) ? -1.0 : 1.0;
+        double flipDirection = (robotCentric || FieldConstants.isRedAlliance()) ? -1.0 : 1.0;
 
         m_swerveDrive.drive(
                 new Translation2d(
@@ -261,16 +261,16 @@ public class DriveTrain extends SubsystemBase {
      * @param pathName PathPlanner path name.
      * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
      */
-    // public Command followPath(PathPlannerPath path) {
-    //     // Create a path following command using AutoBuilder. This will also trigger event markers.
-    //     return AutoBuilder.followPath(path);
-    // }
-
     public Command followPath(PathPlannerPath path) {
-        return new FollowPathHolonomic(path, this::getPose, this::getRobotVelocity, this::setChassisSpeeds, 
-                PATH_FOLLOWER_CONFIG,
-                () -> FieldConstants.isRedAlliance(), this);
+        // Create a path following command using AutoBuilder. This will also trigger event markers.
+        return AutoBuilder.followPath(path);
     }
+
+    // public Command followPath(PathPlannerPath path) {
+    //     return new FollowPathHolonomic(path, this::getPose, this::getRobotVelocity, this::setChassisSpeeds, 
+    //             PATH_FOLLOWER_CONFIG,
+    //             () -> FieldConstants.isRedAlliance(), this);
+    // }
 
 
     /**
@@ -362,7 +362,8 @@ public class DriveTrain extends SubsystemBase {
     public void periodic() {
         // Have the vision system update based on the Apriltags, if seen
         // need to add the pipeline result
-        // m_aprilTagVision.updateOdometry(m_swerveDrive.swerveDrivePoseEstimator, m_swerveDrive.field);
+        // m_swerveDrive.addVisionMeasurement
+        m_aprilTagVision.updateOdometry(m_swerveDrive);
     }
 
     @Override
@@ -411,6 +412,7 @@ public class DriveTrain extends SubsystemBase {
      * @param chassisSpeeds Chassis Speeds to set.
      */
     public void setChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+        // System.out.println("setChassisSpeeds: pose " + getPose() + " speeds " + chassisSpeeds + " currVel " + getRobotVelocity());
         m_swerveDrive.setChassisSpeeds(chassisSpeeds);
     }
 
@@ -429,17 +431,6 @@ public class DriveTrain extends SubsystemBase {
      */
     public void zeroHeading() {
         m_swerveDrive.zeroGyro();
-    }
-
-    /**
-     * Checks if the alliance is red, defaults to false if alliance isn't available.
-     *
-     * @return true if the red alliance, false if blue. Defaults to false if none is
-     *         available.
-     */
-    private boolean isRedAlliance() {
-        var alliance = DriverStation.getAlliance();
-        return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
     }
 
     /**

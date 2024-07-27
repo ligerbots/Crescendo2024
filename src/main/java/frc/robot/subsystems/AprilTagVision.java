@@ -22,7 +22,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 // import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,6 +34,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import swervelib.SwerveDrive;
 
 public class AprilTagVision extends SubsystemBase {
     // variable to turn on/off our private tag layout
@@ -137,14 +137,14 @@ public class AprilTagVision extends SubsystemBase {
         m_visionSim.update(pose);
     }
 
-    public void updateOdometry(SwerveDrivePoseEstimator odometry, Field2d field) {
+    public void updateOdometry(SwerveDrive swerve) {
         // Cannot do anything if there is no field layout
         if (m_aprilTagFieldLayout == null)
             return;
 
         try {
             if (PLOT_VISIBLE_TAGS) {
-                plotVisibleTags(field, List.of(m_aprilTagCameraFront, m_aprilTagCameraBack));
+                plotVisibleTags(swerve.field, List.of(m_aprilTagCameraFront, m_aprilTagCameraBack));
             }
 
             // Warning: be careful about fetching values. If cameras are not connected, you
@@ -152,7 +152,7 @@ public class AprilTagVision extends SubsystemBase {
             // Example: cannot fetch timestamp without checking for the camera.
             // Make sure to test!
 
-            Pose2d robotPose = odometry.getEstimatedPosition();
+            Pose2d robotPose = swerve.getPose();
             Optional<EstimatedRobotPose> frontEstimate = 
                    getEstimateForCamera(m_aprilTagCameraFront, m_photonPoseEstimatorFront, robotPose);
             Optional<EstimatedRobotPose> backEstimate = 
@@ -162,24 +162,24 @@ public class AprilTagVision extends SubsystemBase {
             if (!frontEstimate.isPresent()) {
                 if (backEstimate.isPresent()) {
                     Pose2d pose = backEstimate.get().estimatedPose.toPose2d();
-                    odometry.addVisionMeasurement(pose, m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
+                    swerve.addVisionMeasurement(pose, m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
 
                     if (PLOT_POSE_SOLUTIONS) {
-                        plotVisionPose(field, pose);
+                        plotVisionPose(swerve.field, pose);
                     }
                     if (PLOT_ALTERNATE_POSES) {
                         // *** Yes, this is repeated code, and maybe that is bad.
                         // But this will save some cycles if this PLOT option is turned off.
                         if (backEstimate.get().strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-                            plotAlternateSolutions(field,
+                            plotAlternateSolutions(swerve.field,
                                     List.of(getAmbiguousPoses(m_aprilTagCameraBack.getLatestResult(), m_robotToBackAprilTagCam)));
                         } else
-                            field.getObject("visionAltPoses").setPose(pose);
+                            swerve.field.getObject("visionAltPoses").setPose(pose);
                     }
                 } else {
                     // no results, so clear the list in the Field
-                    plotVisionPoses(field, null);
-                    field.getObject("visionAltPoses").setPoses();
+                    plotVisionPoses(swerve.field, null);
+                    swerve.field.getObject("visionAltPoses").setPoses();
                 }
                 return;
             }
@@ -187,19 +187,19 @@ public class AprilTagVision extends SubsystemBase {
             // if back estimate is not there add front estimate because we know it is there
             if (!backEstimate.isPresent()) {
                 Pose2d pose = frontEstimate.get().estimatedPose.toPose2d();
-                odometry.addVisionMeasurement(pose, m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
+                swerve.addVisionMeasurement(pose, m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
 
                 if (PLOT_POSE_SOLUTIONS) {
-                    plotVisionPose(field, pose);
+                    plotVisionPose(swerve.field, pose);
                 }
                 if (PLOT_ALTERNATE_POSES) {
                     // *** Yes, this is repeated code, and maybe that is bad.
                     // But this will save some cycles if this PLOT option is turned off.
                     if (frontEstimate.get().strategy != PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR) {
-                        plotAlternateSolutions(field,
+                        plotAlternateSolutions(swerve.field,
                                 List.of(getAmbiguousPoses(m_aprilTagCameraFront.getLatestResult(), m_robotToFrontAprilTagCam)));
                     } else
-                        field.getObject("visionAltPoses").setPose(pose);
+                        swerve.field.getObject("visionAltPoses").setPose(pose);
                 }
 
                 return;
@@ -230,7 +230,7 @@ public class AprilTagVision extends SubsystemBase {
             double minDistance = 1e6;
 
             if (PLOT_ALTERNATE_POSES) {
-                plotAlternateSolutions(field, List.of(frontOptions, backOptions));
+                plotAlternateSolutions(swerve.field, List.of(frontOptions, backOptions));
             }
 
             // compare all backposes and frontposes to each other to find correct robot pose
@@ -247,11 +247,11 @@ public class AprilTagVision extends SubsystemBase {
                 }
             }
 
-            odometry.addVisionMeasurement(bestFrontPose3d.toPose2d(), m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
-            odometry.addVisionMeasurement(bestBackPose3d.toPose2d(), m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
+            swerve.addVisionMeasurement(bestFrontPose3d.toPose2d(), m_aprilTagCameraFront.getLatestResult().getTimestampSeconds());
+            swerve.addVisionMeasurement(bestBackPose3d.toPose2d(), m_aprilTagCameraBack.getLatestResult().getTimestampSeconds());
 
             if (PLOT_POSE_SOLUTIONS) {
-                plotVisionPoses(field, List.of(bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()));
+                plotVisionPoses(swerve.field, List.of(bestFrontPose3d.toPose2d(), bestBackPose3d.toPose2d()));
             }
             return;
         } catch (Exception e) {

@@ -65,7 +65,7 @@ public class GetCenterNoteX extends GetNoteX {
 
             // drive to shoot position, and spin up Shooter while going (after feeder stops)
             new PrintCommand("CenterNote: starting drivein"),
-            new DeferredCommand(() -> m_driveTrain.followPath(m_returnPath), Set.of(m_driveTrain))
+            m_driveTrain.followPath(m_returnPath)
                 .deadlineWith(
                     new WaitCommand(0.5)
                         .andThen(
