@@ -23,8 +23,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.FollowPathHolonomic;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -54,13 +52,20 @@ public class DriveTrain extends SubsystemBase {
 
     public static final double ROBOT_SWERVE_OFFSET_X_INCHES = -3.0;
     private static final Translation2d ROTATION_CENTER_OFFSET = new Translation2d(Units.inchesToMeters(ROBOT_SWERVE_OFFSET_X_INCHES), 0 );
-    // TODO: need to set the rotation center in YAGSL
 
-    // TODO: determine values, these were defaults from YAGSL example
-    private static final PIDConstants PATH_TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
-    private static final PIDConstants PATH_ANGLE_PID       = new PIDConstants(0.4, 0, 0.01);
+    // values from 2024 competition. Maybe should be tuned
+    private static final PIDConstants PATH_PLANNER_TRANSLATION_PID = new PIDConstants(3.0, 0, 0);
+    private static final PIDConstants PATH_PLANNER_ANGLE_PID       = new PIDConstants(3.0, 0, 0);
 
-    // Module Speed per module is appropriate
+    // local overrides for PP max values. 
+    // These are combined using "min()" with the values computed from the JSON config files, where available.
+    private static final double PATH_PLANNER_MAX_SPEED = 4.5;
+    private static final double PATH_PLANNER_MAX_ACCELERATION = 3.5;
+    private static final double PATH_PLANNER_MAX_ANGULAR_SPEED = 4.5;
+    private static final double PATH_PLANNER_MAX_ANGULAR_ACCELERATION = 4.5;
+
+    // Path following constraints
+    // (really is final, but compiler does not like separate initialization routine)
     private HolonomicPathFollowerConfig PATH_FOLLOWER_CONFIG;
 
     // if true, then robot is in field centric mode
@@ -69,13 +74,13 @@ public class DriveTrain extends SubsystemBase {
     // if true, then robot is in precision mode
     private boolean m_precisionMode = false;
 
-    // store status of whether we are on goal for turning while driving
-    private boolean m_onGoalForActiveTurn;
-
     // need to remember the configured max rotation speed
     private final double m_maxRotationSpeed;
     private static final double PRECISION_MODE_SCALE_FACTOR = 1.0 / 6.0;
     private static final double OUTREACH_MODE_SCALE_FACTOR = 0.5;
+
+    // 2024: store status of whether we are on goal for turning while driving
+    private boolean m_onGoalForActiveTurn;
 
     // offset to heading when shooting into Speaker
     // persists throughout the match
@@ -147,11 +152,12 @@ public class DriveTrain extends SubsystemBase {
      */
     public void setupPathPlanner() {
         PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
-                PATH_TRANSLATION_PID,
-                PATH_ANGLE_PID,
+                PATH_PLANNER_TRANSLATION_PID,
+                PATH_PLANNER_ANGLE_PID,
                 4.5, // Max module speed, in m/s
                 m_swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters(),
-                new ReplanningConfig() // Default path replanning config. See the API for the options here
+                // allow initial path replanning, but not dynamic
+                new ReplanningConfig(true, false)
         );
 
         AutoBuilder.configureHolonomic(
@@ -202,7 +208,8 @@ public class DriveTrain extends SubsystemBase {
                         flipDirection * translationY * m_swerveDrive.getMaximumVelocity()),
                 angularRotation * m_swerveDrive.getMaximumAngularVelocity(),
                 !robotCentric,
-                false);
+                false,
+                ROTATION_CENTER_OFFSET);
     }
 
     /**
@@ -217,11 +224,11 @@ public class DriveTrain extends SubsystemBase {
         // swerveDrive.setHeadingCorrection(true); // Normally you would want heading
         // correction for this kind of control.
         // Make the robot move
-        driveFieldOriented(
+        m_swerveDrive.driveFieldOriented(
             m_swerveDrive.swerveController.getTargetSpeeds(
                 translationX, translationY,
                 heading, m_swerveDrive.getOdometryHeading().getRadians(),
-                m_swerveDrive.getMaximumVelocity()));
+                m_swerveDrive.getMaximumVelocity()), ROTATION_CENTER_OFFSET);
     }
 
 
@@ -266,13 +273,6 @@ public class DriveTrain extends SubsystemBase {
         return AutoBuilder.followPath(path);
     }
 
-    // public Command followPath(PathPlannerPath path) {
-    //     return new FollowPathHolonomic(path, this::getPose, this::getRobotVelocity, this::setChassisSpeeds, 
-    //             PATH_FOLLOWER_CONFIG,
-    //             () -> FieldConstants.isRedAlliance(), this);
-    // }
-
-
     /**
      * Use PathPlanner Path finding to go to a point on the field.
      *
@@ -282,8 +282,8 @@ public class DriveTrain extends SubsystemBase {
     public Command driveToPose(Pose2d pose) {
         // Create the constraints to use while pathfinding
         PathConstraints constraints = new PathConstraints(
-                m_swerveDrive.getMaximumVelocity(), 4.0,
-                m_swerveDrive.getMaximumAngularVelocity(), Units.degreesToRadians(720));
+                Math.min(PATH_PLANNER_MAX_SPEED, m_swerveDrive.getMaximumVelocity()), PATH_PLANNER_MAX_ACCELERATION,
+                Math.min(PATH_PLANNER_MAX_ANGULAR_SPEED, m_swerveDrive.getMaximumAngularVelocity()), PATH_PLANNER_MAX_ANGULAR_ACCELERATION);
 
         // Since AutoBuilder is configured, we can use it to build pathfinding commands
         return AutoBuilder.pathfindToPose(
@@ -305,25 +305,7 @@ public class DriveTrain extends SubsystemBase {
         return null;
     }
 
-    /**
-     * Drive the robot given a field-oriented chassis velocity.
-     *
-     * @param velocity Velocity according to the field.
-     */
-    public void driveFieldOriented(ChassisSpeeds velocity) {
-        m_swerveDrive.driveFieldOriented(velocity);
-    }
-
-    /**
-     * Drive according to the robot-oriented chassis velocity.
-     *
-     * @param velocity Robot oriented {@link ChassisSpeeds}
-     */
-    public void driveRobotOriented(ChassisSpeeds velocity) {
-        m_swerveDrive.drive(velocity);
-    }
-
-        // for the beginning of auto rountines
+    // for the beginning of auto rountines
     public void resetDrivingModes() {
         setFieldCentricMode(true);
         setPrecisionMode(false);
