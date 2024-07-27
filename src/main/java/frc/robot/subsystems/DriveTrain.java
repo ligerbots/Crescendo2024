@@ -434,22 +434,6 @@ public class DriveTrain extends SubsystemBase {
     }
 
     /**
-     * This will zero (calibrate) the robot to assume the current position is facing
-     * forward
-     * <p>
-     * If red alliance rotate the robot 180 after the drviebase zero command
-     */
-    // public void zeroGyroWithAlliance() {
-    //     if (isRedAlliance()) {
-    //         zeroGyro();
-    //         // Set the pose 180 degrees
-    //         resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(180)));
-    //     } else {
-    //         zeroGyro();
-    //     }
-    // }
-
-    /**
      * Sets the drive motors to brake/coast mode.
      *
      * @param brake True to set motors to brake mode, false for coast.
@@ -468,47 +452,6 @@ public class DriveTrain extends SubsystemBase {
      */
     public Rotation2d getHeading() {
         return getPose().getRotation();
-    }
-
-    /**
-     * Get the chassis speeds based on controller input of 2 joysticks. One for
-     * speeds in which direction. The other for
-     * the angle of the robot.
-     *
-     * @param xInput   X joystick input for the robot to move in the X direction.
-     * @param yInput   Y joystick input for the robot to move in the Y direction.
-     * @param headingX X joystick which controls the angle of the robot.
-     * @param headingY Y joystick which controls the angle of the robot.
-     * @return {@link ChassisSpeeds} which can be sent to the Swerve Drive.
-     */
-    public ChassisSpeeds getTargetSpeeds(double xInput, double yInput, double headingX, double headingY) {
-        Translation2d scaledInputs = SwerveMath.cubeTranslation(new Translation2d(xInput, yInput));
-        return m_swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(),
-                scaledInputs.getY(),
-                headingX,
-                headingY,
-                getHeading().getRadians(),
-                MAX_SPEED);
-    }
-
-    /**
-     * Get the chassis speeds based on controller input of 1 joystick and one angle.
-     * Control the robot at an offset of
-     * 90deg.
-     *
-     * @param xInput X joystick input for the robot to move in the X direction.
-     * @param yInput Y joystick input for the robot to move in the Y direction.
-     * @param angle  The angle in as a {@link Rotation2d}.
-     * @return {@link ChassisSpeeds} which can be sent to the Swerve Drive.
-     */
-    public ChassisSpeeds getTargetSpeeds(double xInput, double yInput, Rotation2d angle) {
-        Translation2d scaledInputs = SwerveMath.cubeTranslation(new Translation2d(xInput, yInput));
-
-        return m_swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(),
-                scaledInputs.getY(),
-                angle.getRadians(),
-                getHeading().getRadians(),
-                MAX_SPEED);
     }
 
     /**
