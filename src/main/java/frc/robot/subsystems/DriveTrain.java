@@ -195,21 +195,17 @@ public class DriveTrain extends SubsystemBase {
      * @param translationY     Translation [-1, 1] in the Y direction. 
      * @param angularRotation  Angular velocity [-1, 1] of the robot to set. 
      * @param robotCentric     Robot centric drive if true.
-     * @return Drive command.
      */
     public void drive(double translationX, double translationY, double angularRotation, boolean robotCentric) {
         // field centric: flip direction if we are Red
         // robot centric (for 2024): input is on the BACK of the robot, so flip to match the camera
         double flipDirection = (robotCentric || FieldConstants.isRedAlliance()) ? -1.0 : 1.0;
 
-        m_swerveDrive.drive(
-                new Translation2d(
-                        flipDirection * translationX * m_swerveDrive.getMaximumVelocity(),
-                        flipDirection * translationY * m_swerveDrive.getMaximumVelocity()),
-                angularRotation * m_swerveDrive.getMaximumAngularVelocity(),
-                !robotCentric,
-                false,
-                ROTATION_CENTER_OFFSET);
+        double v_x = flipDirection * translationX * m_swerveDrive.getMaximumVelocity();
+        double v_y = flipDirection * translationY * m_swerveDrive.getMaximumVelocity();
+        double v_ang = angularRotation * m_swerveDrive.getMaximumAngularVelocity();
+
+        driveWithSpeeds(v_x, v_y, v_ang, robotCentric);
     }
 
     /**
@@ -218,54 +214,49 @@ public class DriveTrain extends SubsystemBase {
      * @param translationX Translation [-1, 1] in the X direction.
      * @param translationY Translation [-1, 1] in the Y direction.
      * @param heading      Target heading in radians.
-     * @return Drive command.
      */
     public void driveWithHeading(double translationX, double translationY, double heading) {
         // swerveDrive.setHeadingCorrection(true); // Normally you would want heading
         // correction for this kind of control.
-        // Make the robot move
-        m_swerveDrive.driveFieldOriented(
-            m_swerveDrive.swerveController.getTargetSpeeds(
-                translationX, translationY,
-                heading, m_swerveDrive.getOdometryHeading().getRadians(),
-                m_swerveDrive.getMaximumVelocity()), ROTATION_CENTER_OFFSET);
+
+        // for now, only allow field-centric
+        double flipDirection = FieldConstants.isRedAlliance() ? -1.0 : 1.0;
+
+        double v_x = flipDirection * translationX * m_swerveDrive.getMaximumVelocity();
+        double v_y = flipDirection * translationY * m_swerveDrive.getMaximumVelocity();
+
+        // use PID in SwerveController to compute desired angular velocity
+        double v_ang = m_swerveDrive.swerveController.headingCalculate(m_swerveDrive.getOdometryHeading().getRadians(), heading);
+
+        driveWithSpeeds(v_x, v_y, v_ang, false);
     }
 
+    /** 
+     * Basic drive routine. Take individual speeds, and command the robot.
+     * Includes standard offset of the center, and can include acceleration limits
+     * 
+     * @param speedX - speed in X direction (m/s)
+     * @param speedY - speed in X direction (m/s)
+     * @param speedAng - angular rotation speed (rad/s)
+     * @param robotCentric - if true, x/y speeds are robot-centric
+    */
+    private void driveWithSpeeds(double speedX, double speedY, double speedAng, boolean robotCentric) {
+        ChassisSpeeds speeds;
+        if (robotCentric) {
+            speeds = new ChassisSpeeds(speedX, speedY, speedAng);
+        } else {
+            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedAng, m_swerveDrive.getOdometryHeading());
+        }
 
-    /**
-     * The primary method for controlling the drivebase. Takes a
-     * {@link Translation2d} and a rotation rate, and
-     * calculates and commands module states accordingly. Can use either open-loop
-     * or closed-loop velocity control for
-     * the wheel velocities. Also has field- and robot-relative modes, which affect
-     * how the translation vector is used.
-     *
-     * @param translationVelocity   {@link Translation2d} that is the commanded linear
-     *                      velocity of the robot, in meters per
-     *                      second. In robot-relative mode, positive x is torwards
-     *                      the bow (front) and positive y is
-     *                      torwards port (left). In field-relative mode, positive x
-     *                      is away from the alliance wall
-     *                      (field North) and positive y is torwards the left wall
-     *                      when looking through the driver station
-     *                      glass (field West).
-     * @param rotationSpeed      Robot angular rate, in radians per second. CCW positive.
-     *                      Unaffected by field/robot
-     *                      relativity.
-     * @param fieldRelative Drive mode. True for field-relative, false for
-     *                      robot-relative.
-     */
-    public void drive(Translation2d translationVelocity, double rotationSpeed, boolean fieldRelative) {
-        m_swerveDrive.drive(translationVelocity,
-                rotationSpeed,
-                fieldRelative,
-                false); // Open loop is disabled since it shouldn't be used most of the time.
+        // TODO: add in acceleration controls
+
+        m_swerveDrive.drive(speeds, false, ROTATION_CENTER_OFFSET);
     }
 
     /**
      * Get the path follower with events.
      *
-     * @param pathName PathPlanner path name.
+     * @param path PathPlanner path.
      * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
      */
     public Command followPath(PathPlannerPath path) {
