@@ -29,7 +29,7 @@ public class Elevator extends TrapezoidProfileSubsystem {
     
     // For initial testing, these should be very slow.
     // We can update them as we get more confidence.
-    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(30.0);
+    private static final double MAX_VEL_METER_PER_SEC = Units.inchesToMeters(15);
 
     // private static final double ELEVATOR_MAX_ACC_METER_PER_SEC_SQ = Units.inchesToMeters(50.0);
 

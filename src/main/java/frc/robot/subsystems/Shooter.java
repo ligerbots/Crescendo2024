@@ -43,9 +43,9 @@ public class Shooter extends SubsystemBase {
     
     // This is negative to push the note back slowly
     public static final double BACKUP_FEED_SPEED = -0.25;
-    public static final double BACKUP_SHOOTER_SPEED = -0.2;
+    public static final double BACKUP_SHOOTER_SPEED = -0.1;
 
-    public static final double BACKUP_FEED_TIME = 0.5;  // seconds
+    public static final double BACKUP_FEED_TIME = 0.25;  // seconds
 
     public static final double RPM_TOLERANCE = 200;
     public static final double FEEDER_RPM_TOLERANCE = 100; 
