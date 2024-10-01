@@ -42,6 +42,8 @@ public class RobotContainer {
     private final SendableChooser<Translation2d> m_secondNoteChosen = buildNoteChooser();
     private final SendableChooser<Translation2d> m_thirdNoteChosen = buildNoteChooser();
     
+    private final SendableChooser<Command> m_overrideCommand = getCommandList();
+
     private final SendableChooser<Pose2d> m_startLocation = new SendableChooser<>();
     private Command m_prevAutoCommand = null;
     private Pose2d m_prevInitialPose = new Pose2d();
@@ -66,6 +68,48 @@ public class RobotContainer {
         returnVal.addOption( "S2", FieldConstants.BLUE_NOTE_S_2 );
         returnVal.addOption( "S3", FieldConstants.BLUE_NOTE_S_3 );
         return returnVal;
+    }
+
+    private SendableChooser<Command> getCommandList() {
+            SendableChooser<Command> commandSelector = new SendableChooser<>();
+
+            commandSelector.setDefaultOption("ActiveSetShooter", new ActiveSetShooter(m_shooter, m_shooterPivot,
+                            () -> m_shooter.getShootValues(m_driveTrain)));
+
+            commandSelector.addOption("ActiveTurnToHeadingWithDriving",
+                            new ActiveTurnToHeadingWithDriving(m_driveTrain, m_driveTrain::headingToSpeaker,
+                                            () -> -modifyAxis(m_driverController.getLeftY()),
+                                            () -> -modifyAxis(m_driverController.getLeftX()),
+                                            () -> -modifyAxis(m_driverController.getRightX())));
+
+            commandSelector.addOption("CheckPrepStatsAndRumble", new CheckPrepStatsAndRumble(m_shooterPivot, m_shooter, m_driverController.getHID()));
+
+            commandSelector.addOption("Drive", getDriveCommand());
+
+            commandSelector.addOption("RumbleOnIntake", new RumbleOnIntake(m_intake, m_driverController.getHID()));
+
+            commandSelector.addOption("SetElevatorLength", new SetElevatorLength(m_elevator,
+                            () -> Units.inchesToMeters(SmartDashboard.getNumber("elevator/testLength", 0)), false)
+                            .withTimeout(5.0));
+
+            commandSelector.addOption("SetPivotAngle",
+                            new SetPivotAngle(m_shooterPivot,
+                                            () -> Math.toRadians(SmartDashboard.getNumber("shooterPivot/testAngle", 0)),
+                                            false).withTimeout(5.0));
+                                            
+            commandSelector.addOption("TriggerShot",
+                            new TriggerShot(m_shooter).alongWith(new InstantCommand(m_intake::clearHasNote)));
+ 
+            commandSelector.addOption("AutoSpeakerShot", new AutoSpeakerShot(m_driveTrain, m_shooter, m_shooterPivot)
+                            .alongWith(new InstantCommand(m_intake::clearHasNote)));
+
+            commandSelector.addOption("StartIntake", new StartIntake(m_intake, m_shooter, m_shooterPivot, m_elevator));
+
+            commandSelector.addOption("TestShootSpeed", new TestShootSpeed(m_shooter,
+                            () -> SmartDashboard.getNumber("shooter/testLeftRpm", 0),
+                            () -> SmartDashboard.getNumber("shooter/testRightRpm", 0)));
+
+            return commandSelector;
     }
 
     private void configureBindings() {
@@ -226,6 +270,8 @@ public class RobotContainer {
         SmartDashboard.putData("Second Note", m_secondNoteChosen);
         SmartDashboard.putData("Third Note", m_thirdNoteChosen);
 
+        SmartDashboard.putData("Override Command", m_overrideCommand);
+
     }
 
     public Pose2d getInitialPose() {
@@ -233,9 +279,13 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-            return new GetMultiNoteGeneric(
-                            new Translation2d[] { m_firstNoteChosen.getSelected(), m_secondNoteChosen.getSelected(), m_thirdNoteChosen.getSelected() },
-                            m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator);
+        //     return new GetMultiNoteGeneric(
+        //                     new Translation2d[] { 
+        //                         m_firstNoteChosen.getSelected(), 
+        //                         m_secondNoteChosen.getSelected(),
+        //                         m_thirdNoteChosen.getSelected() },
+        //                     m_driveTrain, m_noteVision, m_shooter, m_shooterPivot, m_intake, m_elevator);
+        return m_overrideCommand.getSelected();
     }
 
     public boolean autoHasChanged() {
