@@ -376,9 +376,7 @@ public class RobotContainer {
         return m_driveTrain.driveCommand( 
                 () -> -conditionAxis(m_driverController.getLeftY()),
                 () -> -conditionAxis(m_driverController.getLeftX()),
-                // TEMP: Paul has a Logitech controller
-                // () -> -conditionAxis(m_driverController.getRightX()),
-                () -> -conditionAxis(m_driverController.getRawAxis(2)),
+                () -> -conditionAxis(m_driverController.getRightX()),
                 m_driverController.rightBumper());
     }
 
