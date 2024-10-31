@@ -382,8 +382,8 @@ public class RobotContainer {
 
     private double conditionAxis(double value) {
         value = MathUtil.applyDeadband(value, JOYSTICK_DEADBAND);
-        // Square the axis
-        return Math.copySign(value * value, value);
+        // Square the axis, retaining the sign
+        return Math.abs(value) * value;
     }
 
     public DriveTrain getDriveTrain() {
