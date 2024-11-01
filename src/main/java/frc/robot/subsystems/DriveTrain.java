@@ -141,6 +141,9 @@ public class DriveTrain extends SubsystemBase {
         m_swerveDrive.setCosineCompensator(false);// !SwerveDriveTelemetry.isSimulation); // Disables cosine compensation
                                                 // for simulations since it causes discrepancies not seen in real life.
         
+        // for now (testing!!), turn off periodic sync of the absolute encoders
+        m_swerveDrive.setModuleEncoderAutoSynchronize(false, 3.0);
+
         m_aprilTagVision = apriltagVision;
         m_noteVision = noteVision;
         
