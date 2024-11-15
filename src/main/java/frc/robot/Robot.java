@@ -61,6 +61,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledPeriodic() {
+        if (isSimulation()) {
+            // YAGSL bug fix (Nov 2024)
+            // The simulation needs to be told the drive speed every loop, even when disabled 
+            m_robotContainer.getDriveTrain().drive(0, 0, 0, false);
+        }
+
         // m_robotContainer.getDriveTrain().syncSwerveAngleEncoders();
         m_robotContainer.getShooterPivot().resetGoal();
         
