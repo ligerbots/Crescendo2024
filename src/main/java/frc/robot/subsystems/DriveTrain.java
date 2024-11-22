@@ -487,6 +487,9 @@ public class DriveTrain extends SubsystemBase {
         SmartDashboard.putNumber("drivetrain/headingAdjust", Math.toDegrees(m_headingAdjustment));
 
         SmartDashboard.putBoolean("drivetrain/precisionMode", m_precisionMode);
+        SmartDashboard.putNumber("drivetrain/XDist", m_odometry.getEstimatedPosition().getX());
+        SmartDashboard.putNumber("drivetrain/YDist", m_odometry.getEstimatedPosition().getY());
+
         
         for (SwerveModule mod : m_swerveModules) {
             mod.updateSmartDashboard();
