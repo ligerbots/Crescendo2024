@@ -376,7 +376,7 @@ public class RobotContainer {
         return m_driveTrain.driveCommand( 
                 () -> -conditionAxis(m_driverController.getLeftY()),
                 () -> -conditionAxis(m_driverController.getLeftX()),
-                () -> conditionAxis(m_driverController.getRightX()),
+                () -> -conditionAxis(m_driverController.getRightX()),
                 m_driverController.rightBumper());
     }
 
